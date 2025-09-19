@@ -1,0 +1,47 @@
+# map aanmaken en naar snakefile gaan
+cd Desktop/
+mkdir snakefile
+cd snakefile/
+
+# snake.py maken met vi
+vi snake.py
+cat snake.py   # inhoud bekijken
+
+# wrapper-script 'pakket' maken
+echo '#!/bin/bash' > pakket
+echo 'env python3 /usr/lib/pakket/snake.py' >> pakket
+chmod +x pakket
+
+# test lokaal
+./pakket    # fout: file niet gevonden
+
+# terug naar home
+cd
+cd
+
+# snake.py proberen te kopiëren (map bestond nog niet)
+sudo cp ./Desktop/snakefile/snake.py /usr/lib/pakket/snake.py
+# foutmelding: No such file or directory
+
+# map aanmaken en opnieuw kopiëren
+sudo mkdir -p /usr/lib/pakket
+sudo cp ./Desktop/snakefile/snake.py /usr/lib/pakket/snake.py
+
+# terug naar snakefile map
+cd Desktop/snakefile/
+ls
+
+# wrapper kopiëren naar /usr/bin
+sudo cp pakket /usr/bin/pa     # autocomplete probeerde iets
+sudo cp pakket /usr/bin/pakket
+
+# opnieuw testen
+./pakket
+pakket
+# foutmelding: ModuleNotFoundError: No module named 'tkinter'
+
+# tkinter installeren
+sudo apt-get install python3-tk -y
+
+# nogmaals runnen
+pakket

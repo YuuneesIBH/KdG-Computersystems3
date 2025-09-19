@@ -1,0 +1,308 @@
+#ik heb snake in de root gezet
+vi snake.py 
+
+ubuntu@ubuntu:~$ #!/bin/bash
+cat >>~/.bashrc <<EOF
+DEBEMAIL="younes.elazzouzi@student.kdg.be"
+DEBFULLNAME="Younes El Azzouzi"
+export DEBEMAIL DEBFULLNAME
+EOF
+
+ubuntu@ubuntu:~$ source ~/.bashrc
+
+env | grep -E "DEBEMAIL|DEBFULLNAME"
+DEBFULLNAME=Younes El Azzouzi
+DEBEMAIL=younes.elazzouzi@student.kdg.be
+
+
+##### Maken van de executable 
+#hier installeer ik de nodige stuff 
+sudo apt-get install -y dh-make debhelper fakeroot devscripts lintian python3-tk
+
+#dan voer ik het script 
+./create_snake_package.sh uit
+
+ubuntu@ubuntu:~$ ./create_snake_package.sh 
+snake-1/
+snake-1/snake
+
+ubuntu@ubuntu:~$ cd snake/snake-1
+ubuntu@ubuntu:~/snake/snake-1$ 
+
+ubuntu@ubuntu:~$ cd snake/snake-1
+ubuntu@ubuntu:~/snake/snake-1$ dh_make --native
+Type of package: (single, indep, library, python)
+[s/i/l/p]?
+Maintainer Name     : Younes El Azzouzi
+Email-Address       : younes.elazzouzi@student.kdg.be
+Date                : Fri, 19 Sep 2025 12:45:54 +0000
+Package Name        : snake
+Version             : 1
+License             : gpl3
+Package Type        : single
+Are the details correct? [Y/n/q]
+Please respond with "yes", "no" or "quit" (or "y", "n" or "q")
+Currently there is not top level Makefile. This may require additional tuning
+Done. Please edit the files in the debian/ subdirectory now.
+
+ubuntu@ubuntu:~/snake/snake-1$ 
+
+#nu is er een debian directory bijgekomen 
+ubuntu@ubuntu:~/snake/snake-1$ cd debian/
+ubuntu@ubuntu:~/snake/snake-1/debian$ ls
+README         copyright        postinst.ex  salsa-ci.yml.ex
+README.Debian  manpage.1.ex     postrm.ex    snake-docs.docs
+README.source  manpage.md.ex    preinst.ex   snake.cron.d.ex
+changelog      manpage.sgml.ex  prerm.ex     snake.doc-base.ex
+control        manpage.xml.ex   rules        source
+ubuntu@ubuntu:~/snake/snake-1/debian$ 
+
+
+#nu heb ik de keuze om alle rommel te verwijderen 
+ubuntu@ubuntu:~/snake/snake-1/debian$ vi control
+
+Het debian/control bestand is één van de belangrijkste bestanden voor het genereren van 
+een pakket. Opgelet! Verwijder niet de lege lijn in dit bestand.
+De lijn met Homepage mag je verwijderen
+
+#nu pas ik de file aan naar mijn liking (Architecture zet je op all)
+Source: snake
+Section: games
+Priority: optional
+Maintainer: Younes El Azzouzi <younes.elazzouzi@student.kdg.be>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Rules-Requires-Root: no
+
+Package: snake
+Architecture: all
+Depends: ${misc:Depends}, python3, python3-tk
+Description: Snake-game in Python (Tkinter)
+ Een eenvoudige Snake-app in Python met Tkinter. Installeert een launcher
+ in het menu en het commando "snake" dat /usr/lib/snake/snake.py start.
+
+##!!! dch moet niet uitgevoerd worden als je al een changelog hebt in de /debian directory
+dch --create -v 1 --package snake -D jammy "Initial release"
+
+ubuntu@ubuntu:~/snake/snake-1/debian$ ls
+README         copyright        postinst.ex  salsa-ci.yml.ex
+README.Debian  manpage.1.ex     postrm.ex    snake-docs.docs
+README.source  manpage.md.ex    preinst.ex   snake.cron.d.ex
+!!!changelog!!!      manpage.sgml.ex  prerm.ex     snake.doc-base.ex
+control        manpage.xml.ex   rules        source
+
+##manpage hernoemen (noemen naar pakket.1!!!!!!)
+mv manpage.1.ex snake.1 
+
+ubuntu@ubuntu:~/snake/snake-1/debian$ cat snake.1
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" (C) Copyright 2025 Younes El Azzouzi <younes.elazzouzi@student.kdg.be>,
+.\"
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH Snake SECTION "September 19 2025"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+snake \- start de snake game
+.SH SYNOPSIS
+.B snake
+.RI [ options ] " files" ...
+.br
+.B bar
+.RI [ options ] " files" ...
+.SH DESCRIPTION
+Start de Python/Tkinter Snake applicatie.
+.B snake
+and
+.B bar
+commands.
+.PP
+.\" TeX users may be more comfortable with the \fB<whatever>\fP and
+.\" \fI<whatever>\fP escape sequences to invode bold face and italics,
+.\" respectively.
+\fBsnake\fP is a program that...
+.SH OPTIONS
+These programs follow the usual GNU command line syntax, with long
+options starting with two dashes (`-').
+A summary of options is included below.
+For a complete description, see the Info files.
+.TP
+.B \-h, \-\-help
+Show summary of options.
+.TP
+.B \-v, \-\-version
+Show version of program.
+.SH SEE ALSO
+.BR bar (1),
+.BR baz (1).
+.br
+The programs are documented fully by
+.IR "The Rise and Fall of a Fooish Bar" ,
+available via the Info system.
+
+##maken van een nieuwe tekstbestand met de naam manpages hieri
+ubuntu@ubuntu:~/snake/snake-1/debian$ echo "debian/snake.1" > manpages
+ubuntu@ubuntu:~/snake/snake-1/debian$ cat manpages
+debian/snake.1
+
+#nu heb ik een rules file die bestaande stappen eventueel kan overrulen het is de build script van mijn pakket 
+
+ubuntu@ubuntu:~/snake/snake-1/debian$ cat rules 
+#!/usr/bin/make -f
+# See debhelper(7) (uncomment to enable)
+# output every command that modifies files on the build system.
+#export DH_VERBOSE = 1
+
+
+# see FEATURE AREAS in dpkg-buildflags(1)
+#export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+# see ENVIRONMENT in dpkg-buildflags(1)
+# package maintainers to append CFLAGS
+#export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
+# package maintainers to append LDFLAGS
+#export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
+
+%:
+	dh $@
+
+
+# dh_make generated override targets
+# This is example for Cmake (See https://bugs.debian.org/641051 )
+#override_dh_auto_configure:
+#	dh_auto_configure -- \
+#	-DCMAKE_LIBRARY_PATH=$(DEB_HOST_MULTIARCH)
+
+
+#maken van menuitem voor Debian menusysteem (verouderd)
+
+ubuntu@ubuntu:~/snake/snake-1$ tee debian/menu >/dev/null <<'EOF'
+?package(snake):needs="X11" section="Applications/Games" \
+ title="Snake" command="/usr/bin/snake"
+EOF
+ubuntu@ubuntu:~/snake/snake-1$ cd debian/
+ubuntu@ubuntu:~/snake/snake-1/debian$ ls
+README         copyright        menu         rules            snake.doc-base.ex
+README.Debian  manpage.md.ex    postinst.ex  salsa-ci.yml.ex  source
+README.source  manpage.sgml.ex  postrm.ex    snake-docs.docs
+changelog      manpage.xml.ex   preinst.ex   snake.1
+control        manpages         prerm.ex     snake.cron.d.ex
+ubuntu@ubuntu:~/snake/snake-1/debian$ 
+
+Bij het bouwen pikt dh_installmenu dit op en stopt het in het pakket.
+Bij installatie roept Debhelper automatisch update-menus aan (via maintainer-scripts), waardoor er een menu-entry voor jouw app verschijnt in window managers die dit systeem gebruiken (oude Debian menu’s).
+elangrijke velden:
+package(...) → aan welk pakket het item toebehoort
+needs="X11" → grafische sessie nodig
+section="Applications/Games" → categorie/pad in het menu
+title="Snake" → naam die je ziet
+command="/usr/bin/snake" → wat gestart wordt
+(optioneel) icon="/usr/share/pixmaps/snake.xpm" → icoon
+
+## Via de desktop app kan de applicatie verschijnen in de menustructuur 
+ubuntu@ubuntu:~/snake/snake-1/debian$ cat snake.desktop 
+[Desktop Entry]
+Name=Snake
+Comment=Snake game in Python
+GenericName=Snake
+Exec=python3 /usr/lib/snake/snake.py
+Icon=snake
+Terminal=false
+Type=Application
+Categories=Game;    
+
+##random app icon maken 
+command -v convert && convert -size 128x128 xc:green debian/snake.png
+
+## nu ga ik veel mogen debuilden tot alles in orde is 
+cd ~/snake/snake-
+
+#minimale install-file maken
+tee debian/install >/dev/null <<'EOF'
+snake usr/bin
+snake.py usr/lib/snake/
+EOF
+
+test -f debian/snake.desktop && echo 'debian/snake.desktop usr/share/applications/' >> debian/install
+test -f debian/snake.png     && echo 'debian/snake.png usr/share/pixmaps/'      >> debian/install
+
+#snake had ik in de home dir maar moet in de dir van snake 
+cp ~/snake.py ~/snake/snake-1/
+
+# dan pas ik de location aan
+ubuntu@ubuntu:~/snake/snake-1/debian$ cat install 
+snake usr/bin/snake
+snake.py usr/lib/snake/
+debian/snake.desktop usr/share/applications/
+ubuntu@ubuntu:~/snake/snake-1/debian$ 
+
+#alle templates die gegeven werden eruit gooien 
+rm -f debian/*.ex debian/*.EX debian/README.* \
+      debian/manpage.*.ex debian/salsa-ci.yml.ex \
+      debian/postinst.ex debian/postrm.ex debian/preinst.ex debian/prerm.ex \
+      debian/snake.cron.d.ex debian/snake.doc-base.ex \
+      debian/menu \
+      usr/share/menu/snake 2>/dev/null || true
+
+#minimal rules 
+tee debian/rules >/dev/null <<'EOF'
+#!/usr/bin/make -f
+%:
+	dh $@
+EOF
+
+## beschrijving niet laten starten met snake
+sed -i 's/^Description:.*/Description: Arcadespel in Python (Tkinter)/' debian/control
+
+##games naar usr/games upv usr/bin
+tee debian/install >/dev/null <<'EOF'
+snake usr/games
+snake.py usr/lib/snake/
+debian/snake.desktop usr/share/applications/
+EOF
+
+##install update 
+tee debian/install >/dev/null <<'EOF'
+snake usr/games
+snake.py usr/lib/snake/
+debian/snake.desktop usr/share/applications/
+EOF
+
+
+## bij het openen van snake krijg ik nu een error 
+Linux ubuntu 5.15.0-87-generic #97-Ubuntu SMP Tue Oct 3 09:52:42 UTC 2023 aarch64 aarch64 aarch64 GNU/Linux
+
+# Waarom verscheen een “Warning” venster i.p.v. mijn Snake-game?
+
+- De eerste demo uit de slides gebruikt **Zenity** om `uname -a` te tonen.
+- Mijn launcher/wrapper heet `snake` en werd geïnstalleerd als **/usr/games/snake**.
+- Die wrapper bevatte nog de **Zenity-demo**, niet mijn Python-starter.
+- Gevolg: bij starten verscheen een Zenity “Warning” met de tekst van `uname -a`. Dit is geen crash.
+
+## Doel van de wrapper
+De wrapper moet enkel mijn Python-app starten die is geïnstalleerd op **/usr/lib/snake/snake.py**.
+
+### Juiste inhoud van de wrapper
+```sh
+#!/bin/sh
+exec python3 /usr/lib/snake/snake.py "$@"
+
+sudo tee /usr/games/snake >/dev/null <<'EOF'
+#!/bin/sh
+exec python3 /usr/lib/snake/snake.py "$@"
+EOF
+sudo chmod 755 /usr/games/snake
+
