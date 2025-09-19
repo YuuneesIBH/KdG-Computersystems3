@@ -305,4 +305,3 @@ sudo tee /usr/games/snake >/dev/null <<'EOF'
 exec python3 /usr/lib/snake/snake.py "$@"
 EOF
 sudo chmod 755 /usr/games/snake
-
