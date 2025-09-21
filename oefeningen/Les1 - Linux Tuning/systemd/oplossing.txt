@@ -1,0 +1,298 @@
+####
+installeren van de chkservice
+####
+
+sudo apt install chkservice 
+
+#####
+met welk commando zie je de bestanden die chkservice installeert? 
+#####
+
+dpkg -L chkservice
+
+ubuntu@ubuntu:~$ dpkg -L chkservice
+/.
+/usr
+/usr/bin
+/usr/bin/chkservice
+/usr/share
+/usr/share/doc
+/usr/share/doc/chkservice
+/usr/share/doc/chkservice/changelog.Debian.gz
+/usr/share/doc/chkservice/copyright
+/usr/share/man
+/usr/share/man/man8
+/usr/share/man/man8/chkservice.8.gz
+
+#####
+2. Gebruik systemd om de services weer te geven die de langste opstarttijd hebben.
+Welk commando gebruik je hiervoor?
+Welke 4 services nemen het meeste tijd in beslag?
+#####
+
+ubuntu@ubuntu:~$ systemd-analyze blame
+2.004s systemd-networkd-wait-online.service
+1.189s snapd.service
+ 962ms dev-mapper-ubuntu\x2d\x2dvg\x2dubuntu\x2d\x2dlv.device
+ 894ms cloud-init-local.service
+
+#####
+Stop en start de nginx service met systemctl
+#####
+
+ubuntu@ubuntu:~$ sudo systemctl stop nginx
+ubuntu@ubuntu:~$ sudo systemctl start  nginx
+ubuntu@ubuntu:~$ systemctl is-active nginx
+active
+
+####
+bekijk de log van nginx dat doe je met
+####
+
+ubuntu@ubuntu:~$ journalctl -u nginx
+Sep 21 10:40:43 ubuntu systemd[1]: Starting A high performance web server and a>
+Sep 21 10:40:43 ubuntu systemd[1]: Started A high performance web server and a >
+Sep 21 10:41:12 ubuntu systemd[1]: Stopping A high performance web server and a>
+Sep 21 10:41:12 ubuntu systemd[1]: nginx.service: Deactivated successfully.
+Sep 21 10:41:12 ubuntu systemd[1]: Stopped A high performance web server and a >
+Sep 21 10:41:18 ubuntu systemd[1]: Starting A high performance web server and a>
+Sep 21 10:41:18 ubuntu systemd[1]: Started A high performance web server and a >
+lines 1-7/7 (END)
+
+####
+5. Schrijf "helloworldd" een script (service) die om de tien seconden Hello World en de datum en tijd toont.
+Het script moet luisteren naar het eerste argument "start" om op te starten en het eerste argument "stop" om de opgestarte service te stoppen.
+Test dit script eerst commandline uit!
+Zet helloworldd in /usr/local/sbin
+Schrijf in /etc/systemd/system/ een heloworldd.service die zorgt dat jouw script wordt opgestart. Je kan als inspiratie /lib/systemd/system/nginx.service gebruiken.
+Zet wel het Type op simple (forking start een kind op, maar dat doen wij niet)
+Geef het commando systemctl daemon-reload om de veranderingen in te laten.
+
+Test nu uit of je de helloworldd service kan opstarten/stoppen/status bekijken via systemctl.
+####
+
+ubuntu@ubuntu:~/Desktop$ vi helloworld
+ubuntu@ubuntu:~/Desktop$ chmod +x helloworld 
+ubuntu@ubuntu:~/Desktop$ ./helloworld start
+Hello World op Sun Sep 21 10:45:33 UTC 2025
+Hello World op Sun Sep 21 10:45:43 UTC 2025
+^C
+ubuntu@ubuntu:~/Desktop$ 
+
+
+#script#
+ubuntu@ubuntu:~/Desktop$ cat helloworld 
+#!/bin/bash
+
+case "$1" in
+  start)
+    while true
+    do
+      echo "Hello World op $(date)"
+      sleep 10
+    done
+    ;;
+  stop)
+    exit 0
+    ;;
+  *)
+    echo "Gebruik: $0 {start|stop}"
+    exit 1
+    ;;
+esac
+
+####
+ZO KAN HET OOK 
+####
+
+sudo tee /usr/local/sbin/helloworldd >/dev/null <<'EOF'
+#!/bin/bash
+PIDFILE=/run/helloworldd.pid
+
+start() {
+  mkdir -p /run
+  echo $$ > "$PIDFILE"
+  while true; do
+    echo "Hello World op $(date)"
+    sleep 10
+  done
+}
+
+stop() {
+  [ -f "$PIDFILE" ] && kill "$(cat "$PIDFILE")" && rm -f "$PIDFILE"
+}
+
+case "$1" in
+  start) start ;;
+  stop)  stop  ;;
+  *)     echo "Gebruik: $0 {start|stop}"; exit 1 ;;
+esac
+EOF
+sudo chmod +x /usr/local/sbin/helloworldd
+
+###
+Schrijf in /etc/systemd/system/ een heloworldd.service die zorgt dat jouw script wordt opgestart. Je kan als inspiratie /lib/systemd/system/nginx.service gebruiken.
+###
+
+sudo tee /etc/systemd/system/helloworldd.service >/dev/null <<'EOF'
+[Unit]
+Description=Hello World Service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/helloworldd start
+ExecStop=/usr/local/sbin/helloworldd stop
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+
+###
+Zet wel het Type op simple (forking start een kind op, maar dat doen wij niet)
+Geef het commando systemctl daemon-reload om de veranderingen in te laten.
+
+Test nu uit of je de helloworldd service kan opstarten/stoppen/status bekijken via systemctl.
+###
+
+sudo systemctl daemon-reload
+sudo systemctl start helloworldd
+systemctl status helloworldd
+sudo systemctl stop helloworldd
+systemctl is-active helloworldd
+journalctl -u helloworldd -n 20 --no-pager
+
+ubuntu@ubuntu:~/Desktop$ sudo systemctl daemon-reload
+ubuntu@ubuntu:~/Desktop$ sudo systemctl start hellworld
+Failed to start hellworld.service: Unit hellworld.service not found.
+ubuntu@ubuntu:~/Desktop$ sudo systemctl start hellworldd
+Failed to start hellworldd.service: Unit hellworldd.service not found.
+ubuntu@ubuntu:~/Desktop$ sudo systemctl start helloworldd
+ubuntu@ubuntu:~/Desktop$ journalctl -u helloworldd -n 20 --no-pager
+Sep 21 10:49:42 ubuntu systemd[1]: Started Hello World Service.
+Sep 21 10:49:42 ubuntu helloworldd[3983]: Hello World op Sun Sep 21 10:49:42 UTC 2025
+Sep 21 10:49:52 ubuntu helloworldd[3983]: Hello World op Sun Sep 21 10:49:52 UTC 2025
+ubuntu@ubuntu:~/Desktop$ 
+
+####
+6. Op Centos/Redhat systemen bestaat een systemd service en die heet firewalld. Op Debian systemen bestaat die nog niet. Straks wel, want jij gaat die maken!
+
+Deze bash functie veegt alle regels van de firewall en laat alles toe:
+firewalld_stop() {
+iptables -F
+iptables -X
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT
+}
+
+Deze bash functie veegt alle regels van de firewall, verbiedt alle icmp versie 4 pakketten en laat de rest toe
+firewalld_start() {
+iptables -F
+iptables -X
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT
+iptables -A INPUT -p icmp -j DROP
+iptables -A OUTPUT -p icmp -j DROP
+}
+Schrijf het script /usr/local/sbin/firewalld dat deze functies gebruikt.
+Voorzie ook dat je script een restart en een reload kan doen (doe voor beide een stop en start)
+Test uit met een ping versie 4.
+
+Schrijf nu een firewalld service
+
+Test nu uit of je de firewalld service kan opstarten/stoppen/status bekijken via systemctl.
+####
+
+## script maken ##
+
+sudo apt install iptables -y
+
+sudo tee /usr/local/sbin/firewalld >/dev/null <<'EOF'
+#!/bin/bash
+
+firewalld_stop() {
+  iptables -F
+  iptables -X
+  iptables -P INPUT ACCEPT
+  iptables -P FORWARD ACCEPT
+  iptables -P OUTPUT ACCEPT
+}
+
+firewalld_start() {
+  iptables -F
+  iptables -X
+  iptables -P INPUT ACCEPT
+  iptables -P FORWARD ACCEPT
+  iptables -P OUTPUT ACCEPT
+  iptables -A INPUT -p icmp -j DROP
+  iptables -A OUTPUT -p icmp -j DROP
+}
+
+case "$1" in
+  start)
+    firewalld_start
+    ;;
+  stop)
+    firewalld_stop
+    ;;
+  restart|reload)
+    firewalld_stop
+    firewalld_start
+    ;;
+  *)
+    echo "Gebruik: $0 {start|stop|restart|reload}"
+    exit 1
+    ;;
+esac
+EOF
+
+sudo chmod +x /usr/local/sbin/firewalld
+
+ubuntu@ubuntu:~/Desktop$ sudo /usr/local/sbin/firewalld start
+ubuntu@ubuntu:~/Desktop$ ping -c 2 8.8.8.8
+PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+^C
+--- 8.8.8.8 ping statistics ---
+2 packets transmitted, 0 received, 100% packet loss, time 1018ms
+
+ubuntu@ubuntu:~/Desktop$ sudo /usr/local/sbin/firewalld stop
+ubuntu@ubuntu:~/Desktop$ ping -c 2 8.8.8.8
+PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+64 bytes from 8.8.8.8: icmp_seq=1 ttl=116 time=17.9 ms
+64 bytes from 8.8.8.8: icmp_seq=2 ttl=116 time=23.9 ms
+
+--- 8.8.8.8 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1002ms
+rtt min/avg/max/mdev = 17.912/20.922/23.933/3.010 ms
+
+###
+service schrijven
+###
+
+sudo tee /etc/systemd/system/firewalld.service >/dev/null <<'EOF'
+[Unit]
+Description=Custom Firewall Service
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/firewalld start
+ExecStop=/usr/local/sbin/firewalld stop
+ExecReload=/usr/local/sbin/firewalld reload
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# checken #
+sudo systemctl daemon-reload
+sudo systemctl start firewalld
+sudo systemctl status firewalld
+
+ubuntu@ubuntu:~/Desktop$ sudo systemctl enable firewalld
+Created symlink /etc/systemd/system/multi-user.target.wants/firewalld.service \u2192 /etc/systemd/system/firewalld.service.
+ubuntu@ubuntu:~/Desktop$ 
