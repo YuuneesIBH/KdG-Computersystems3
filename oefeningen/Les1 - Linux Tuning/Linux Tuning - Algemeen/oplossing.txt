@@ -1,0 +1,494 @@
+####
+1. Copieer met "time" een groot bestand vanaf je cdrom of usb naar je schijf. Doe dit 2 keer. Vergelijk de 2 metingen.
+####
+
+time cp /media/cdrom/grootbestand.iso /tmp/test.iso
+
+####
+2. Schakel process accounting aan. Kijk welk proces het meest gebruikt wordt.
+####
+
+ubuntu@ubuntu:~$ sudo apt-get install acct
+
+ubuntu@ubuntu:~$ sudo touch /var/account/pacct
+ubuntu@ubuntu:~$ sudo chmod 664 /var/account/pacct
+ubuntu@ubuntu:~$ sudo accton /var/account/pacct
+Turning on process accounting, file set to '/var/account/pacct'.
+ubuntu@ubuntu:~$ lastcomm | head
+accton                 root     pts/1      0.00 secs Sun Sep 21 11:07
+date                   root     __         0.00 secs Sun Sep 21 11:07
+sleep                  root     __         0.00 secs Sun Sep 21 11:07
+sudo             S     ubuntu   pts/0      0.00 secs Sun Sep 21 11:07
+sudo              F    ubuntu   pts/1      0.00 secs Sun Sep 21 11:07
+chmod            S     root     pts/1      0.00 secs Sun Sep 21 11:07
+date                   root     __         0.00 secs Sun Sep 21 11:07
+sleep                  root     __         0.00 secs Sun Sep 21 11:06
+sudo             S     ubuntu   pts/0      0.00 secs Sun Sep 21 11:07
+sudo              F    ubuntu   pts/1      0.00 secs Sun Sep 21 11:07
+ubuntu@ubuntu:~$ sa
+     992       5.63re       0.18cp         0avio      2403k
+     332       0.06re       0.05cp         0avio      3729k   lsb_release
+       2       0.14re       0.05cp         0avio     13349k   apt-check
+       3       0.51re       0.03cp         0avio      4105k   apt-get
+      22       1.05re       0.02cp         0avio      6500k   ***other*
+      49       0.02re       0.01cp         0avio       765k   gzip
+       2       0.01re       0.01cp         0avio      3871k   store
+       2       0.02re       0.00cp         0avio      8977k   python3
+       2       0.03re       0.00cp         0avio      4644k   http
+      45       0.00re       0.00cp         0avio       998k   tar
+      77       0.01re       0.00cp         0avio      1536k   dpkg
+      10       0.00re       0.00cp         0avio       754k   grep
+       7       0.35re       0.00cp         0avio      1656k   sudo
+       6       0.01re       0.00cp         0avio       576k   apt-key
+      68       0.00re       0.00cp         0avio      2886k   apt-config
+      68       0.00re       0.00cp         0avio       576k   apt-key*
+      19       0.00re       0.00cp         0avio       579k   rm
+      18       0.00re       0.00cp         0avio      1710k   systemctl
+      18       0.00re       0.00cp         0avio      1050k   gpg-connect-age
+      16       0.00re       0.00cp         0avio      2866k   apt-config*
+      15       0.43re       0.00cp         0avio       576k   sh
+      12       0.00re       0.00cp         0avio       798k   sed
+      12       0.00re       0.00cp         0avio       670k   date
+      12       0.00re       0.00cp         0avio       552k   readlink
+      11       0.00re       0.00cp         0avio       580k   cmp
+      11       0.00re       0.00cp         0avio       571k   mktemp
+      10       0.03re       0.00cp         0avio      1740k   gpgv
+      10       0.00re       0.00cp         0avio       604k   touch
+      10       0.00re       0.00cp         0avio       551k   cat
+       9       1.50re       0.00cp         0avio       655k   sleep
+       9       0.00re       0.00cp         0avio       591k   chmod
+       8       0.00re       0.00cp         0avio       843k   find
+       7       0.35re       0.00cp         0avio      2770k   sudo*
+       7       0.00re       0.00cp         0avio       840k   cp
+       6       0.01re       0.00cp         0avio      2894k   gpgv*
+       6       0.00re       0.00cp         0avio       860k   gpgconf
+       6       0.00re       0.00cp         0avio       567k   sort
+       5       0.00re       0.00cp         0avio       929k   mv
+       5       0.00re       0.00cp         0avio       658k   test
+       4       0.01re       0.00cp         0avio      5015k   https
+       4       0.00re       0.00cp         0avio      3706k   systemd-detect-
+       4       0.00re       0.00cp         0avio       665k   stty
+       4       0.00re       0.00cp         0avio       410k   accton
+       3       0.41re       0.00cp         0avio     10267k   apt-get*
+       3       0.02re       0.00cp         0avio       576k   vmlinuz-get-ver
+       3       0.01re       0.00cp         0avio       558k   tail
+       3       0.00re       0.00cp         0avio       576k   vmlinuz-get-ver*
+       3       0.00re       0.00cp         0avio       555k   tr
+       3       0.00re       0.00cp         0avio       655k   dirname
+       3       0.00re       0.00cp         0avio       576k   which
+       2       0.50re       0.00cp         0avio     49528k   gdbus
+       2       0.15re       0.00cp         0avio       576k   update-motd-upd
+       2       0.00re       0.00cp         0avio      9344k   python3*
+       2       0.00re       0.00cp         0avio      3092k   python3.10
+       2       0.00re       0.00cp         0avio       868k   mkdir
+       2       0.00re       0.00cp         0avio       659k   who
+       2       0.00re       0.00cp         0avio       655k   basename
+       2       0.00re       0.00cp         0avio       655k   echo
+       2       0.00re       0.00cp         0avio       549k   ubuntu-distro-i
+ubuntu@ubuntu:~$ 
+
+####
+3. Draai het tooltje vmstat (om de 2 seconden, 10 metingen).
+Hoeveel processen staan er maximaal te wachten om te draaien?
+Hoeveel processen staan er maximaal te wachten op I/O?
+####
+
+ubuntu@ubuntu:~$ vmstat 2 10
+procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+ 1  0      0 2004208  51720 1181112    0    0    65    95   43   55  2  1 97  0  0
+ 1  0      0 2004208  51728 1181132    0    0     0    60  405  194 11  2 87  0  0
+ 1  0      0 2004208  51728 1181148    0    0     0     0  397  179 10  2 87  0  0
+ 1  0      0 2004208  51728 1181140    0    0     0     8  424  188 10  2 87  0  0
+ 1  0      0 2004208  51728 1181140    0    0     0     0  384  168 10  3 87  0  0
+ 1  0      0 2004208  51728 1181140    0    0     0     0  390  165 10  2 87  0  0
+ 1  0      0 2004208  51736 1181140    0    0     0    60  418  187 10  3 87  0  0
+^C
+ubuntu@ubuntu:~$ 
+
+r = processen die wachten op CPU
+b = processen die wachten op I/O
+
+Maximaal aantal processen dat wacht op CPU (r): 1
+Maximaal aantal processen dat wacht op I/O (b): 0
+
+####
+4. Bekijk de cache die de kernel gebruikt. Welke cache gebruikt het meeste geheugen?
+####
+
+ubuntu@ubuntu:~$ sudo slabtop
+
+buffer_head gebruik het meeste geheugen hiervoor kijk je naar de cache_size
+
+####
+5. Draaien er applicaties die ipc gebruiken op je systeem?
+####
+
+ubuntu@ubuntu:~$ ipcs
+
+------ Message Queues --------
+key        msqid      owner      perms      used-bytes   messages    
+
+------ Shared Memory Segments --------
+key        shmid      owner      perms      bytes      nattch     status      
+
+------ Semaphore Arrays --------
+key        semid      owner      perms      nsems     
+
+ubuntu@ubuntu:~$ 
+
+alles staat leeg dus er lopen geen ipc communicatie processen
+
+####
+6. Start een vi editor op.
+a) Gebruik ldd om te kijken welke libraries vi gebruik.
+b) Gebruik pmap om te kijken hoeveel geheugen vi gebruikt.
+c) Wat is het verschil tussen de bibliotheken die pmap toont en de bibliotheken die ldd toont?
+####
+
+ubuntu@ubuntu:~$ ldd /usr/bin/vi
+	linux-vdso.so.1 (0x0000ffffa7ea0000)
+	libm.so.6 => /lib/aarch64-linux-gnu/libm.so.6 (0x0000ffffa7a10000)
+	libtinfo.so.6 => /lib/aarch64-linux-gnu/libtinfo.so.6 (0x0000ffffa79c0000)
+	libselinux.so.1 => /lib/aarch64-linux-gnu/libselinux.so.1 (0x0000ffffa7980000)
+	libsodium.so.23 => /lib/aarch64-linux-gnu/libsodium.so.23 (0x0000ffffa7930000)
+	libacl.so.1 => /lib/aarch64-linux-gnu/libacl.so.1 (0x0000ffffa7910000)
+	libgpm.so.2 => /lib/aarch64-linux-gnu/libgpm.so.2 (0x0000ffffa78f0000)
+	libpython3.10.so.1.0 => /lib/aarch64-linux-gnu/libpython3.10.so.1.0 (0x0000ffffa7310000)
+	libc.so.6 => /lib/aarch64-linux-gnu/libc.so.6 (0x0000ffffa7160000)
+	/lib/ld-linux-aarch64.so.1 (0x0000ffffa7e67000)
+	libpcre2-8.so.0 => /lib/aarch64-linux-gnu/libpcre2-8.so.0 (0x0000ffffa70c0000)
+	libexpat.so.1 => /lib/aarch64-linux-gnu/libexpat.so.1 (0x0000ffffa7080000)
+	libz.so.1 => /lib/aarch64-linux-gnu/libz.so.1 (0x0000ffffa7050000)
+
+##
+vi openstaan in andere terminal tab
+##
+
+ubuntu@ubuntu:~$ ps aux | grep vi
+ubuntu      1441  0.0  0.3 335816 12944 ?        Sl   10:36   0:00 /usr/libexec/goa-identity-service
+ubuntu      1517  0.0  0.3 516688 15752 ?        Ssl  10:36   0:00 /usr/libexec/gnome-session-binary --systemd-service --session=ubuntu
+ubuntu      1596  0.0  0.1 156620  4132 ?        Ssl  10:36   0:00 /usr/libexec/dconf-service
+ubuntu      2006  0.0  1.4 892092 56584 ?        Sl   10:37   0:00 /usr/bin/gnome-calendar --gapplication-service
+ubuntu      2009  0.0  0.9 392156 38412 ?        SLl  10:37   0:00 /usr/bin/seahorse --gapplication-service
+ubuntu      6927  0.1  0.2  17560  9236 pts/0    S+   11:15   0:00 vi
+ubuntu      6997  2.0  1.0 561308 42336 ?        Sl   11:16   0:00 /usr/bin/nautilus --gapplication-service
+ubuntu      7006  1.8  0.6 378340 25652 ?        Sl   11:16   0:00 /usr/bin/file-roller --service
+ubuntu      7027  0.0  0.0   3436  1784 pts/1    S+   11:16   0:00 grep --color=auto vi
+ubuntu@ubuntu:~$ 
+ubuntu@ubuntu:~$ sudo pmap -x 6927
+[sudo] password for ubuntu: 
+6927:   vi
+Address           Kbytes     RSS   Dirty Mode  Mapping
+0000aaaade7c0000    3368    2960       0 r-x-- vim.basic
+0000aaaadeb19000      68      68      68 r---- vim.basic
+0000aaaadeb2a000     148     140     128 rw--- vim.basic
+0000aaaadeb4f000      52      48      48 rw---   [ anon ]
+0000aaab04072000    2916    2812    2812 rw---   [ anon ]
+0000ffff96e89000     348     124       0 r---- LC_CTYPE
+0000ffff96ee0000      96      64       0 r-x-- libz.so.1.2.11
+0000ffff96ef8000      64       0       0 ----- libz.so.1.2.11
+0000ffff96f08000       4       4       4 r---- libz.so.1.2.11
+0000ffff96f09000       4       4       4 rw--- libz.so.1.2.11
+0000ffff96f10000     156      64       0 r-x-- libexpat.so.1.8.7
+0000ffff96f37000      64       0       0 ----- libexpat.so.1.8.7
+0000ffff96f47000       8       8       8 r---- libexpat.so.1.8.7
+0000ffff96f49000       4       4       4 rw--- libexpat.so.1.8.7
+0000ffff96f50000     512      64       0 r-x-- libpcre2-8.so.0.10.4
+0000ffff96fd0000      64       0       0 ----- libpcre2-8.so.0.10.4
+0000ffff96fe0000       4       4       4 r---- libpcre2-8.so.0.10.4
+0000ffff96fe1000       4       4       4 rw--- libpcre2-8.so.0.10.4
+0000ffff96ff0000    1568    1344       0 r-x-- libc.so.6
+0000ffff97178000      60       0       0 ----- libc.so.6
+0000ffff97187000      16      16      16 r---- libc.so.6
+0000ffff9718b000       8       8       8 rw--- libc.so.6
+0000ffff9718d000      48      20      20 rw---   [ anon ]
+0000ffff971a0000    5352     512       0 r-x-- libpython3.10.so.1.0
+0000ffff976da000      60       0       0 ----- libpython3.10.so.1.0
+0000ffff976e9000      24      24      24 r---- libpython3.10.so.1.0
+0000ffff976ef000     256     256     256 rw--- libpython3.10.so.1.0
+0000ffff9772f000     276       0       0 rw---   [ anon ]
+0000ffff97780000      20      20       0 r-x-- libgpm.so.2
+0000ffff97785000      64       0       0 ----- libgpm.so.2
+0000ffff97795000       4       4       4 r---- libgpm.so.2
+0000ffff97796000       4       4       4 rw--- libgpm.so.2
+0000ffff977a0000      28      28       0 r-x-- libacl.so.1.1.2301
+0000ffff977a7000      60       0       0 ----- libacl.so.1.1.2301
+0000ffff977b6000       4       4       4 r---- libacl.so.1.1.2301
+0000ffff977b7000       4       4       4 rw--- libacl.so.1.1.2301
+0000ffff977c0000     220      64       0 r-x-- libsodium.so.23.3.0
+0000ffff977f7000      60       0       0 ----- libsodium.so.23.3.0
+0000ffff97806000       4       4       4 r---- libsodium.so.23.3.0
+0000ffff97807000       4       4       4 rw--- libsodium.so.23.3.0
+0000ffff97810000     152     128       0 r-x-- libselinux.so.1
+0000ffff97836000      64       0       0 ----- libselinux.so.1
+0000ffff97846000       4       4       4 r---- libselinux.so.1
+0000ffff97847000       4       4       4 rw--- libselinux.so.1
+0000ffff97848000       8       0       0 rw---   [ anon ]
+0000ffff97850000     176     176       0 r-x-- libtinfo.so.6.3
+0000ffff9787c000      60       0       0 ----- libtinfo.so.6.3
+0000ffff9788b000      16      16      16 r---- libtinfo.so.6.3
+0000ffff9788f000       4       4       4 rw--- libtinfo.so.6.3
+0000ffff978a0000     536      64       0 r-x-- libm.so.6
+0000ffff97926000      60       0       0 ----- libm.so.6
+0000ffff97935000       4       4       4 r---- libm.so.6
+0000ffff97936000       4       4       4 rw--- libm.so.6
+0000ffff97945000       4       4       0 r---- LC_NUMERIC
+0000ffff97946000       4       4       0 r---- LC_TIME
+0000ffff97947000       4       4       0 r---- LC_COLLATE
+0000ffff97948000       4       4       0 r---- LC_MONETARY
+0000ffff97949000       4       4       0 r---- SYS_LC_MESSAGES
+0000ffff9794a000       4       4       0 r---- LC_PAPER
+0000ffff9794b000       4       4       0 r---- LC_NAME
+0000ffff9794c000       4       4       0 r---- LC_ADDRESS
+0000ffff9794d000      28      28       0 r--s- gconv-modules.cache
+0000ffff97954000     172     172       0 r-x-- ld-linux-aarch64.so.1
+0000ffff9797f000       4       4       0 r---- LC_TELEPHONE
+0000ffff97980000       4       4       0 r---- LC_MEASUREMENT
+0000ffff97981000       4       4       0 r---- LC_IDENTIFICATION
+0000ffff97982000      36      32      32 rw---   [ anon ]
+0000ffff9798b000       8       0       0 r----   [ anon ]
+0000ffff9798d000       4       4       0 r-x--   [ anon ]
+0000ffff9798e000       8       8       8 r---- ld-linux-aarch64.so.1
+0000ffff97990000       8       8       8 rw--- ld-linux-aarch64.so.1
+0000ffffd0c55000     132      64      64 rw---   [ stack ]
+---------------- ------- ------- ------- 
+total kB           17560    9452    3580
+ubuntu@ubuntu:~$ 
+
+####
+7. Test met hdparm de prestaties uit van je schijf
+####
+
+ubuntu@ubuntu:~$ sudo apt-get install hdparm
+
+ubuntu@ubuntu:~$ sudo hdparm -tT /dev/sda
+/dev/sda: No such file or directory
+ubuntu@ubuntu:~$ 
+
+##
+disks showen
+##
+
+ubuntu@ubuntu:~$ lsblk
+NAME                      MAJ:MIN RM   SIZE RO TYPE MOUNTPOINTS
+loop0                       7:0    0     4K  1 loop /snap/bare/5
+loop1                       7:1    0  68.9M  1 loop /snap/core22/2134
+loop2                       7:2    0  68.5M  1 loop /snap/core22/867
+loop3                       7:3    0 226.7M  1 loop /snap/firefox/3259
+loop4                       7:4    0 475.1M  1 loop /snap/gnome-42-2204/143
+loop5                       7:5    0 493.5M  1 loop /snap/gnome-42-2204/201
+loop6                       7:6    0  91.7M  1 loop /snap/gtk-common-themes/1535
+loop7                       7:7    0  35.5M  1 loop /snap/snapd/20298
+loop8                       7:8    0  44.2M  1 loop /snap/snapd/25205
+sr0                        11:0    1  1024M  0 rom  
+vda                       252:0    0    64G  0 disk 
+\u251c\u2500vda1                    252:1    0     1G  0 part /boot/efi
+\u251c\u2500vda2                    252:2    0     2G  0 part /boot
+\u2514\u2500vda3                    252:3    0  60.9G  0 part 
+  \u2514\u2500ubuntu--vg-ubuntu--lv 253:0    0  30.5G  0 lvm  /var/snap/firefox/common/host-hunspell
+                                                    /
+ubuntu@ubuntu:~$ 
+
+ubuntu@ubuntu:~$ sudo hdparm -tT /dev/vda
+
+/dev/vda:
+ Timing cached reads:   46180 MB in  1.99 seconds = 23181.10 MB/sec
+ Timing buffered disk reads: 4286 MB in  3.00 seconds = 1427.25 MB/sec
+ubuntu@ubuntu:~$ 
+
+####
+8. Gebruik lsof om te kijken welke processen (al-dan-niet gewenst) het netwerk gebruiken.
+####
+
+ubuntu@ubuntu:~$ sudo lsof -i
+COMMAND    PID            USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+systemd-n  728 systemd-network   15u  IPv4  88650      0t0  UDP blocked.local:bootpc 
+systemd-r  745 systemd-resolve   13u  IPv4  11982      0t0  UDP localhost:domain 
+systemd-r  745 systemd-resolve   14u  IPv4  11983      0t0  TCP localhost:domain (LISTEN)
+cupsd      814            root    6u  IPv6  23036      0t0  TCP ip6-localhost:ipp (LISTEN)
+cupsd      814            root    7u  IPv4  23037      0t0  TCP localhost:ipp (LISTEN)
+cups-brow  850            root    7u  IPv4  24842      0t0  UDP *:631 
+sshd       876            root    3u  IPv4  24452      0t0  TCP *:ssh (LISTEN)
+sshd       876            root    4u  IPv6  24454      0t0  TCP *:ssh (LISTEN)
+avahi-dae  879           avahi   12u  IPv4  24836      0t0  UDP *:mdns 
+avahi-dae  879           avahi   13u  IPv6  24837      0t0  UDP *:mdns 
+avahi-dae  879           avahi   14u  IPv4  24838      0t0  UDP *:59401 
+avahi-dae  879           avahi   15u  IPv6  24839      0t0  UDP *:47859 
+nginx     3689            root    6u  IPv4  71412      0t0  TCP *:http (LISTEN)
+nginx     3689            root    7u  IPv6  71413      0t0  TCP *:http (LISTEN)
+nginx     3690        www-data    6u  IPv4  71412      0t0  TCP *:http (LISTEN)
+nginx     3690        www-data    7u  IPv6  71413      0t0  TCP *:http (LISTEN)
+nginx     3691        www-data    6u  IPv4  71412      0t0  TCP *:http (LISTEN)
+nginx     3691        www-data    7u  IPv6  71413      0t0  TCP *:http (LISTEN)
+nginx     3692        www-data    6u  IPv4  71412      0t0  TCP *:http (LISTEN)
+nginx     3692        www-data    7u  IPv6  71413      0t0  TCP *:http (LISTEN)
+nginx     3693        www-data    6u  IPv4  71412      0t0  TCP *:http (LISTEN)
+nginx     3693        www-data    7u  IPv6  71413      0t0  TCP *:http (LISTEN)
+nginx     3694        www-data    6u  IPv4  71412      0t0  TCP *:http (LISTEN)
+nginx     3694        www-data    7u  IPv6  71413      0t0  TCP *:http (LISTEN)
+nginx     3695        www-data    6u  IPv4  71412      0t0  TCP *:http (LISTEN)
+nginx     3695        www-data    7u  IPv6  71413      0t0  TCP *:http (LISTEN)
+nginx     3696        www-data    6u  IPv4  71412      0t0  TCP *:http (LISTEN)
+nginx     3696        www-data    7u  IPv6  71413      0t0  TCP *:http (LISTEN)
+nginx     3697        www-data    6u  IPv4  71412      0t0  TCP *:http (LISTEN)
+nginx     3697        www-data    7u  IPv6  71413      0t0  TCP *:http (LISTEN)
+ubuntu@ubuntu:~$ 
+
+####
+9. Gebruik het tooltje ip om een extra netwerkkaart aan te maken met de naam dummy1. Deze krijgt het adres 1.2.3.4/24.
+Test uit of je deze kan pingen. Verwijder dan deze interface.
+####
+
+ubuntu@ubuntu:~$ sudo modprobe dummy
+ubuntu@ubuntu:~$ sudo ip link add dummy1 type dummy
+ubuntu@ubuntu:~$ sudo ip addr add 1.2.3.4/24 dev dummy1
+ubuntu@ubuntu:~$ sudo ip link set dummy1 up
+ubuntu@ubuntu:~$ ping -c 4 1.2.3.4
+PING 1.2.3.4 (1.2.3.4) 56(84) bytes of data.
+
+--- 1.2.3.4 ping statistics ---
+4 packets transmitted, 0 received, 100% packet loss, time 3056ms
+
+ubuntu@ubuntu:~$ 
+ubuntu@ubuntu:~$ sudo ip link del dummy1
+
+####
+10. Schrijf een korte oneindige loop in shell script.
+Zorg met cpulimit dat de oneindige loop zo weinig mogelijk cputijd gebruikt. Lukt dit?
+####
+
+ubuntu@ubuntu:~$ tee loop.sh > /dev/null <<'EOF'
+#!/bin/bash
+# Oneindige loop
+while true; do
+  :   # doet niks, houdt CPU bezig
+done
+EOF
+ubuntu@ubuntu:~$ chmod +x loop.sh
+ubuntu@ubuntu:~$ ./loop.sh
+^C
+
+ubuntu@ubuntu:~$ sudo apt-get install cpulimit
+ubuntu@ubuntu:~$ ./loop.sh &
+[2] 8315
+ubuntu@ubuntu:~$ sudo cpulimit --pid 8315 --limit 10
+Process 8315 detected
+
+####
+11. Maak een extra swapfile met de naam pagefile.sys. Zorg dat het systeem deze swapfile ook gebruikt. Waarom gebruikt linux een swapartitie en meestal geen swapfile?
+####
+
+ubuntu@ubuntu:~$ sudo dd if=/dev/zero of=/pagefile.sys bs=1M count=512
+512+0 records in
+512+0 records out
+536870912 bytes (537 MB, 512 MiB) copied, 0.472318 s, 1.1 GB/s
+ubuntu@ubuntu:~$ sudo chmod 600 /pagefile.sys
+ubuntu@ubuntu:~$ sudo mkswap /pagefile.sys
+Setting up swapspace version 1, size = 512 MiB (536866816 bytes)
+no label, UUID=510515e6-d9da-4d96-a2cb-65a25b090174
+ubuntu@ubuntu:~$ sudo swapon /pagefile.sys
+ubuntu@ubuntu:~$ swapon --show
+free -h
+NAME          TYPE SIZE USED PRIO
+/swap.img     file 3.8G 520K   -2
+/pagefile.sys file 512M   0B   -3
+               total        used        free      shared  buff/cache   available
+Mem:           3.8Gi       696Mi       1.5Gi        72Mi       1.7Gi       2.9Gi
+Swap:          4.3Gi       0.0Ki       4.3Gi
+ubuntu@ubuntu:~$ 
+
+####
+12. Verander een kernelparameter zodat deze zo veel mogelijk swapt. Start enkele programma's en zorg ervoor dat je swapfile gebruikt wordt (zoek zelf uit hoe je dat kan zien).
+####
+
+ubuntu@ubuntu:~$ cat /proc/sys/vm/swappiness
+60
+ubuntu@ubuntu:~$ sudo sysctl vm.swappiness=100
+vm.swappiness = 100
+ubuntu@ubuntu:~$ cat /proc/sys/vm/swappiness
+100
+ubuntu@ubuntu:~$ sudo apt-get install stress
+stress --vm 2 --vm-bytes 256M --timeout 30s
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  stress
+0 upgraded, 1 newly installed, 0 to remove and 471 not upgraded.
+Need to get 18.2 kB of archives.
+After this operation, 47.1 kB of additional disk space will be used.
+Get:1 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 stress arm64 1.0.5-1 [18.2 kB]
+Fetched 18.2 kB in 0s (49.5 kB/s)
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package stress.
+(Reading database ... 173647 files and directories currently installed.)
+Preparing to unpack .../stress_1.0.5-1_arm64.deb ...
+Unpacking stress (1.0.5-1) ...
+Setting up stress (1.0.5-1) ...
+Processing triggers for man-db (2.10.2-1) ...
+debconf: unable to initialize frontend: Dialog
+debconf: (No usable dialog-like program is installed, so the dialog based frontend cannot be used. at /usr/share/perl5/Debconf/FrontEnd/Dialog.pm line 78.)
+debconf: falling back to frontend: Readline
+Scanning processes...                                                                               
+Scanning candidates...                                                                              
+Scanning linux images...                                                                            
+
+Running kernel seems to be up-to-date.
+
+Restarting services...
+Daemons using outdated libraries
+--------------------------------
+
+  1. systemd-journald.service  4. systemd-networkd.service  7. systemd-timesyncd.service
+  2. systemd-logind.service    5. systemd-oomd.service      8. user@1000.service
+  3. systemd-manager           6. systemd-resolved.service  9. none of the above
+
+(Enter the items or ranges you want to select, separated by spaces.)
+
+Which services should be restarted? 
+
+Service restarts being deferred:
+ systemctl restart systemd-journald.service
+ systemctl restart systemd-logind.service
+ /etc/needrestart/restart.d/systemd-manager
+ systemctl restart systemd-networkd.service
+ systemctl restart systemd-oomd.service
+ systemctl restart systemd-resolved.service
+ systemctl restart systemd-timesyncd.service
+ systemctl restart user@1000.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+stress: info: [8679] dispatching hogs: 0 cpu, 0 io, 2 vm, 0 hdd
+
+
+
+
+
+
+stress: info: [8679] successful run completed in 30s
+ubuntu@ubuntu:~$ 
+ubuntu@ubuntu:~$ 
+ubuntu@ubuntu:~$ 
+ubuntu@ubuntu:~$ 
+ubuntu@ubuntu:~$ 
+ubuntu@ubuntu:~$ 
+ubuntu@ubuntu:~$ swapon --show
+free -h
+NAME          TYPE SIZE USED PRIO
+/swap.img     file 3.8G 520K   -2
+/pagefile.sys file 512M   0B   -3
+               total        used        free      shared  buff/cache   available
+Mem:           3.8Gi       702Mi       1.5Gi        73Mi       1.7Gi       2.9Gi
+Swap:          4.3Gi       0.0Ki       4.3Gi
+ubuntu@ubuntu:~$ 
+
+####
+13. Compileer de voorziene c en cpp source bestanden en start de gecompileerde programma's op.
+Zoek zelf uit wat er fout loopt wanneer je het programma opstart.
+Voor bestand b.c moet je lokaal een apache server draaien.
+####
