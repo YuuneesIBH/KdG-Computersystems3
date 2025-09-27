@@ -1,0 +1,289 @@
+NODIG: Virtuele ubuntu met bind9,
+             Configureer met eth0 Host Only adapter, eth1 NAT      
+
+REF: https://help.ubuntu.com/community/BIND9ServerHowto    
+
+Opgelet: De referentie van Ubuntu is niet helemaal up-to-date
+
+Installeer bind9 en bind9utils.
+- Configureer een Primary Master DNS server (bind9) op jouw domein (bv achternaam.local).
+  Gebruik als IP adres het Host Only adres.
+
+* ubuntu@ubuntu:~$ sudo apt install bind9 bind9utils -y
+[sudo] password for ubuntu: 
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+bind9-host bind9-libs bind9-utils
+
+ubuntu@ubuntu:~$ sudo vi /etc/bind/named.conf.local
+FILE:
+//
+// Do any local configuration here
+//
+
+// Consider adding the 1918 zones here, if they are not used in your
+// organization
+//include "/etc/bind/zones.rfc1918";
+
+zone "elazzouzi.local" {
+    type master;
+    file "/etc/bind/db.elazzouzi.local";
+};
+
+- Definieer ook www.achternaam.local (Koppelingen naar een externe site.) en mail.achternaam.local met hetzelfde IP adres.
+Zonebestand maken met www en mail.
+ubuntu@ubuntu:~$ sudo vi /etc/bind/db.elazzouzi.local
+
+ZONEFILE:
+$TTL    604800
+@   IN  SOA ns.elazzouzi.local. root.elazzouzi.local. (
+        2025092701 ; serial
+        604800     ; refresh
+        86400      ; retry
+        2419200    ; expire
+        604800 )   ; minimum
+
+; Nameserver
+@       IN  NS      ns.elazzouzi.local.
+ns      IN  A       192.168.64.11
+
+; Hosts
+www     IN  A       192.168.64.11
+mail    IN  A       192.168.64.11
+
+; Mail
+@       IN  MX 10   mail.elazzouzi.local.
+
+- Test uit of jouw DNS configuratiebestanden juist zijn. Gebruik named-checkconf en named-checkzone
+ubuntu@ubuntu:~$ sudo named-checkconf
+ubuntu@ubuntu:~$ 
+(geen output is geen issues)
+
+- Configureer jouw DNS server als DNS server (in /etc/resolv.conf).
+ubuntu@ubuntu:~$ sudo vi /etc/resolv.conf
+nameserver 192.168.64.11 (hier zet ik custom adres)
+options edns0 trust-ad
+search .
+
+- Test uit of een forward lookup werkt (dig, nslookup en host www.achternaam.local (Koppelingen naar een externe site.))
+ubuntu@ubuntu:~$ systemctl status bind9
+ubuntu@ubuntu:~$ dig www.elazzouzi.local
+
+; <<>> DiG 9.18.39-0ubuntu0.22.04.1-Ubuntu <<>> www.elazzouzi.local
+;; global options: +cmd
+;; Got answer:
+;; WARNING: .local is reserved for Multicast DNS
+;; You are currently testing what happens when an mDNS query is leaked to DNS
+;; ->>HEADER<<- opcode: QUERY, status: SERVFAIL, id: 46417
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 65494
+;; QUESTION SECTION:
+;www.elazzouzi.local.		IN	A
+
+;; Query time: 3 msec
+;; SERVER: 127.0.0.53#53(127.0.0.53) (UDP)
+;; WHEN: Sat Sep 27 05:38:47 UTC 2025
+;; MSG SIZE  rcvd: 48
+
+ubuntu@ubuntu:~$ 
+
+ubuntu@ubuntu:~$ nslookup www.elazzouzi.local
+;; Got SERVFAIL reply from 127.0.0.53
+Server:		127.0.0.53
+Address:	127.0.0.53#53
+
+** server can't find www.elazzouzi.local: SERVFAIL
+
+ubuntu@ubuntu:~$ 
+
+ubuntu@ubuntu:~$ host www.elazzouzi.local
+Host www.elazzouzi.local not found: 2(SERVFAIL)
+ubuntu@ubuntu:~$ 
+
+# See resolved.conf(5) for details.
+ubuntu@ubuntu:~$ sudo vi /etc/systemd/resolved.conf
+[Resolve]
+# Some examples of DNS servers which may be used for DNS= and FallbackDNS=:
+# Cloudflare: 1.1.1.1#cloudflare-dns.com 1.0.0.1#cloudflare-dns.com 2606:4700:4700::1111#cloudflare-dns.com 2606:4700:4700::1001#cloudflare-dns.com
+# Google:     8.8.8.8#dns.google 8.8.4.4#dns.google 2001:4860:4860::8888#dns.google 2001:4860:4860::8844#dns.google
+# Quad9:      9.9.9.9#dns.quad9.net 149.112.112.112#dns.quad9.net 2620:fe::fe#dns.quad9.net 2620:fe::9#dns.quad9.net
+DNS=192.168.64.11 ##ADDED
+#FallbackDNS=
+Domains=elazzouzi.local ##ADDED
+#DNSSEC=no
+#DNSOverTLS=no
+#MulticastDNS=no
+#LLMNR=no
+#Cache=no-negative
+#CacheFromLocalhost=no
+#DNSStubListener=yes
+#DNSStubListenerExtra=
+#ReadEtcHosts=yes
+#ResolveUnicastSingleLabel=no
+
+CORRECTE OUTPUT:
+ubuntu@ubuntu:~$ dig www.elazzouzi.lan
+nslookup www.elazzouzi.lan
+host www.elazzouzi.lan
+
+; <<>> DiG 9.18.39-0ubuntu0.22.04.1-Ubuntu <<>> www.elazzouzi.lan
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 20135
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+; COOKIE: 18ad0c382673a93b0100000068d77b321d4c0c30e8831d0e (good)
+;; QUESTION SECTION:
+;www.elazzouzi.lan.		IN	A
+
+;; ANSWER SECTION:
+www.elazzouzi.lan.	604800	IN	A	192.168.64.11
+
+;; Query time: 0 msec
+;; SERVER: 192.168.64.11#53(192.168.64.11) (UDP)
+;; WHEN: Sat Sep 27 05:50:42 UTC 2025
+;; MSG SIZE  rcvd: 90
+
+Server:		192.168.64.11
+Address:	192.168.64.11#53
+
+Name:	www.elazzouzi.lan
+Address: 192.168.64.11
+
+www.elazzouzi.lan has address 192.168.64.11
+ubuntu@ubuntu:~$ 
+
+- Test uit of een reverse lookup werkt (dig, nslookup en host IP adres)
+ubuntu@ubuntu:~$ sudo vi /etc/bind/named.conf.local
+//
+// Do any local configuration here
+//
+
+// Consider adding the 1918 zones here, if they are not used in your
+// organization
+//include "/etc/bind/zones.rfc1918";
+
+zone "elazzouzi.local" {
+    type master;
+    file "/etc/bind/db.elazzouzi.local";
+};
+
+##REVERSE LOOKUP
+zone "64.168.192.in-addr.arpa" {
+    type master;
+    file "/etc/bind/db.192";
+};
+
+ubuntu@ubuntu:~$ sudo cp /etc/bind/db.127 /etc/bind/db.192
+sudo vi /etc/bind/db.192
+ubuntu@ubuntu:~$ sudo tee /etc/bind/db.192 > /dev/null << 'EOF'
+$TTL    604800
+@   IN  SOA ns.elazzouzi.lan. root.elazzouzi.lan. (
+        2025092701 ; serial
+        604800     ; refresh
+        86400      ; retry
+        2419200    ; expire
+        604800 )   ; minimum
+
+; Nameserver
+@   IN  NS  ns.elazzouzi.lan.
+
+; PTR records
+11  IN  PTR ns.elazzouzi.lan.
+11  IN  PTR www.elazzouzi.lan.
+11  IN  PTR mail.elazzouzi.lan.
+EOF
+ubuntu@ubuntu:~$ sudo named-checkzone 64.168.192.in-addr.arpa /etc/bind/db.192
+zone 64.168.192.in-addr.arpa/IN: loaded serial 2025092701
+OK
+ubuntu@ubuntu:~$ sudo systemctl restart bind9
+
+ubuntu@ubuntu:~$ dig -x 192.168.64.11
+nslookup 192.168.64.11
+host 192.168.64.11
+
+; <<>> DiG 9.18.39-0ubuntu0.22.04.1-Ubuntu <<>> -x 192.168.64.11
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 23629
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 3, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+; COOKIE: 02135721e496f79e0100000068d77bbec2aedde4779b4685 (good)
+;; QUESTION SECTION:
+;11.64.168.192.in-addr.arpa.	IN	PTR
+
+;; ANSWER SECTION:
+11.64.168.192.in-addr.arpa. 604800 IN	PTR	ns.elazzouzi.lan.
+11.64.168.192.in-addr.arpa. 604800 IN	PTR	mail.elazzouzi.lan.
+11.64.168.192.in-addr.arpa. 604800 IN	PTR	www.elazzouzi.lan.
+
+;; Query time: 0 msec
+;; SERVER: 192.168.64.11#53(192.168.64.11) (UDP)
+;; WHEN: Sat Sep 27 05:53:02 UTC 2025
+;; MSG SIZE  rcvd: 150
+
+11.64.168.192.in-addr.arpa	name = ns.elazzouzi.lan.
+11.64.168.192.in-addr.arpa	name = www.elazzouzi.lan.
+11.64.168.192.in-addr.arpa	name = mail.elazzouzi.lan.
+
+11.64.168.192.in-addr.arpa domain name pointer ns.elazzouzi.lan.
+11.64.168.192.in-addr.arpa domain name pointer mail.elazzouzi.lan.
+11.64.168.192.in-addr.arpa domain name pointer www.elazzouzi.lan.
+ubuntu@ubuntu:~$ 
+
+- Zorg dat ook een ping via de nameserver werkt (hint: /etc/nsswitch.conf)
+ubuntu@ubuntu:~$ sudo vi /etc/nsswitch.conf
+# /etc/nsswitch.conf
+#
+# Example configuration of GNU Name Service Switch functionality.
+# If you have the `glibc-doc-reference' and `info' packages installed, try:
+# `info libc "Name Service Switch"' for information about this file.
+
+passwd:         files systemd sss
+group:          files systemd sss
+shadow:         files sss
+gshadow:        files
+
+hosts:          files dns myhostname
+networks:       files
+
+protocols:      db files
+services:       db files sss
+ethers:         db files
+rpc:            db files
+
+netgroup:       nis sss
+automount:      sss
+
+ubuntu@ubuntu:~$ sudo vi /etc/nsswitch.conf
+ubuntu@ubuntu:~$ ping www.elazzouzi.lan
+PING www.elazzouzi.lan (192.168.64.11) 56(84) bytes of data.
+^C
+--- www.elazzouzi.lan ping statistics ---
+39 packets transmitted, 0 received, 100% packet loss, time 38895ms
+
+ubuntu@ubuntu:~$ sudo iptables -L -n | grep icmp
+DROP       icmp --  0.0.0.0/0            0.0.0.0/0           
+DROP       icmp --  0.0.0.0/0            0.0.0.0/0           
+ubuntu@ubuntu:~$ sudo iptables -D INPUT -p icmp -j DROP
+sudo iptables -D OUTPUT -p icmp -j DROP
+ubuntu@ubuntu:~$ ping www.elazzouzi.lan
+PING www.elazzouzi.lan (192.168.64.11) 56(84) bytes of data.
+64 bytes from ns.elazzouzi.lan (192.168.64.11): icmp_seq=1 ttl=64 time=0.018 ms
+64 bytes from mail.elazzouzi.lan (192.168.64.11): icmp_seq=2 ttl=64 time=0.032 ms
+64 bytes from ns.elazzouzi.lan (192.168.64.11): icmp_seq=3 ttl=64 time=0.032 ms
+^C
+--- www.elazzouzi.lan ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2037ms
+rtt min/avg/max/mdev = 0.018/0.027/0.032/0.006 ms
+ubuntu@ubuntu:~$ 
+
+#Firewall hield icmp pings tegen dus moest ik doorlaten

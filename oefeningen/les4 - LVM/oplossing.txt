@@ -1,0 +1,34 @@
+2. Je virtuele machine heeft volgende opties:
+
+OS: Redhat Linux 64 bit
+RAM: 2048MB
+Storage: Twee identieke schijven van 20GB bv raid1.vdi, raid2.vdi
+Storage: 1 schijfje van 100MB bv home1.vmdk en 1 schijfje van 200MB bv home2.vmdk
+Netwerk: Voorzie een NAT en een Host-Only Netwerkkaart
+
+- Hiervoor moet ik eerst de schijven aanmaken voordat ik de VM zelf opstart.
+Nadien ga ik door de setup en zorg ik ervoor dat ik CentOS Server kies zodat er geen GUI is.
+Red compartidas moet ik ook adden en solo host. Stap 3 met het indelen van de schijven
+
+---------------------------------------------------------
+VIDEO: https://www.youtube.com/watch?v=I-EDgpc0OZE&t=89s
+---------------------------------------------------------
+IK MOET DE SCHIJHF DIE UTM AANMAAKT verwijderen! 
+
+3. Start de installer
+Geef een root paswoord (selecteer meteen ook ssh login)
+Maak achtereenvolgens volgende partities aan (zie [link8]):
+Je hebt een BIOS boot partitie nodig (1 MB)
+Je hebt een /boot partitie nodig (1000 MB) in RAID
+Je hebt ene swap partitie nodig (bv 2000 MB) in RAID
+De rest van de schijf wordt / (root partitie) hierop maak je een LVM aan MET RAID1(mirror)
+Voeg tijdens de installatie ook een netwerkkaart toe!
+In het kort maak je het volgende tijdens de installatie:
+* RAID /dev/md0 met /dev/sda1 en /dev/sdb1 (elk 1MB) geformateerd in ext4-> biosboot
+* RAID /dev/md1 met /dev/sda2 en /dev/sdb2 (elk 1000 MB) geformateerd in ext4 -> /boot partitie
+* RAID /dev/md2 met /dev/sda3 en /dev/sdb3 (elk 2000 MB) geformateerd in swap -> swap partitie
+Volumegroep vg-root maat je NIEUW aan
+Selecteer "Server" bij de software die je wilt installeren
+
+- Hier selecteer ik dan de twee schijven van 20GB en zet ik de opslagconfiguratie op Custom
+
