@@ -32,3 +32,920 @@ Selecteer "Server" bij de software die je wilt installeren
 
 - Hier selecteer ik dan de twee schijven van 20GB en zet ik de opslagconfiguratie op Custom
 
+Nadat ik de video heb gevolgd ben ik eindelijk in de terminal screen gekomen 
+
+
+
+
+
+----MACOS drop rellen dus vertrek ik van een normale CENTOS maar heb ik wel een VM met de schijven 
+[root@blocked ~]# fdisk /dev/vdb
+
+Welkom bij 'fdisk' (util-linux 2.37.4).
+Wijzigingen worden alleen in het computergeheugen gemaakt,
+tot het moment dat u besluit ze naar schijf te schrijven.
+Wees voorzichtig vóór het gebruik van de schrijfopdracht.
+
+Apparaat bevat geen herkenbare partitietabel.
+Nieuw DOS-schijflabel is aangemaakt met schijf-ID 0x5a655058.
+
+Opdracht (m voor hulp): 
+
+
+Opdracht (m voor hulp): n
+Partitietype
+   p   primair (0 primary, 0 extended, 4 free)
+   e   uitgebreid (container voor logische partities)
+Selecteer (standaard is p): p
+Partitienummer (1-4, standaard 1): 1
+Eerste sector (2048-41943039, standaard 2048): +1000M
+Waarde valt buiten bereik.
+Eerste sector (2048-41943039, standaard 2048): 1000
+Waarde valt buiten bereik.
+Eerste sector (2048-41943039, standaard 2048): 1000M
+Waarde valt buiten bereik.
+Eerste sector (2048-41943039, standaard 2048): 
+Last sector, +/-sectors or +/-size{K,M,G,T,P} (2048-41943039, standaard 41943039): +1000M
+
+Nieuwe partitie 1 van type 'Linux' en grootte 1000 MiB is aangemaakt.
+
+Opdracht (m voor hulp): n
+Partitietype
+   p   primair (1 primary, 0 extended, 3 free)
+   e   uitgebreid (container voor logische partities)
+Selecteer (standaard is p): p
+Partitienummer (2-4, standaard 2): 2
+Eerste sector (2050048-41943039, standaard 2050048): 
+Last sector, +/-sectors or +/-size{K,M,G,T,P} (2050048-41943039, standaard 41943039): +1000M
+
+Nieuwe partitie 2 van type 'Linux' en grootte 1000 MiB is aangemaakt.
+
+Opdracht (m voor hulp): 
+
+
+Opdracht (m voor hulp): 
+
+
+Opdracht (m voor hulp): n
+Partitietype
+   p   primair (2 primary, 0 extended, 2 free)
+   e   uitgebreid (container voor logische partities)
+Selecteer (standaard is p): p
+Partitienummer (3,4, standaard 3): 3
+Eerste sector (4098048-41943039, standaard 4098048): 
+Last sector, +/-sectors or +/-size{K,M,G,T,P} (4098048-41943039, standaard 41943039): 
+
+Nieuwe partitie 3 van type 'Linux' en grootte 18 GiB is aangemaakt.
+
+Opdracht (m voor hulp): t
+Partitienummer (1-3, standaard 3): 3
+Hex code or alias (type L to list all): 8e
+
+Het type van de partitie is veranderd van 'Linux' naar 'Linux LVM'.
+
+Opdracht (m voor hulp): w
+De partitietabel is gewijzigd.
+Aanroepen van ioctl() om partitietabel opnieuw in te lezen...
+Leegmaken van schijfbuffers...
+
+[root@blocked ~]# lsblk
+NAME                MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+sr0                  11:0    1 1024M  0 rom  
+vda                 252:0    0   20G  0 disk 
+├─vda1              252:1    0  600M  0 part /boot/efi
+├─vda2              252:2    0    1G  0 part /boot
+└─vda3              252:3    0 18,4G  0 part 
+  ├─cs_blocked-root 253:0    0 16,4G  0 lvm  /
+  └─cs_blocked-swap 253:1    0    2G  0 lvm  [SWAP]
+vdb                 252:16   0   20G  0 disk 
+├─vdb1              252:17   0 1000M  0 part 
+├─vdb2              252:18   0 1000M  0 part 
+└─vdb3              252:19   0   18G  0 part 
+vdc                 252:32   0  100M  0 disk 
+vdd                 252:48   0  200M  0 disk 
+[root@blocked ~]# pvcreate /dev/vdb3
+  Physical volume "/dev/vdb3" successfully created.
+[root@blocked ~]# vgcreate vg-root /dev/vdb3
+  Volume group "vg-root" successfully created
+[root@blocked ~]# lvcreate -n root -L 15G vg-root
+  Logical volume "root" created.
+[root@blocked ~]# mkfs.ext4 /dev/vg-root/root
+mke2fs 1.46.5 (30-Dec-2021)
+Verwerpen van blokken: voltooid                        
+Aanmaken van bestandssysteem met 3932160 blokken (van 4K) en 983040 inodes.
+Bestandssysteem-UUID: df8f39e5-c7b1-40d9-97af-af59a8adc438
+Superblokreservekopieën zijn opgeslagen in blokken: 
+	32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 2654208
+
+Reserveren van groepstabellen: voltooid                        
+Schrijven van inodetabellen: voltooid                        
+Aanmaken van journal (16384 blokken): voltooid
+Schrijven van superblokken en bestandssysteem-metagegevens: voltooid
+
+[root@blocked ~]# 
+[root@blocked ~]# 
+[root@blocked ~]# pvcreate /dev/vdc
+  Physical volume "/dev/vdc" successfully created.
+[root@blocked ~]# vgcreate VolGroupHome /dev/vdc
+  Volume group "VolGroupHome" successfully created
+[root@blocked ~]# lvcreate -n LogVolHome -l 100%FREE VolGroupHome
+  Logical volume "LogVolHome" created.
+[root@blocked ~]# mkfs.ext4 /dev/VolGroupHome/LogVolHome
+mke2fs 1.46.5 (30-Dec-2021)
+Verwerpen van blokken: voltooid                        
+Aanmaken van bestandssysteem met 98304 blokken (van 1K) en 24576 inodes.
+Bestandssysteem-UUID: 66bfd255-413e-40b0-b94a-78fffcd44ee9
+Superblokreservekopieën zijn opgeslagen in blokken: 
+	8193, 24577, 40961, 57345, 73729
+
+Reserveren van groepstabellen: voltooid                        
+Schrijven van inodetabellen: voltooid                        
+Aanmaken van journal (4096 blokken): voltooid
+Schrijven van superblokken en bestandssysteem-metagegevens: voltooid
+
+[root@blocked ~]# pvcreate /dev/vdd
+  Physical volume "/dev/vdd" successfully created.
+[root@blocked ~]# vgextend VolGroupHome /dev/vdd
+  Volume group "VolGroupHome" successfully extended
+[root@blocked ~]# lvextend -l +100%FREE /dev/VolGroupHome/LogVolHome
+  Size of logical volume VolGroupHome/LogVolHome changed from 96,00 MiB (24 extents) to 292,00 MiB (73 extents).
+  Logical volume VolGroupHome/LogVolHome successfully resized.
+[root@blocked ~]# resize2fs /dev/VolGroupHome/LogVolHome
+resize2fs 1.46.5 (30-Dec-2021)
+Van grootte veranderen van bestandssysteem op /dev/VolGroupHome/LogVolHome naar 299008 blokken (van 1K).
+Het bestandssysteem op /dev/VolGroupHome/LogVolHome is nu 299008 blokken (van 1K) groot.
+
+[root@blocked ~]# mkdir -p /mnt/test-root
+[root@blocked ~]# mkfs.ext4 /dev/VolGroupHome/LogVolHome
+mke2fs 1.46.5 (30-Dec-2021)
+/dev/VolGroupHome/LogVolHome bevat een ext4-bestandssysteem
+	aangemaakt op Sun Sep 28 15:19:28 2025
+Toch doorgaan? (j,N) pvcreate /dev/vdd
+
+[root@blocked ~]# 
+[root@blocked ~]# mkfs.ext4 /dev/VolGroupHome/LogVolHome
+mke2fs 1.46.5 (30-Dec-2021)
+/dev/VolGroupHome/LogVolHome bevat een ext4-bestandssysteem
+	aangemaakt op Sun Sep 28 15:19:28 2025
+Toch doorgaan? (j,N) j
+Verwerpen van blokken: voltooid                        
+Aanmaken van bestandssysteem met 299008 blokken (van 1K) en 74888 inodes.
+Bestandssysteem-UUID: 820aea97-8cb5-460a-8fa5-afc6c07612e4
+Superblokreservekopieën zijn opgeslagen in blokken: 
+	8193, 24577, 40961, 57345, 73729, 204801, 221185
+
+Reserveren van groepstabellen: voltooid                        
+Schrijven van inodetabellen: voltooid                        
+Aanmaken van journal (8192 blokken): voltooid
+Schrijven van superblokken en bestandssysteem-metagegevens: voltooid
+
+[root@blocked ~]# vgextend VolGroupHome /dev/vdd
+  Physical volume '/dev/vdd' is already in volume group 'VolGroupHome'
+  Unable to add physical volume '/dev/vdd' to volume group 'VolGroupHome'
+  /dev/vdd: physical volume not initialized.
+[root@blocked ~]# lvextend -l +100%FREE /dev/VolGroupHome/LogVolHome
+  New size (73 extents) matches existing size (73 extents).
+  No size change.
+[root@blocked ~]# resize2fs /dev/VolGroupHome/LogVolHome
+resize2fs 1.46.5 (30-Dec-2021)
+Het bestandssysteem is al 299008 blokken (van 1K) groot.  Er is niets te doen!
+
+[root@blocked ~]# mkdir -p /mnt/test-home
+[root@blocked ~]# mount /dev/vg-root/root /mnt/test-root
+[root@blocked ~]# mount /dev/VolGroupHome/LogVolHome /mnt/test-home
+[root@blocked ~]# df -h
+Bestandssysteem                     Grootte Gebruikt Besch Geb% Aangekoppeld op
+devtmpfs                               4,0M        0  4,0M   0% /dev
+tmpfs                                  1,8G        0  1,8G   0% /dev/shm
+tmpfs                                  717M     9,6M  707M   2% /run
+efivarfs                               256K      28K  229K  11% /sys/firmware/efi/efivars
+/dev/mapper/cs_blocked-root             17G     4,7G   12G  29% /
+/dev/vda2                              960M     329M  632M  35% /boot
+/dev/vda1                              599M     7,3M  592M   2% /boot/efi
+tmpfs                                  359M     116K  359M   1% /run/user/1000
+/dev/mapper/vg--root-root               15G      24K   14G   1% /mnt/test-root
+/dev/mapper/VolGroupHome-LogVolHome    264M      14K  245M   1% /mnt/test-home
+[root@blocked ~]# 
+
+[root@blocked ~]# pvdisplay
+  --- Physical volume ---
+  PV Name               /dev/vdc
+  VG Name               VolGroupHome
+  PV Size               100,00 MiB / not usable 4,00 MiB
+  Allocatable           yes (but full)
+  PE Size               4,00 MiB
+  Total PE              24
+  Free PE               0
+  Allocated PE          24
+  PV UUID               8D76f0-eK6S-xJx3-b9Sh-ByL0-tRuA-UMrYMs
+   
+  --- Physical volume ---
+  PV Name               /dev/vdd
+  VG Name               VolGroupHome
+  PV Size               200,00 MiB / not usable 4,00 MiB
+  Allocatable           yes (but full)
+  PE Size               4,00 MiB
+  Total PE              49
+  Free PE               0
+  Allocated PE          49
+  PV UUID               FfzvaE-Fe8X-2XBc-3JbH-IAgh-bYA1-N1p01X
+   
+  --- Physical volume ---
+  PV Name               /dev/vda3
+  VG Name               cs_blocked
+  PV Size               18,41 GiB / not usable 2,00 MiB
+  Allocatable           yes (but full)
+  PE Size               4,00 MiB
+  Total PE              4713
+  Free PE               0
+  Allocated PE          4713
+  PV UUID               O9M1PP-2MP1-wrdP-HGEb-dHOW-PGgx-cF8MFx
+   
+  --- Physical volume ---
+  PV Name               /dev/vdb3
+  VG Name               vg-root
+  PV Size               <18,05 GiB / not usable 3,00 MiB
+  Allocatable           yes 
+  PE Size               4,00 MiB
+  Total PE              4619
+  Free PE               779
+  Allocated PE          3840
+  PV UUID               8M63kC-z1Ll-QUMR-enA4-aaWL-XiLX-YTJDne
+   
+[root@blocked ~]# vgdisplay
+  --- Volume group ---
+  VG Name               VolGroupHome
+  System ID             
+  Format                lvm2
+  Metadata Areas        2
+  Metadata Sequence No  4
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                1
+  Open LV               1
+  Max PV                0
+  Cur PV                2
+  Act PV                2
+  VG Size               292,00 MiB
+  PE Size               4,00 MiB
+  Total PE              73
+  Alloc PE / Size       73 / 292,00 MiB
+  Free  PE / Size       0 / 0   
+  VG UUID               5KGf5J-49hD-VRiw-4zPX-IX71-7vNz-2xIfI8
+   
+  --- Volume group ---
+  VG Name               cs_blocked
+  System ID             
+  Format                lvm2
+  Metadata Areas        1
+  Metadata Sequence No  3
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                2
+  Open LV               2
+  Max PV                0
+  Cur PV                1
+  Act PV                1
+  VG Size               18,41 GiB
+  PE Size               4,00 MiB
+  Total PE              4713
+  Alloc PE / Size       4713 / 18,41 GiB
+  Free  PE / Size       0 / 0   
+  VG UUID               49itS8-BYbw-BHru-9NRc-yWef-ttsp-9vO3q1
+   
+  --- Volume group ---
+  VG Name               vg-root
+  System ID             
+  Format                lvm2
+  Metadata Areas        1
+  Metadata Sequence No  2
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                1
+  Open LV               1
+  Max PV                0
+  Cur PV                1
+  Act PV                1
+  VG Size               18,04 GiB
+  PE Size               4,00 MiB
+  Total PE              4619
+  Alloc PE / Size       3840 / 15,00 GiB
+  Free  PE / Size       779 / 3,04 GiB
+  VG UUID               0wFKfw-xoBK-aOGI-TI0p-HH7j-Pym6-xqRWke
+   
+[root@blocked ~]# lvdisplat
+bash: lvdisplat: commando niet gevonden...
+[root@blocked ~]# lvdisplay
+  --- Logical volume ---
+  LV Path                /dev/VolGroupHome/LogVolHome
+  LV Name                LogVolHome
+  VG Name                VolGroupHome
+  LV UUID                25TVtF-iW1n-k3lb-PEqV-e5gu-RJUa-BU56RF
+  LV Write Access        read/write
+  LV Creation host, time blocked.local, 2025-09-28 15:19:23 +0200
+  LV Status              available
+  # open                 1
+  LV Size                292,00 MiB
+  Current LE             73
+  Segments               2
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:3
+   
+  --- Logical volume ---
+  LV Path                /dev/cs_blocked/swap
+  LV Name                swap
+  VG Name                cs_blocked
+  LV UUID                lkw1us-dZf0-mgpt-BQwQ-BUBY-kTdS-uHfnIl
+  LV Write Access        read/write
+  LV Creation host, time blocked.local, 2025-09-28 14:37:52 +0200
+  LV Status              available
+  # open                 2
+  LV Size                2,00 GiB
+  Current LE             512
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:1
+   
+  --- Logical volume ---
+  LV Path                /dev/cs_blocked/root
+  LV Name                root
+  VG Name                cs_blocked
+  LV UUID                BvQoWD-tKwM-Ydbd-J2g6-fUrL-fweD-eLJxjm
+  LV Write Access        read/write
+  LV Creation host, time blocked.local, 2025-09-28 14:37:53 +0200
+  LV Status              available
+  # open                 1
+  LV Size                16,41 GiB
+  Current LE             4201
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:0
+   
+  --- Logical volume ---
+  LV Path                /dev/vg-root/root
+  LV Name                root
+  VG Name                vg-root
+  LV UUID                v03W00-W94B-Hn2n-IQ3F-lF9C-bl3l-jXxuHb
+  LV Write Access        read/write
+  LV Creation host, time blocked.local, 2025-09-28 15:18:30 +0200
+  LV Status              available
+  # open                 1
+  LV Size                15,00 GiB
+  Current LE             3840
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:2
+   
+[root@blocked ~]# 
+
+[root@blocked ~]# cat /proc/mdstat > /root/raidok.txt
+[root@blocked ~]# echo "=== LVM Configuration ===" >> /root/raidok.txt
+[root@blocked ~]# df -h >> /root/raidok.txt
+[root@blocked ~]# cat /root/raidok.txt
+Personalities : 
+unused devices: <none>
+=== LVM Configuration ===
+Bestandssysteem                     Grootte Gebruikt Besch Geb% Aangekoppeld op
+devtmpfs                               4,0M        0  4,0M   0% /dev
+tmpfs                                  1,8G        0  1,8G   0% /dev/shm
+tmpfs                                  717M     9,6M  707M   2% /run
+efivarfs                               256K      28K  229K  11% /sys/firmware/efi/efivars
+/dev/mapper/cs_blocked-root             17G     4,7G   12G  29% /
+/dev/vda2                              960M     329M  632M  35% /boot
+/dev/vda1                              599M     7,3M  592M   2% /boot/efi
+tmpfs                                  359M     116K  359M   1% /run/user/1000
+/dev/mapper/vg--root-root               15G      24K   14G   1% /mnt/test-root
+/dev/mapper/VolGroupHome-LogVolHome    264M      14K  245M   1% /mnt/test-home
+[root@blocked ~]# umount /mnt/test-root /mnt/test-home 2>/dev/null || true
+[root@blocked ~]# 
+
+
+---RAID + LVM Setup met MACOS issues 
+[root@blocked ~]# umount /mnt/test-root /mnt/test-home 2>/dev/null || true
+[root@blocked ~]# lvremove -f /dev/vg-root/root
+  Logical volume "root" successfully removed.
+[root@blocked ~]# umount /mnt/test-root /mnt/test-home 2>/dev/null || true
+[root@blocked ~]# 
+[root@blocked ~]# 
+[root@blocked ~]# lvremove -f /dev/vg-root/root
+  Failed to find logical volume "vg-root/root"
+[root@blocked ~]# lvremove -f /dev/VolGroupHome/LogVolHome
+  Logical volume "LogVolHome" successfully removed.
+[root@blocked ~]# vgremove -f vg-root
+  Volume group "vg-root" successfully removed
+[root@blocked ~]# vgremove -f VolGroupHome
+  Volume group "VolGroupHome" successfully removed
+[root@blocked ~]# pvremove /dev/vdb3 /dev/vdc /dev/vdd
+  Labels on physical volume "/dev/vdb3" successfully wiped.
+  Labels on physical volume "/dev/vdc" successfully wiped.
+  Labels on physical volume "/dev/vdd" successfully wiped.
+[root@blocked ~]# c
+
+[root@blocked ~]# lsblk
+NAME                MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+sr0                  11:0    1 1024M  0 rom  
+vda                 252:0    0   20G  0 disk 
+├─vda1              252:1    0  600M  0 part /boot/efi
+├─vda2              252:2    0    1G  0 part /boot
+└─vda3              252:3    0 18,4G  0 part 
+  ├─cs_blocked-root 253:0    0 16,4G  0 lvm  /
+  └─cs_blocked-swap 253:1    0    2G  0 lvm  [SWAP]
+vdb                 252:16   0   20G  0 disk 
+├─vdb1              252:17   0 1000M  0 part 
+├─vdb2              252:18   0 1000M  0 part 
+└─vdb3              252:19   0   18G  0 part 
+vdc                 252:32   0  100M  0 disk 
+vdd                 252:48   0  200M  0 disk 
+[root@blocked ~]# fdisk /dev/vdb
+
+Welkom bij 'fdisk' (util-linux 2.37.4).
+Wijzigingen worden alleen in het computergeheugen gemaakt,
+tot het moment dat u besluit ze naar schijf te schrijven.
+Wees voorzichtig vóór het gebruik van de schrijfopdracht.
+
+
+Opdracht (m voor hulp): t
+Partitienummer (1-3, standaard 3): 1
+Hex code or alias (type L to list all): fd
+
+Het type van de partitie is veranderd van 'Linux' naar 'Linux raid autodetect'.
+
+Opdracht (m voor hulp): t
+Partitienummer (1-3, standaard 3): 2
+Hex code or alias (type L to list all): fd
+
+Het type van de partitie is veranderd van 'Linux' naar 'Linux raid autodetect'.
+
+Opdracht (m voor hulp): t
+Partitienummer (1-3, standaard 3): 3
+Hex code or alias (type L to list all): fd
+
+Het type van de partitie is veranderd van 'Linux LVM' naar 'Linux raid autodetect'.
+
+Opdracht (m voor hulp): w
+De partitietabel is gewijzigd.
+Aanroepen van ioctl() om partitietabel opnieuw in te lezen...
+Leegmaken van schijfbuffers...
+
+[root@blocked ~]# 
+
+vdb                 252:16   0   20G  0 disk 
+├─vdb1              252:17   0 1000M  0 part 
+├─vdb2              252:18   0 1000M  0 part 
+└─vdb3              252:19   0   18G  0 part 
+vdc                 252:32   0  100M  0 disk 
+vdd                 252:48   0  200M  0 disk 
+[root@blocked ~]# fdisk /dev/vdb
+
+Welkom bij 'fdisk' (util-linux 2.37.4).
+Wijzigingen worden alleen in het computergeheugen gemaakt,
+tot het moment dat u besluit ze naar schijf te schrijven.
+Wees voorzichtig vóór het gebruik van de schrijfopdracht.
+
+
+Opdracht (m voor hulp): t
+Partitienummer (1-3, standaard 3): 1
+Hex code or alias (type L to list all): fd
+
+Het type van de partitie is veranderd van 'Linux' naar 'Linux raid autodetect'.
+
+Opdracht (m voor hulp): t
+Partitienummer (1-3, standaard 3): 2
+Hex code or alias (type L to list all): fd
+
+Het type van de partitie is veranderd van 'Linux' naar 'Linux raid autodetect'.
+
+Opdracht (m voor hulp): t
+Partitienummer (1-3, standaard 3): 3
+Hex code or alias (type L to list all): fd
+
+Het type van de partitie is veranderd van 'Linux LVM' naar 'Linux raid autodetect'.
+
+Opdracht (m voor hulp): w
+De partitietabel is gewijzigd.
+Aanroepen van ioctl() om partitietabel opnieuw in te lezen...
+Leegmaken van schijfbuffers...
+
+[root@blocked ~]# 
+[root@blocked ~]# mdadm --create /dev/md1 --level=1 --raid-devices=1 --force /dev/vdb1
+To optimalize recovery speed, it is recommended to enable write-indent bitmap, do you want to enable it now? [y/N]? y
+mdadm: Note: this array has metadata at the start and
+    may not be suitable as a boot device.  If you plan to
+    store '/boot' on this device please ensure that
+    your boot-loader understands md/v1.x metadata, or use
+    --metadata=0.90
+Continue creating array [y/N]? y
+mdadm: Defaulting to version 1.2 metadata
+mdadm: array /dev/md1 started.
+[root@blocked ~]# mdadm --create /dev/md2 --level=1 --raid-devices=1 --force /dev/vdb2
+To optimalize recovery speed, it is recommended to enable write-indent bitmap, do you want to enable it now? [y/N]? y
+mdadm: Note: this array has metadata at the start and
+    may not be suitable as a boot device.  If you plan to
+    store '/boot' on this device please ensure that
+    your boot-loader understands md/v1.x metadata, or use
+    --metadata=0.90
+Continue creating array [y/N]? y
+mdadm: Defaulting to version 1.2 metadata
+mdadm: array /dev/md2 started.
+[root@blocked ~]# mdadm --create /dev/md3 --level=1 --raid-devices=1 --force /dev/vdb3
+To optimalize recovery speed, it is recommended to enable write-indent bitmap, do you want to enable it now? [y/N]? t
+mdadm: bad option.
+mdadm: Note: this array has metadata at the start and
+    may not be suitable as a boot device.  If you plan to
+    store '/boot' on this device please ensure that
+    your boot-loader understands md/v1.x metadata, or use
+    --metadata=0.90
+Continue creating array [y/N]? y
+mdadm: Defaulting to version 1.2 metadata
+mdadm: array /dev/md3 started.
+[root@blocked ~]# mdadm --create /dev/md3 --level=1 --raid-devices=1 --force /dev/vdb3
+To optimalize recovery speed, it is recommended to enable write-indent bitmap, do you want to enable it now? [y/N]? y
+mdadm: cannot open /dev/vdb3: Device or resource busy
+[root@blocked ~]# y
+bash: y: commando niet gevonden...
+[root@blocked ~]# 
+
+[root@blocked ~]# 
+
+[root@blocked ~]# cat /proc/mdstat
+Personalities : [raid1] 
+md3 : active raid1 vdb3[0]
+      18905088 blocks super 1.2 [1/1] [U]
+      
+md2 : active raid1 vdb2[0]
+      1022976 blocks super 1.2 [1/1] [U]
+      bitmap: 0/1 pages [0KB], 65536KB chunk
+
+md1 : active raid1 vdb1[0]
+      1022976 blocks super 1.2 [1/1] [U]
+      bitmap: 0/1 pages [0KB], 65536KB chunk
+
+unused devices: <none>
+[root@blocked ~]# pvcreate /dev/md3
+  Physical volume "/dev/md3" successfully created.
+[root@blocked ~]# vgcreate vg-root /dev/md3
+  Volume group "vg-root" successfully created
+[root@blocked ~]# lvcreate -n root -L 15G vg-root
+  Logical volume "root" created.
+[root@blocked ~]# mkfs.ext4 /dev/vg-root/root
+mke2fs 1.46.5 (30-Dec-2021)
+Verwerpen van blokken: voltooid                        
+Aanmaken van bestandssysteem met 3932160 blokken (van 4K) en 983040 inodes.
+Bestandssysteem-UUID: 1a590bcc-d7db-45fa-b63f-2f35b0d62a03
+Superblokreservekopieën zijn opgeslagen in blokken: 
+	32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 2654208
+
+Reserveren van groepstabellen: voltooid                        
+Schrijven van inodetabellen: voltooid                        
+Aanmaken van journal (16384 blokken): voltooid
+Schrijven van superblokken en bestandssysteem-metagegevens: voltooid
+
+[root@blocked ~]# 
+[root@blocked ~]# pvcreate /dev/vdc
+  Physical volume "/dev/vdc" successfully created.
+[root@blocked ~]# pvcreate /dev/vdd
+  Physical volume "/dev/vdd" successfully created.
+[root@blocked ~]# vgcreate VolGroupHome /dev/vdc /dev/vdd
+  Volume group "VolGroupHome" successfully created
+[root@blocked ~]# lvcreate -n LogVolHome -l 100%FREE VolGroupHome
+  Logical volume "LogVolHome" created.
+[root@blocked ~]# mkfs.ext4 /dev/VolGroupHome/LogVolHome
+mke2fs 1.46.5 (30-Dec-2021)
+Verwerpen van blokken: voltooid                        
+Aanmaken van bestandssysteem met 299008 blokken (van 1K) en 74888 inodes.
+Bestandssysteem-UUID: 8a4b167e-d5da-42e6-a826-8e1fd73ba10b
+Superblokreservekopieën zijn opgeslagen in blokken: 
+	8193, 24577, 40961, 57345, 73729, 204801, 221185
+
+Reserveren van groepstabellen: voltooid                        
+Schrijven van inodetabellen: voltooid                        
+Aanmaken van journal (8192 blokken): voltooid
+Schrijven van superblokken en bestandssysteem-metagegevens: voltooid
+
+[root@blocked ~]# mkfs.ext4 /dev/md1
+mke2fs 1.46.5 (30-Dec-2021)
+Verwerpen van blokken: voltooid                        
+Aanmaken van bestandssysteem met 255744 blokken (van 4K) en 64000 inodes.
+Bestandssysteem-UUID: 823ed9d4-3c84-4953-bd4e-469bf0ef33e5
+Superblokreservekopieën zijn opgeslagen in blokken: 
+	32768, 98304, 163840, 229376
+
+Reserveren van groepstabellen: voltooid                        
+Schrijven van inodetabellen: voltooid                        
+Aanmaken van journal (4096 blokken): voltooid
+Schrijven van superblokken en bestandssysteem-metagegevens: voltooid
+
+[root@blocked ~]# mkswap /dev/md2
+Instellen van wisselgeheugen, versie 1, grootte = 999 MiB (1047523328 bytes)
+geen label, UUID=ab3db897-e9f1-4c8b-a978-8696d290de3e
+[root@blocked ~]# c
+
+[root@blocked ~]# cat /proc/mdstat > /root/raidok.txt
+[root@blocked ~]# echo "=== RAID Details ===" >> /root/raidok.txt
+[root@blocked ~]# mdadm --detail /dev/md1 >> /root/raidok.txt
+[root@blocked ~]# mdadm --detail /dev/md2 >> /root/raidok.txt
+[root@blocked ~]# mdadm --detail /dev/md3 >> /root/raidok.txt
+[root@blocked ~]# echo "=== LVM Configuration ===" >> /root/raidok.txt
+[root@blocked ~]# pvdisplay >> /root/raidok.txt
+[root@blocked ~]# vgdisplay >> /root/raidok.txt
+[root@blocked ~]# lvdisplay >> /root/raidok.txt
+[root@blocked ~]# echo "=== Mounted Filesystems ===" >> /root/raidok.txt
+[root@blocked ~]# df -h >> /root/raidok.txt
+[root@blocked ~]# cat /root/raidok.txt
+Personalities : [raid1] 
+md3 : active raid1 vdb3[0]
+      18905088 blocks super 1.2 [1/1] [U]
+      
+md2 : active raid1 vdb2[0]
+      1022976 blocks super 1.2 [1/1] [U]
+      bitmap: 0/1 pages [0KB], 65536KB chunk
+
+md1 : active raid1 vdb1[0]
+      1022976 blocks super 1.2 [1/1] [U]
+      bitmap: 0/1 pages [0KB], 65536KB chunk
+
+unused devices: <none>
+=== RAID Details ===
+/dev/md1:
+           Version : 1.2
+     Creation Time : Sun Sep 28 15:31:32 2025
+        Raid Level : raid1
+        Array Size : 1022976 (999.00 MiB 1047.53 MB)
+     Used Dev Size : 1022976 (999.00 MiB 1047.53 MB)
+      Raid Devices : 1
+     Total Devices : 1
+       Persistence : Superblock is persistent
+
+     Intent Bitmap : Internal
+
+       Update Time : Sun Sep 28 15:33:56 2025
+             State : clean 
+    Active Devices : 1
+   Working Devices : 1
+    Failed Devices : 0
+     Spare Devices : 0
+
+Consistency Policy : bitmap
+
+              Name : blocked.local:1  (local to host blocked.local)
+              UUID : 5b0ccbab:d4a4dc16:d4686369:84c83d65
+            Events : 2
+
+    Number   Major   Minor   RaidDevice State
+       0     252       17        0      active sync   /dev/vdb1
+/dev/md2:
+           Version : 1.2
+     Creation Time : Sun Sep 28 15:31:39 2025
+        Raid Level : raid1
+        Array Size : 1022976 (999.00 MiB 1047.53 MB)
+     Used Dev Size : 1022976 (999.00 MiB 1047.53 MB)
+      Raid Devices : 1
+     Total Devices : 1
+       Persistence : Superblock is persistent
+
+     Intent Bitmap : Internal
+
+       Update Time : Sun Sep 28 15:34:02 2025
+             State : clean 
+    Active Devices : 1
+   Working Devices : 1
+    Failed Devices : 0
+     Spare Devices : 0
+
+Consistency Policy : bitmap
+
+              Name : blocked.local:2  (local to host blocked.local)
+              UUID : 399fbecc:229c3336:b2eff24f:a4fba8c6
+            Events : 2
+
+    Number   Major   Minor   RaidDevice State
+       0     252       18        0      active sync   /dev/vdb2
+/dev/md3:
+           Version : 1.2
+     Creation Time : Sun Sep 28 15:31:47 2025
+        Raid Level : raid1
+        Array Size : 18905088 (18.03 GiB 19.36 GB)
+     Used Dev Size : 18905088 (18.03 GiB 19.36 GB)
+      Raid Devices : 1
+     Total Devices : 1
+       Persistence : Superblock is persistent
+
+       Update Time : Sun Sep 28 15:32:58 2025
+             State : clean 
+    Active Devices : 1
+   Working Devices : 1
+    Failed Devices : 0
+     Spare Devices : 0
+
+Consistency Policy : resync
+
+              Name : blocked.local:3  (local to host blocked.local)
+              UUID : c0194b6a:6434a341:55e83ac8:a20bec86
+            Events : 2
+
+    Number   Major   Minor   RaidDevice State
+       0     252       19        0      active sync   /dev/vdb3
+=== LVM Configuration ===
+  --- Physical volume ---
+  PV Name               /dev/md3
+  VG Name               vg-root
+  PV Size               <18,03 GiB / not usable 2,00 MiB
+  Allocatable           yes 
+  PE Size               4,00 MiB
+  Total PE              4615
+  Free PE               775
+  Allocated PE          3840
+  PV UUID               djI6bA-qx7q-fv1D-Wg07-SIkZ-CzF8-ZLY4Qj
+   
+  --- Physical volume ---
+  PV Name               /dev/vdc
+  VG Name               VolGroupHome
+  PV Size               100,00 MiB / not usable 4,00 MiB
+  Allocatable           yes (but full)
+  PE Size               4,00 MiB
+  Total PE              24
+  Free PE               0
+  Allocated PE          24
+  PV UUID               7CDDA4-ulJx-2Q81-WLy1-jebV-I1fe-VYIND2
+   
+  --- Physical volume ---
+  PV Name               /dev/vdd
+  VG Name               VolGroupHome
+  PV Size               200,00 MiB / not usable 4,00 MiB
+  Allocatable           yes (but full)
+  PE Size               4,00 MiB
+  Total PE              49
+  Free PE               0
+  Allocated PE          49
+  PV UUID               bkAh0w-MKMl-p7Ri-M9f2-LRo1-uXm7-KuA8mE
+   
+  --- Physical volume ---
+  PV Name               /dev/vda3
+  VG Name               cs_blocked
+  PV Size               18,41 GiB / not usable 2,00 MiB
+  Allocatable           yes (but full)
+  PE Size               4,00 MiB
+  Total PE              4713
+  Free PE               0
+  Allocated PE          4713
+  PV UUID               O9M1PP-2MP1-wrdP-HGEb-dHOW-PGgx-cF8MFx
+   
+  --- Volume group ---
+  VG Name               vg-root
+  System ID             
+  Format                lvm2
+  Metadata Areas        1
+  Metadata Sequence No  2
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                1
+  Open LV               0
+  Max PV                0
+  Cur PV                1
+  Act PV                1
+  VG Size               <18,03 GiB
+  PE Size               4,00 MiB
+  Total PE              4615
+  Alloc PE / Size       3840 / 15,00 GiB
+  Free  PE / Size       775 / <3,03 GiB
+  VG UUID               lNIipt-jlHl-D3Sb-OHal-sGmg-csR1-dvodHU
+   
+  --- Volume group ---
+  VG Name               VolGroupHome
+  System ID             
+  Format                lvm2
+  Metadata Areas        2
+  Metadata Sequence No  2
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                1
+  Open LV               0
+  Max PV                0
+  Cur PV                2
+  Act PV                2
+  VG Size               292,00 MiB
+  PE Size               4,00 MiB
+  Total PE              73
+  Alloc PE / Size       73 / 292,00 MiB
+  Free  PE / Size       0 / 0   
+  VG UUID               Zs27gc-G5nS-mtKz-7Ia7-tFOT-vr28-d46LcP
+   
+  --- Volume group ---
+  VG Name               cs_blocked
+  System ID             
+  Format                lvm2
+  Metadata Areas        1
+  Metadata Sequence No  3
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                2
+  Open LV               2
+  Max PV                0
+  Cur PV                1
+  Act PV                1
+  VG Size               18,41 GiB
+  PE Size               4,00 MiB
+  Total PE              4713
+  Alloc PE / Size       4713 / 18,41 GiB
+  Free  PE / Size       0 / 0   
+  VG UUID               49itS8-BYbw-BHru-9NRc-yWef-ttsp-9vO3q1
+   
+  --- Logical volume ---
+  LV Path                /dev/vg-root/root
+  LV Name                root
+  VG Name                vg-root
+  LV UUID                dV1Qze-k4RW-q7LR-p0fv-DJEG-YJx7-hED2dM
+  LV Write Access        read/write
+  LV Creation host, time blocked.local, 2025-09-28 15:32:53 +0200
+  LV Status              available
+  # open                 0
+  LV Size                15,00 GiB
+  Current LE             3840
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:2
+   
+  --- Logical volume ---
+  LV Path                /dev/VolGroupHome/LogVolHome
+  LV Name                LogVolHome
+  VG Name                VolGroupHome
+  LV UUID                DEXziK-6d0l-aAoB-lNld-YH5X-O9uK-Vi45rq
+  LV Write Access        read/write
+  LV Creation host, time blocked.local, 2025-09-28 15:33:44 +0200
+  LV Status              available
+  # open                 0
+  LV Size                292,00 MiB
+  Current LE             73
+  Segments               2
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:3
+   
+  --- Logical volume ---
+  LV Path                /dev/cs_blocked/swap
+  LV Name                swap
+  VG Name                cs_blocked
+  LV UUID                lkw1us-dZf0-mgpt-BQwQ-BUBY-kTdS-uHfnIl
+  LV Write Access        read/write
+  LV Creation host, time blocked.local, 2025-09-28 14:37:52 +0200
+  LV Status              available
+  # open                 2
+  LV Size                2,00 GiB
+  Current LE             512
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:1
+   
+  --- Logical volume ---
+  LV Path                /dev/cs_blocked/root
+  LV Name                root
+  VG Name                cs_blocked
+  LV UUID                BvQoWD-tKwM-Ydbd-J2g6-fUrL-fweD-eLJxjm
+  LV Write Access        read/write
+  LV Creation host, time blocked.local, 2025-09-28 14:37:53 +0200
+  LV Status              available
+  # open                 1
+  LV Size                16,41 GiB
+  Current LE             4201
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:0
+   
+=== Mounted Filesystems ===
+Bestandssysteem             Grootte Gebruikt Besch Geb% Aangekoppeld op
+devtmpfs                       4,0M        0  4,0M   0% /dev
+tmpfs                          1,8G        0  1,8G   0% /dev/shm
+tmpfs                          717M     9,6M  707M   2% /run
+efivarfs                       256K      28K  229K  11% /sys/firmware/efi/efivars
+/dev/mapper/cs_blocked-root     17G     4,7G   12G  29% /
+/dev/vda2                      960M     329M  632M  35% /boot
+/dev/vda1                      599M     7,3M  592M   2% /boot/efi
+tmpfs                          359M     116K  359M   1% /run/user/1000
+[root@blocked ~]# 
+
+
+
+
+
+
