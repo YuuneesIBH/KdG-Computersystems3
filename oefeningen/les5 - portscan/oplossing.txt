@@ -1,0 +1,1212 @@
+DOEL: Analyseren van netwerkdata
+
+NODIG: Linux
+
+REFERENTIES:
+http://www.tcpdump.org/ Links to an external site.
+http://www.snort.org/ Links to an external site.
+http://www.wireshark.org/ Links to an external site.
+https://zeek.org Links to an external site.
+man nmap
+https://resources.infosecinstitute.com/port-scanning-using-scapy Links to an external site.
+
+De log portscan2021.pcap (in binair tcpdump formaat) werd vastgesteld op een Network Intrusion Detection System (NIDS). Vijf verschillende scans werden vastgelegd naar de target. Met behulp van tcpdump/wireshark kan je elke scan manueel analyseren.
+
+Met behulp van p0f, ettercap en snort kan je automatisch analyses laten uitvoeren.
+
+--TOOLS installeren 
+sudo apt update
+sudo apt install -y wireshark tshark tcpdump nmap p0f ettercap-text-only snort
+
+1. Hoe werd het binaire logbestand portscan2021.pcap aangemaakt?
+snort -r portscan2021.pcap
+
+***A*R** Seq: 0x0  Ack: 0x6591A1FF  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980587 192.168.56.1:32916 -> 192.168.56.103:9979
+TCP TTL:64 TOS:0x0 ID:58703 IpLen:20 DgmLen:60 DF
+******S* Seq: 0xF75E79DA  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980596 192.168.56.103:9977 -> 192.168.56.1:47224
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0x7476B9B9  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980598 192.168.56.1:52180 -> 192.168.56.103:9980
+TCP TTL:64 TOS:0x0 ID:31365 IpLen:20 DgmLen:60 DF
+******S* Seq: 0xC9D6E610  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980606 192.168.56.103:9978 -> 192.168.56.1:42712
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0x8050F582  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980609 192.168.56.1:42088 -> 192.168.56.103:9981
+TCP TTL:64 TOS:0x0 ID:18140 IpLen:20 DgmLen:60 DF
+******S* Seq: 0x2C86DA49  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980617 192.168.56.103:9979 -> 192.168.56.1:32916
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0xF75E79DB  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980621 192.168.56.1:56390 -> 192.168.56.103:9982
+TCP TTL:64 TOS:0x0 ID:28907 IpLen:20 DgmLen:60 DF
+******S* Seq: 0x65DFEC7E  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980628 192.168.56.103:9980 -> 192.168.56.1:52180
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0xC9D6E611  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980632 192.168.56.1:50416 -> 192.168.56.103:9983
+TCP TTL:64 TOS:0x0 ID:35297 IpLen:20 DgmLen:60 DF
+******S* Seq: 0x41321574  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980640 192.168.56.103:9981 -> 192.168.56.1:42088
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0x2C86DA4A  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980643 192.168.56.1:42106 -> 192.168.56.103:9984
+TCP TTL:64 TOS:0x0 ID:33537 IpLen:20 DgmLen:60 DF
+******S* Seq: 0x7C6E1F94  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980651 192.168.56.103:9982 -> 192.168.56.1:56390
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0x65DFEC7F  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980654 192.168.56.1:59788 -> 192.168.56.103:9985
+TCP TTL:64 TOS:0x0 ID:31875 IpLen:20 DgmLen:60 DF
+******S* Seq: 0x20B9E016  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980662 192.168.56.103:9983 -> 192.168.56.1:50416
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0x41321575  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980666 192.168.56.1:45814 -> 192.168.56.103:9986
+TCP TTL:64 TOS:0x0 ID:29048 IpLen:20 DgmLen:60 DF
+******S* Seq: 0x4166EDED  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980673 192.168.56.103:9984 -> 192.168.56.1:42106
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0x7C6E1F95  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980677 192.168.56.1:48518 -> 192.168.56.103:9987
+TCP TTL:64 TOS:0x0 ID:20212 IpLen:20 DgmLen:60 DF
+******S* Seq: 0x685BD261  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980685 192.168.56.103:9985 -> 192.168.56.1:59788
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0x20B9E017  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980689 192.168.56.1:45552 -> 192.168.56.103:9988
+TCP TTL:64 TOS:0x0 ID:56443 IpLen:20 DgmLen:60 DF
+******S* Seq: 0xD4AB40EE  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980696 192.168.56.103:9986 -> 192.168.56.1:45814
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0x4166EDEE  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980700 192.168.56.1:40474 -> 192.168.56.103:9989
+TCP TTL:64 TOS:0x0 ID:29417 IpLen:20 DgmLen:60 DF
+******S* Seq: 0x349EE7C  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980708 192.168.56.103:9987 -> 192.168.56.1:48518
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0x685BD262  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980712 192.168.56.1:40844 -> 192.168.56.103:9990
+TCP TTL:64 TOS:0x0 ID:1702 IpLen:20 DgmLen:60 DF
+******S* Seq: 0x108F9A33  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980720 192.168.56.103:9988 -> 192.168.56.1:45552
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0xD4AB40EF  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980723 192.168.56.1:51676 -> 192.168.56.103:9991
+TCP TTL:64 TOS:0x0 ID:62277 IpLen:20 DgmLen:60 DF
+******S* Seq: 0x25406FD0  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980731 192.168.56.103:9989 -> 192.168.56.1:40474
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0x349EE7D  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980736 192.168.56.1:56884 -> 192.168.56.103:9992
+TCP TTL:64 TOS:0x0 ID:34671 IpLen:20 DgmLen:60 DF
+******S* Seq: 0xFABE1BFA  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980748 192.168.56.1:54446 -> 192.168.56.103:9993
+TCP TTL:64 TOS:0x0 ID:56693 IpLen:20 DgmLen:60 DF
+******S* Seq: 0xBD4B41E0  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980751 192.168.56.103:9990 -> 192.168.56.1:40844
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0x108F9A34  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980759 192.168.56.1:59262 -> 192.168.56.103:9994
+TCP TTL:64 TOS:0x0 ID:20846 IpLen:20 DgmLen:60 DF
+******S* Seq: 0xB7F2CDFB  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980762 192.168.56.103:9991 -> 192.168.56.1:51676
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0x25406FD1  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980770 192.168.56.1:52620 -> 192.168.56.103:9995
+TCP TTL:64 TOS:0x0 ID:2979 IpLen:20 DgmLen:60 DF
+******S* Seq: 0x25C59736  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980773 192.168.56.103:9992 -> 192.168.56.1:56884
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0xFABE1BFB  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980782 192.168.56.1:46722 -> 192.168.56.103:9996
+TCP TTL:64 TOS:0x0 ID:5760 IpLen:20 DgmLen:60 DF
+******S* Seq: 0x19118A15  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980783 192.168.56.103:9993 -> 192.168.56.1:54446
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0xBD4B41E1  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980794 192.168.56.1:59344 -> 192.168.56.103:9997
+TCP TTL:64 TOS:0x0 ID:12101 IpLen:20 DgmLen:60 DF
+******S* Seq: 0x272BB3D0  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980794 192.168.56.103:9994 -> 192.168.56.1:59262
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0xB7F2CDFC  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980806 192.168.56.103:9995 -> 192.168.56.1:52620
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0x25C59737  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980806 192.168.56.1:52498 -> 192.168.56.103:9998
+TCP TTL:64 TOS:0x0 ID:18286 IpLen:20 DgmLen:60 DF
+******S* Seq: 0xFE7DBFB  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980816 192.168.56.103:9996 -> 192.168.56.1:46722
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0x19118A16  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980819 192.168.56.1:34558 -> 192.168.56.103:9999
+TCP TTL:64 TOS:0x0 ID:61735 IpLen:20 DgmLen:60 DF
+******S* Seq: 0x52B16DB2  Ack: 0x0  Win: 0x7210  TcpLen: 40
+TCP Options (5) => MSS: 1460 SackOK TS: 3353376345 0 NOP WS: 7 
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980827 192.168.56.103:9997 -> 192.168.56.1:59344
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0x272BB3D1  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980837 192.168.56.103:9998 -> 192.168.56.1:52498
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0xFE7DBFC  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+WARNING: No preprocessors configured for policy 0.
+11/20-13:00:20.980846 192.168.56.103:9999 -> 192.168.56.1:34558
+TCP TTL:64 TOS:0x0 ID:0 IpLen:20 DgmLen:40 DF
+***A*R** Seq: 0x0  Ack: 0x52B16DB3  Win: 0x0  TcpLen: 20
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+===============================================================================
+Run time for packet processing was 1.93131 seconds
+Snort processed 35993 packets.
+Snort ran for 0 days 0 hours 0 minutes 1 seconds
+   Pkts/sec:        35993
+===============================================================================
+Memory usage summary:
+  Total non-mmapped bytes (arena):       790528
+  Bytes in mapped regions (hblkhd):      21590016
+  Total allocated space (uordblks):      684832
+  Total free space (fordblks):           105696
+  Topmost releasable block (keepcost):   99408
+===============================================================================
+Packet I/O Totals:
+   Received:        35993
+   Analyzed:        35993 (100.000%)
+    Dropped:            0 (  0.000%)
+   Filtered:            0 (  0.000%)
+Outstanding:            0 (  0.000%)
+   Injected:            0
+===============================================================================
+Breakdown by protocol (includes rebuilt packets):
+        Eth:        35993 (100.000%)
+       VLAN:            0 (  0.000%)
+        IP4:        35669 ( 99.100%)
+       Frag:            0 (  0.000%)
+       ICMP:         1755 (  4.876%)
+        UDP:            0 (  0.000%)
+        TCP:        33914 ( 94.224%)
+        IP6:            0 (  0.000%)
+    IP6 Ext:            0 (  0.000%)
+   IP6 Opts:            0 (  0.000%)
+      Frag6:            0 (  0.000%)
+      ICMP6:            0 (  0.000%)
+       UDP6:            0 (  0.000%)
+       TCP6:            0 (  0.000%)
+     Teredo:            0 (  0.000%)
+    ICMP-IP:            0 (  0.000%)
+    IP4/IP4:            0 (  0.000%)
+    IP4/IP6:            0 (  0.000%)
+    IP6/IP4:            0 (  0.000%)
+    IP6/IP6:            0 (  0.000%)
+        GRE:            0 (  0.000%)
+    GRE Eth:            0 (  0.000%)
+   GRE VLAN:            0 (  0.000%)
+    GRE IP4:            0 (  0.000%)
+    GRE IP6:            0 (  0.000%)
+GRE IP6 Ext:            0 (  0.000%)
+   GRE PPTP:            0 (  0.000%)
+    GRE ARP:            0 (  0.000%)
+    GRE IPX:            0 (  0.000%)
+   GRE Loop:            0 (  0.000%)
+       MPLS:            0 (  0.000%)
+        ARP:          324 (  0.900%)
+        IPX:            0 (  0.000%)
+   Eth Loop:            0 (  0.000%)
+   Eth Disc:            0 (  0.000%)
+   IP4 Disc:            0 (  0.000%)
+   IP6 Disc:            0 (  0.000%)
+   TCP Disc:            0 (  0.000%)
+   UDP Disc:            0 (  0.000%)
+  ICMP Disc:            0 (  0.000%)
+All Discard:            0 (  0.000%)
+      Other:            0 (  0.000%)
+Bad Chk Sum:            0 (  0.000%)
+    Bad TTL:            0 (  0.000%)
+     S5 G 1:            0 (  0.000%)
+     S5 G 2:            0 (  0.000%)
+      Total:        35993
+===============================================================================
+Snort exiting
+ubuntu@ubuntu:~/Downloads$ 
+
+
+2. Wat is het IP adres van de aanvaller?
+ubuntu@ubuntu:~/Downloads$ tshark -r ~/Downloads/portscan2021.pcap -Y "tcp.flags.syn==1 && tcp.flags.ack==0" \
+  -T fields -e ip.src | sort | uniq -c | sort -nr | head
+  13812 192.168.56.1
+   1006 209.33.28.4
+   1006 192.86.32.91
+   1006 192.168.56.100
+   1006 192.168.1.5
+ubuntu@ubuntu:~/Downloads$ 
+
+3. Wat is het IP adres van de target?
+ubuntu@ubuntu:~/Downloads$ tshark -r ~/Downloads/portscan2021.pcap -Y "tcp.flags.syn==1 && tcp.flags.ack==1" \
+  -T fields -e ip.src | sort | uniq -c | sort -nr
+     12 192.168.56.103
+ubuntu@ubuntu:~/Downloads$ 
+
+4. Welke poorten staan open op de target?
+ubuntu@ubuntu:~/Downloads$ TARGET=192.168.56.103     
+tshark -r ~/Downloads/portscan2021.pcap \
+  -Y "ip.src==$TARGET && tcp.flags.syn==1 && tcp.flags.ack==1" \
+  -T fields -e tcp.srcport | sort -n | uniq
+22
+53
+80
+ubuntu@ubuntu:~/Downloads$ 
+
+5. De target werd op minstens 4 manieren gescand. Geef de 4 methodes en leg uit hoe ze werken.
+In deze oefening zitten o.a. (precies zoals in de slides) :
+TCP ACK scan (evt. met --source-port 8080): RST ⇒ unfiltered; ICMP error ⇒ filtered. Doel: firewall-state detecteren, niet of poort open/closed.
+XMAS scan (-sX): “onmogelijk” pakket met FIN/PSH/URG; geen antwoord ⇒ open (of RFC-afwijkend), RST ⇒ closed, ICMP ⇒ filtered.
+TCP connect scan (-sT, vaak met -r sequentieel): volledige 3-way handshake; SYN-ACK ⇒ open, RST ⇒ closed.
+Decoy scan (-D): extra “valse” source IP’s om ruis te maken.
+
+6. Welke scantool werd gebruikt om de target te scannen? Hoe weet je dit?
+nmap. Hoe weet je dat? De combinatie van technieken/opties (ACK-scan met vaste source-port 8080, XMAS, -sT -r, -D decoys) zijn typische nmap-vlaggen die in de slides exact zo voorkomen.
+
+7. Welke commando's heeft de aanvaller gebruikt? (geef deze zo volledig mogelijk met alle parameters)
+nmap --source-port 8080 -sA  <TARGET>        # ACK scan met vaste bronpoort
+nmap -sX                    <TARGET>        # XMAS scan
+nmap -r -sT                 <TARGET>        # TCP connect, sequentieel
+nmap -D 192.168.1.5,192.86.32.91,209.33.28.4 <TARGET>   # Decoys
+
+
+8. Welk besturingssysteem draait de aanvaller?
+ubuntu@ubuntu:~$ p0f -r ~/Downloads/portscan2021.pcap | less
+ubuntu@ubuntu:~$ 
+
+`----
+
+.-[ 192.168.56.1/51580 -> 192.168.56.103/445 (syn) ]-
+|
+| client   = 192.168.56.1/51580
+| app      = NMap SYN scan
+| dist     = <= 10
+| params   = random_ttl
+| raw_sig  = 4:54+10:0:1460:1024,0:mss::0
+|
+`----
+
+.-[ 192.168.56.1/51580 -> 192.168.56.100/445 (syn) ]-
+|
+| client   = 192.168.56.1/51580
+| app      = NMap SYN scan
+| dist     = <= 6
+| params   = random_ttl
+| raw_sig  = 4:58+6:0:1460:1024,0:mss::0
+|
+`----
+
+.-[ 192.168.56.1/51580 -> 192.168.56.103/135 (syn) ]-
+|
+| client   = 192.168.56.1/51580
+| app      = NMap SYN scan
+| dist     = <= 27
+| params   = random_ttl
+| raw_sig  = 4:37+27:0:1460:1024,0:mss::0
+|
+p0f kon geen echt besturingssysteem fingerprinten, omdat de pakketten duidelijk afkomstig zijn van een Nmap SYN-scan.
+👉 Dus het OS van de aanvaller wordt niet betrouwbaar herkend; p0f herkent enkel de tool “NMap SYN scan” en geeft geen stabiel OS-label.
+
+9. Stel snort in (zorg dat portscans gedetecteerd worden) en laat snort de portscan analyseren.
+Welke aanval(len) zie je in de logs?
+ubuntu@ubuntu:~$ sudo vi /etc/snort/snort.conf
+ubuntu@ubuntu:~$ 
+
+--sfportscan enablen
+    valid_cmds { X-EXPS X-LINK2STATE XADR XAUTH XCIR XEXCH50 XGEN XLICENSE XQUE XSTA XTRN XUSR } \
+    xlink2state { enabled }
+
+# Portscan detection.  For more information, see README.sfportscan
+preprocessor sfportscan: proto  { all } memcap { 10000000 } sense_level { low }
+
+# ARP spoof detection.  For more information, see the Snort Manual - Configuring Snort - Preprocessors - ARP Spoof Preprocessor
+# preprocessor arpspoof
+# preprocessor arpspoof_detect_host: 192.168.40.1 f0:0f:00:f0:0f:00
+
+# SSH anomaly detection.  For more information, see README.ssh
+preprocessor ssh: server_ports { 22 } \
+
+Na het activeren van de sfportscan-preprocessor analyseerde Snort de pcap. In de logs zien we alerts voor SNMP-verkeer zoals SNMP request, SNMP trap en SNMP AgentX/tcp request. Deze werden geclassificeerd als Attempted Information Leak. Dit komt overeen met een Nmap decoy scan, waarbij meerdere bron-IP’s worden gebruikt om SNMP-poorten te scannen.
+
+ubuntu@ubuntu:~$ sudo snort -r ~/Downloads/portscan2021.pcap -c /etc/snort/snort.conf -A console -k none | tee ~/snort_scan.txt
+Running in IDS mode
+
+        --== Initializing Snort ==--
+Initializing Output Plugins!
+Initializing Preprocessors!
+Initializing Plug-ins!
+Parsing Rules file "/etc/snort/snort.conf"
+PortVar 'HTTP_PORTS' defined :  [ 80:81 311 383 591 593 901 1220 1414 1741 1830 2301 2381 2809 3037 3128 3702 4343 4848 5250 6988 7000:7001 7144:7145 7510 7777 7779 8000 8008 8014 8028 8080 8085 8088 8090 8118 8123 8180:8181 8243 8280 8300 8800 8888 8899 9000 9060 9080 9090:9091 9443 9999 11371 34443:34444 41080 50002 55555 ]
+PortVar 'SHELLCODE_PORTS' defined :  [ 0:79 81:65535 ]
+PortVar 'ORACLE_PORTS' defined :  [ 1024:65535 ]
+PortVar 'SSH_PORTS' defined :  [ 22 ]
+PortVar 'FTP_PORTS' defined :  [ 21 2100 3535 ]
+PortVar 'SIP_PORTS' defined :  [ 5060:5061 5600 ]
+PortVar 'FILE_DATA_PORTS' defined :  [ 80:81 110 143 311 383 591 593 901 1220 1414 1741 1830 2301 2381 2809 3037 3128 3702 4343 4848 5250 6988 7000:7001 7144:7145 7510 7777 7779 8000 8008 8014 8028 8080 8085 8088 8090 8118 8123 8180:8181 8243 8280 8300 8800 8888 8899 9000 9060 9080 9090:9091 9443 9999 11371 34443:34444 41080 50002 55555 ]
+PortVar 'GTP_PORTS' defined :  [ 2123 2152 3386 ]
+Detection:
+   Search-Method = AC-Full-Q
+    Split Any/Any group = enabled
+    Search-Method-Optimizations = enabled
+    Maximum pattern length = 20
+Tagged Packet Limit: 256
+Loading dynamic engine /usr/lib/snort/snort_dynamicengine/libsf_engine.so... done
+Loading all dynamic detection libs from /usr/lib/snort/snort_dynamicrules...
+WARNING: No dynamic libraries found in directory /usr/lib/snort/snort_dynamicrules.
+  Finished Loading all dynamic detection libs from /usr/lib/snort/snort_dynamicrules
+Loading all dynamic preprocessor libs from /usr/lib/snort/snort_dynamicpreprocessor/...
+  Loading dynamic preprocessor library /usr/lib/snort/snort_dynamicpreprocessor//libsf_appid_preproc.so... done
+  Loading dynamic preprocessor library /usr/lib/snort/snort_dynamicpreprocessor//libsf_smtp_preproc.so... done
+  Loading dynamic preprocessor library /usr/lib/snort/snort_dynamicpreprocessor//libsf_ftptelnet_preproc.so... done
+  Loading dynamic preprocessor library /usr/lib/snort/snort_dynamicpreprocessor//libsf_sip_preproc.so... done
+  Loading dynamic preprocessor library /usr/lib/snort/snort_dynamicpreprocessor//libsf_ssh_preproc.so... done
+  Loading dynamic preprocessor library /usr/lib/snort/snort_dynamicpreprocessor//libsf_ssl_preproc.so... done
+  Loading dynamic preprocessor library /usr/lib/snort/snort_dynamicpreprocessor//libsf_dns_preproc.so... done
+  Loading dynamic preprocessor library /usr/lib/snort/snort_dynamicpreprocessor//libsf_reputation_preproc.so... done
+  Loading dynamic preprocessor library /usr/lib/snort/snort_dynamicpreprocessor//libsf_sdf_preproc.so... done
+  Loading dynamic preprocessor library /usr/lib/snort/snort_dynamicpreprocessor//libsf_dce2_preproc.so... done
+  Loading dynamic preprocessor library /usr/lib/snort/snort_dynamicpreprocessor//libsf_dnp3_preproc.so... done
+  Loading dynamic preprocessor library /usr/lib/snort/snort_dynamicpreprocessor//libsf_modbus_preproc.so... done
+  Loading dynamic preprocessor library /usr/lib/snort/snort_dynamicpreprocessor//libsf_imap_preproc.so... done
+  Loading dynamic preprocessor library /usr/lib/snort/snort_dynamicpreprocessor//libsf_gtp_preproc.so... done
+  Loading dynamic preprocessor library /usr/lib/snort/snort_dynamicpreprocessor//libsf_pop_preproc.so... done
+  Finished Loading all dynamic preprocessor libs from /usr/lib/snort/snort_dynamicpreprocessor/
+Log directory = /var/log/snort
+WARNING: ip4 normalizations disabled because not inline.
+WARNING: tcp normalizations disabled because not inline.
+WARNING: icmp4 normalizations disabled because not inline.
+WARNING: ip6 normalizations disabled because not inline.
+WARNING: icmp6 normalizations disabled because not inline.
+Frag3 global config:
+    Max frags: 65536
+    Fragment memory cap: 4194304 bytes
+Frag3 engine config:
+    Bound Address: default
+    Target-based policy: WINDOWS
+    Fragment timeout: 180 seconds
+    Fragment min_ttl:   1
+    Fragment Anomalies: Alert
+    Overlap Limit:     10
+    Min fragment Length:     100
+      Max Expected Streams: 768
+Stream global config:
+    Track TCP sessions: ACTIVE
+    Max TCP sessions: 262144
+    TCP cache pruning timeout: 30 seconds
+    TCP cache nominal timeout: 180 seconds
+    Memcap (for reassembly packet storage): 8388608
+    Track UDP sessions: ACTIVE
+    Max UDP sessions: 131072
+    UDP cache pruning timeout: 30 seconds
+    UDP cache nominal timeout: 180 seconds
+    Track ICMP sessions: INACTIVE
+    Track IP sessions: INACTIVE
+    Log info if session memory consumption exceeds 1048576
+    Send up to 2 active responses
+    Wait at least 5 seconds between responses
+    Protocol Aware Flushing: ACTIVE
+        Maximum Flush Point: 16000
+Stream TCP Policy config:
+    Bound Address: default
+    Reassembly Policy: WINDOWS
+    Timeout: 180 seconds
+    Limit on TCP Overlaps: 10
+    Maximum number of bytes to queue per session: 1048576
+    Maximum number of segs to queue per session: 2621
+    Options:
+        Require 3-Way Handshake: YES
+        3-Way Handshake Timeout: 180
+        Detect Anomalies: YES
+    Reassembly Ports:
+      21 client (Footprint) 
+      22 client (Footprint) 
+      23 client (Footprint) 
+      25 client (Footprint) 
+      42 client (Footprint) 
+      53 client (Footprint) 
+      79 client (Footprint) 
+      80 client (Footprint) server (Footprint)
+      81 client (Footprint) server (Footprint)
+      109 client (Footprint) 
+      110 client (Footprint) 
+      111 client (Footprint) 
+      113 client (Footprint) 
+      119 client (Footprint) 
+      135 client (Footprint) 
+      136 client (Footprint) 
+      137 client (Footprint) 
+      139 client (Footprint) 
+      143 client (Footprint) 
+      161 client (Footprint) 
+      additional ports configured but not printed.
+Stream UDP Policy config:
+    Timeout: 180 seconds
+HttpInspect Config:
+    GLOBAL CONFIG
+      Detect Proxy Usage:       NO
+      IIS Unicode Map Filename: /etc/snort/unicode.map
+      IIS Unicode Map Codepage: 1252
+      Memcap used for logging URI and Hostname: 150994944
+      Max Gzip Memory: 104857600
+      Max Gzip Sessions: 201649
+      Gzip Compress Depth: 65535
+      Gzip Decompress Depth: 65535
+    DEFAULT SERVER CONFIG:
+      Server profile: All
+      Ports (PAF): 80 81 311 383 591 593 901 1220 1414 1741 1830 2301 2381 2809 3037 3128 3702 4343 4848 5250 6988 7000 7001 7144 7145 7510 7777 7779 8000 8008 8014 8028 8080 8085 8088 8090 8118 8123 8180 8181 8243 8280 8300 8800 8888 8899 9000 9060 9080 9090 9091 9443 9999 11371 34443 34444 41080 50002 55555 
+      Server Flow Depth: 0
+      Client Flow Depth: 0
+      Max Chunk Length: 500000
+      Small Chunk Length Evasion: chunk size <= 10, threshold >= 5 times
+      Max Header Field Length: 750
+      Max Number Header Fields: 100
+      Max Number of WhiteSpaces allowed with header folding: 200
+      Inspect Pipeline Requests: YES
+      URI Discovery Strict Mode: NO
+      Allow Proxy Usage: NO
+      Disable Alerting: NO
+      Oversize Dir Length: 500
+      Only inspect URI: NO
+      Normalize HTTP Headers: NO
+      Inspect HTTP Cookies: YES
+      Inspect HTTP Responses: YES
+      Extract Gzip from responses: YES
+      Decompress response files:   
+      Unlimited decompression of gzip data from responses: YES
+      Normalize Javascripts in HTTP Responses: YES
+      Max Number of WhiteSpaces allowed with Javascript Obfuscation in HTTP responses: 200
+      Normalize HTTP Cookies: NO
+      Enable XFF and True Client IP: NO
+      Log HTTP URI data: NO
+      Log HTTP Hostname data: NO
+      Extended ASCII code support in URI: NO
+      Ascii: YES alert: NO
+      Double Decoding: YES alert: NO
+      %U Encoding: YES alert: YES
+      Bare Byte: YES alert: NO
+      UTF 8: YES alert: NO
+      IIS Unicode: YES alert: NO
+      Multiple Slash: YES alert: NO
+      IIS Backslash: YES alert: NO
+      Directory Traversal: YES alert: NO
+      Web Root Traversal: YES alert: NO
+      Apache WhiteSpace: YES alert: NO
+      IIS Delimiter: YES alert: NO
+      IIS Unicode Map: GLOBAL IIS UNICODE MAP CONFIG
+      Non-RFC Compliant Characters: 0x00 0x01 0x02 0x03 0x04 0x05 0x06 0x07 
+      Whitespace Characters: 0x09 0x0b 0x0c 0x0d 
+      Legacy mode: NO
+rpc_decode arguments:
+    Ports to decode RPC on: 111 32770 32771 32772 32773 32774 32775 32776 32777 32778 32779 
+    alert_fragments: INACTIVE
+    alert_large_fragments: INACTIVE
+    alert_incomplete: INACTIVE
+    alert_multiple_requests: INACTIVE
+Portscan Detection Config:
+    Detect Protocols:  TCP UDP ICMP IP
+    Detect Scan Type:  portscan portsweep decoy_portscan distributed_portscan
+    Sensitivity Level: Low
+    Memcap (in bytes): 10000000
+    Number of Nodes:   20876
+FTPTelnet Config:
+    GLOBAL CONFIG
+      Inspection Type: stateful
+      Check for Encrypted Traffic: YES alert: NO
+      Continue to check encrypted data: YES
+    TELNET CONFIG:
+      Ports: 23 
+      Are You There Threshold: 20
+      Normalize: YES
+      Detect Anomalies: YES
+    FTP CONFIG:
+      FTP Server: default
+        Ports (PAF): 21 2100 3535 
+        Check for Telnet Cmds: YES alert: YES
+        Ignore Telnet Cmd Operations: YES alert: YES
+        Ignore open data channels: NO
+      FTP Client: default
+        Check for Bounce Attacks: YES alert: YES
+        Check for Telnet Cmds: YES alert: YES
+        Ignore Telnet Cmd Operations: YES alert: YES
+        Max Response Length: 256
+SMTP Config:
+    Ports: 25 465 587 691 
+    Inspection Type: Stateful
+    Normalize: ATRN AUTH BDAT DATA DEBUG EHLO EMAL ESAM ESND ESOM ETRN EVFY EXPN HELO HELP IDENT MAIL NOOP ONEX QUEU QUIT RCPT RSET SAML SEND STARTTLS SOML TICK TIME TURN TURNME VERB VRFY X-EXPS XADR XAUTH XCIR XEXCH50 XGEN XLICENSE X-LINK2STATE XQUE XSTA XTRN XUSR CHUNKING X-ADAT X-DRCP X-ERCP X-EXCH50 
+    Ignore Data: No
+    Ignore TLS Data: No
+    Ignore SMTP Alerts: No
+    Max Command Line Length: 512
+    Max auth Command Line Length: 1000
+    Max Specific Command Line Length: 
+       ATRN:255 AUTH:246 BDAT:255 DATA:246 DEBUG:255 
+       EHLO:500 EMAL:255 ESAM:255 ESND:255 ESOM:255 
+       ETRN:246 EVFY:255 EXPN:255 HELO:500 HELP:500 
+       IDENT:255 MAIL:260 NOOP:255 ONEX:246 QUEU:246 
+       QUIT:246 RCPT:300 RSET:246 SAML:246 SEND:246 
+       SIZE:255 STARTTLS:246 SOML:246 TICK:246 TIME:246 
+       TURN:246 TURNME:246 VERB:246 VRFY:255 X-EXPS:246 
+       XADR:246 XAUTH:246 XCIR:246 XEXCH50:246 XGEN:246 
+       XLICENSE:246 X-LINK2STATE:246 XQUE:246 XSTA:246 XTRN:246 
+       XUSR:246 
+    Max Header Line Length: 1000
+    Max Response Line Length: 512
+    X-Link2State Alert: Yes
+    Drop on X-Link2State Alert: No
+    Alert on commands: None
+    Alert on unknown commands: No
+    SMTP Memcap: 838860
+    MIME Max Mem: 838860
+    Base64 Decoding: Enabled
+    Base64 Decoding Depth: Unlimited
+    Quoted-Printable Decoding: Enabled
+    Quoted-Printable Decoding Depth: Unlimited
+    Unix-to-Unix Decoding: Enabled
+    Unix-to-Unix Decoding Depth: Unlimited
+    Non-Encoded MIME attachment Extraction: Enabled
+    Non-Encoded MIME attachment Extraction Depth: Unlimited
+    Log Attachment filename: Enabled
+    Log MAIL FROM Address: Enabled
+    Log RCPT TO Addresses: Enabled
+    Log Email Headers: Enabled
+    Email Hdrs Log Depth: 1464
+SSH config: 
+    Autodetection: ENABLED
+    Challenge-Response Overflow Alert: ENABLED
+    SSH1 CRC32 Alert: ENABLED
+    Server Version String Overflow Alert: ENABLED
+    Protocol Mismatch Alert: ENABLED
+    Bad Message Direction Alert: DISABLED
+    Bad Payload Size Alert: DISABLED
+    Unrecognized Version Alert: DISABLED
+    Max Encrypted Packets: 20  
+    Max Server Version String Length: 100  
+    MaxClientBytes: 19600 (Default) 
+    Ports:
+	22
+DCE/RPC 2 Preprocessor Configuration
+  Global Configuration
+    DCE/RPC Defragmentation: Enabled
+    Memcap: 102400 KB
+    Events: co 
+    SMB Fingerprint policy: Disabled
+  Server Default Configuration
+    Policy: WinXP
+    Detect ports (PAF)
+      SMB: 139 445 
+      TCP: 135 
+      UDP: 135 
+      RPC over HTTP server: 593 
+      RPC over HTTP proxy: None
+    Autodetect ports (PAF)
+      SMB: None
+      TCP: 1025-65535 
+      UDP: 1025-65535 
+      RPC over HTTP server: 1025-65535 
+      RPC over HTTP proxy: None
+    Invalid SMB shares: C$ D$ ADMIN$ 
+    Maximum SMB command chaining: 3 commands
+    SMB file inspection: Disabled
+DNS config: 
+    DNS Client rdata txt Overflow Alert: ACTIVE
+    Obsolete DNS RR Types Alert: INACTIVE
+    Experimental DNS RR Types Alert: INACTIVE
+    Ports: 53
+SSLPP config:
+    Encrypted packets: not inspected
+    Ports:
+      443      465      563      636      989
+      992      993      994      995     7801
+     7802     7900     7901     7902     7903
+     7904     7905     7906     7907     7908
+     7909     7910     7911     7912     7913
+     7914     7915     7916     7917     7918
+     7919     7920
+    Server side data is trusted
+    Maximum SSL Heartbeat length: 0
+Sensitive Data preprocessor config: 
+    Global Alert Threshold: 25
+    Masked Output: DISABLED
+SIP config: 
+    Max number of sessions: 40000  
+    Max number of dialogs in a session: 4 (Default) 
+    Status: ENABLED
+    Ignore media channel: DISABLED
+    Max URI length: 512  
+    Max Call ID length: 80  
+    Max Request name length: 20 (Default) 
+    Max From length: 256 (Default) 
+    Max To length: 256 (Default) 
+    Max Via length: 1024 (Default) 
+    Max Contact length: 512  
+    Max Content length: 2048  
+    Ports:
+	5060	5061	5600
+    Methods:
+	  invite cancel ack bye register options refer subscribe update join info message notify benotify do qauth sprack publish service unsubscribe prack
+IMAP Config:
+    Ports: 143 
+    IMAP Memcap: 838860
+    MIME Max Mem: 838860
+    Base64 Decoding: Enabled
+    Base64 Decoding Depth: Unlimited
+    Quoted-Printable Decoding: Enabled
+    Quoted-Printable Decoding Depth: Unlimited
+    Unix-to-Unix Decoding: Enabled
+    Unix-to-Unix Decoding Depth: Unlimited
+    Non-Encoded MIME attachment Extraction: Enabled
+    Non-Encoded MIME attachment Extraction Depth: Unlimited
+POP Config:
+    Ports: 110 
+    POP Memcap: 838860
+    MIME Max Mem: 838860
+    Base64 Decoding: Enabled
+    Base64 Decoding Depth: Unlimited
+    Quoted-Printable Decoding: Enabled
+    Quoted-Printable Decoding Depth: Unlimited
+    Unix-to-Unix Decoding: Enabled
+    Unix-to-Unix Decoding Depth: Unlimited
+    Non-Encoded MIME attachment Extraction: Enabled
+    Non-Encoded MIME attachment Extraction Depth: Unlimited
+Modbus config: 
+    Ports:
+	502
+DNP3 config: 
+    Memcap: 262144
+    Check Link-Layer CRCs: ENABLED
+    Ports:
+	20000
+
++++++++++++++++++++++++++++++++++++++++++++++++++++
+Initializing rule chains...
+WARNING: /etc/snort/rules/chat.rules(33) threshold (in rule) is deprecated; use detection_filter instead.
+
+WARNING: /etc/snort/rules/community-sql-injection.rules(6) GID 1 SID 100000106 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-sql-injection.rules(7) GID 1 SID 100000107 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-sql-injection.rules(8) GID 1 SID 100000108 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-sql-injection.rules(9) GID 1 SID 100000109 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-sql-injection.rules(11) GID 1 SID 100000192 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-sql-injection.rules(12) GID 1 SID 100000193 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-sql-injection.rules(13) GID 1 SID 100000194 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-sql-injection.rules(14) GID 1 SID 100000690 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-sql-injection.rules(15) GID 1 SID 100000691 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-client.rules(6) GID 1 SID 100000118 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-client.rules(7) GID 1 SID 100000119 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-client.rules(9) GID 1 SID 100000228 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-client.rules(14) GID 1 SID 100000284 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-client.rules(16) GID 1 SID 100000447 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-client.rules(18) GID 1 SID 100000692 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-client.rules(20) GID 1 SID 100000693 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-client.rules(23) GID 1 SID 100000864 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-iis.rules(7) GID 1 SID 100000138 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-iis.rules(8) GID 1 SID 100000139 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-iis.rules(9) GID 1 SID 100000173 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-iis.rules(10) GID 1 SID 100000174 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(6) GID 1 SID 100000121 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(7) GID 1 SID 100000122 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(8) GID 1 SID 100000129 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(9) GID 1 SID 100000130 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(10) GID 1 SID 100000131 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(12) GID 1 SID 100000132 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(13) GID 1 SID 100000133 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(14) GID 1 SID 100000140 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(15) GID 1 SID 100000141 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(16) GID 1 SID 100000142 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(17) GID 1 SID 100000143 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(18) GID 1 SID 100000144 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(19) GID 1 SID 100000145 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(20) GID 1 SID 100000146 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(22) GID 1 SID 100000148 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(23) GID 1 SID 100000149 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(24) GID 1 SID 100000150 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(25) GID 1 SID 100000177 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(26) GID 1 SID 100000178 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(27) GID 1 SID 100000179 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(28) GID 1 SID 100000184 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(29) GID 1 SID 100000185 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(30) GID 1 SID 100000200 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(31) GID 1 SID 100000209 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(33) GID 1 SID 100000216 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(34) GID 1 SID 100000217 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(35) GID 1 SID 100000225 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(38) GID 1 SID 100000237 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(39) GID 1 SID 100000302 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(40) GID 1 SID 100000303 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(42) GID 1 SID 100000313 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(43) GID 1 SID 100000314 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(49) GID 1 SID 100000317 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(50) GID 1 SID 100000318 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(51) GID 1 SID 100000319 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(52) GID 1 SID 100000320 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(53) GID 1 SID 100000321 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(54) GID 1 SID 100000322 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(55) GID 1 SID 100000323 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(56) GID 1 SID 100000324 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(57) GID 1 SID 100000325 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(58) GID 1 SID 100000326 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(59) GID 1 SID 100000327 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(60) GID 1 SID 100000328 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(61) GID 1 SID 100000329 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(62) GID 1 SID 100000330 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(63) GID 1 SID 100000331 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(64) GID 1 SID 100000332 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(65) GID 1 SID 100000333 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(66) GID 1 SID 100000334 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(67) GID 1 SID 100000335 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(68) GID 1 SID 100000336 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(69) GID 1 SID 100000337 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(70) GID 1 SID 100000338 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(71) GID 1 SID 100000339 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(72) GID 1 SID 100000340 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(73) GID 1 SID 100000341 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(74) GID 1 SID 100000342 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(75) GID 1 SID 100000343 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(76) GID 1 SID 100000344 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(77) GID 1 SID 100000345 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(78) GID 1 SID 100000346 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(79) GID 1 SID 100000347 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(80) GID 1 SID 100000348 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(81) GID 1 SID 100000349 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(82) GID 1 SID 100000350 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(83) GID 1 SID 100000351 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(84) GID 1 SID 100000352 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(85) GID 1 SID 100000353 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(86) GID 1 SID 100000354 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(87) GID 1 SID 100000355 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(88) GID 1 SID 100000356 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(89) GID 1 SID 100000357 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(90) GID 1 SID 100000358 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(91) GID 1 SID 100000359 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(92) GID 1 SID 100000360 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(93) GID 1 SID 100000361 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(94) GID 1 SID 100000362 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(95) GID 1 SID 100000363 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(96) GID 1 SID 100000364 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(97) GID 1 SID 100000365 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(98) GID 1 SID 100000366 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(99) GID 1 SID 100000367 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(100) GID 1 SID 100000368 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(101) GID 1 SID 100000369 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(102) GID 1 SID 100000370 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(103) GID 1 SID 100000371 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(104) GID 1 SID 100000372 in rule duplicates previous rule. Ignoring old rule.
+
+WARNING: /etc/snort/rules/community-web-misc.rules(105) GID 1 SID 100000373 in rule duplicates previous rule. Ignoring old rule.
+
+    IP6 Ext:            0 (  0.000%)
+   IP6 Opts:            0 (  0.000%)
+      Frag6:            0 (  0.000%)
+      ICMP6:            0 (  0.000%)
+       UDP6:            0 (  0.000%)
+       TCP6:            0 (  0.000%)
+     Teredo:            0 (  0.000%)
+    ICMP-IP:            0 (  0.000%)
+    IP4/IP4:            0 (  0.000%)
+    IP4/IP6:            0 (  0.000%)
+    IP6/IP4:            0 (  0.000%)
+    IP6/IP6:            0 (  0.000%)
+        GRE:            0 (  0.000%)
+    GRE Eth:            0 (  0.000%)
+   GRE VLAN:            0 (  0.000%)
+    GRE IP4:            0 (  0.000%)
+    GRE IP6:            0 (  0.000%)
+GRE IP6 Ext:            0 (  0.000%)
+   GRE PPTP:            0 (  0.000%)
+    GRE ARP:            0 (  0.000%)
+    GRE IPX:            0 (  0.000%)
+   GRE Loop:            0 (  0.000%)
+       MPLS:            0 (  0.000%)
+        ARP:          324 (  0.900%)
+        IPX:            0 (  0.000%)
+   Eth Loop:            0 (  0.000%)
+   Eth Disc:            0 (  0.000%)
+   IP4 Disc:            0 (  0.000%)
+   IP6 Disc:            0 (  0.000%)
+   TCP Disc:            0 (  0.000%)
+   UDP Disc:            0 (  0.000%)
+  ICMP Disc:            0 (  0.000%)
+All Discard:            0 (  0.000%)
+      Other:            0 (  0.000%)
+Bad Chk Sum:            0 (  0.000%)
+    Bad TTL:            0 (  0.000%)
+     S5 G 1:            0 (  0.000%)
+     S5 G 2:            0 (  0.000%)
+      Total:        35993
+===============================================================================
+Action Stats:
+     Alerts:         1026 (  2.851%)
+     Logged:         1026 (  2.851%)
+     Passed:            0 (  0.000%)
+Limits:
+      Match:            0
+      Queue:            0
+        Log:            0
+      Event:            0
+      Alert:            0
+Verdicts:
+      Allow:        35993 (100.000%)
+      Block:            0 (  0.000%)
+    Replace:            0 (  0.000%)
+  Whitelist:            0 (  0.000%)
+  Blacklist:            0 (  0.000%)
+     Ignore:            0 (  0.000%)
+      Retry:            0 (  0.000%)
+===============================================================================
+Frag3 statistics:
+        Total Fragments: 0
+      Frags Reassembled: 0
+               Discards: 0
+          Memory Faults: 0
+               Timeouts: 0
+               Overlaps: 0
+              Anomalies: 0
+                 Alerts: 0
+                  Drops: 0
+     FragTrackers Added: 0
+    FragTrackers Dumped: 0
+FragTrackers Auto Freed: 0
+    Frag Nodes Inserted: 0
+     Frag Nodes Deleted: 0
+===============================================================================
+===============================================================================
+Stream statistics:
+            Total sessions: 17836
+              TCP sessions: 17836
+              UDP sessions: 0
+             ICMP sessions: 0
+               IP sessions: 0
+                TCP Prunes: 0
+                UDP Prunes: 0
+               ICMP Prunes: 0
+                 IP Prunes: 0
+TCP StreamTrackers Created: 17836
+TCP StreamTrackers Deleted: 17836
+              TCP Timeouts: 0
+              TCP Overlaps: 0
+       TCP Segments Queued: 0
+     TCP Segments Released: 0
+       TCP Rebuilt Packets: 0
+         TCP Segments Used: 0
+              TCP Discards: 0
+                  TCP Gaps: 0
+      UDP Sessions Created: 0
+      UDP Sessions Deleted: 0
+              UDP Timeouts: 0
+              UDP Discards: 0
+                    Events: 0
+           Internal Events: 0
+           TCP Port Filter
+                  Filtered: 0
+                 Inspected: 0
+                   Tracked: 33914
+           UDP Port Filter
+                  Filtered: 0
+                 Inspected: 0
+                   Tracked: 0
+===============================================================================
+===============================================================================
+SMTP Preprocessor Statistics
+  Total sessions                                    : 0
+  Max concurrent sessions                           : 0
+===============================================================================
+dcerpc2 Preprocessor Statistics
+  Total sessions: 0
+===============================================================================
+===============================================================================
+SIP Preprocessor Statistics
+  Total sessions: 0
+===============================================================================
+IMAP Preprocessor Statistics
+  Total sessions                                    : 0
+  Max concurrent sessions                           : 0
+===============================================================================
+POP Preprocessor Statistics
+  Total sessions                                    : 0
+  Max concurrent sessions                           : 0
+===============================================================================
+ification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.56.1:46370 -> 192.168.56.103:80
+11/20-13:00:11.122713  [**] [1:1228:7] SCAN nmap XMAS [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.56.1:46370 -> 192.168.56.103:53
+11/20-13:00:16.906474  [**] [1:1418:11] SNMP request tcp [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.1.5:55239 -> 192.168.56.103:161
+11/20-13:00:16.906480  [**] [1:1418:11] SNMP request tcp [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.56.1:55239 -> 192.168.56.103:161
+11/20-13:00:16.906486  [**] [1:1418:11] SNMP request tcp [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.86.32.91:55239 -> 192.168.56.103:161
+11/20-13:00:16.906495  [**] [1:1418:11] SNMP request tcp [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 209.33.28.4:55239 -> 192.168.56.103:161
+11/20-13:00:16.906502  [**] [1:1418:11] SNMP request tcp [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.56.100:55239 -> 192.168.56.103:161
+11/20-13:00:16.909305  [**] [1:1421:11] SNMP AgentX/tcp request [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.1.5:55239 -> 192.168.56.103:705
+11/20-13:00:16.909314  [**] [1:1421:11] SNMP AgentX/tcp request [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.56.1:55239 -> 192.168.56.103:705
+11/20-13:00:16.909322  [**] [1:1421:11] SNMP AgentX/tcp request [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.86.32.91:55239 -> 192.168.56.103:705
+11/20-13:00:16.909329  [**] [1:1421:11] SNMP AgentX/tcp request [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 209.33.28.4:55239 -> 192.168.56.103:705
+11/20-13:00:16.909336  [**] [1:1421:11] SNMP AgentX/tcp request [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.56.100:55239 -> 192.168.56.103:705
+11/20-13:00:20.817911  [**] [1:1418:11] SNMP request tcp [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.56.1:43756 -> 192.168.56.103:161
+11/20-13:00:20.817933  [**] [1:1420:11] SNMP trap tcp [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.56.1:51930 -> 192.168.56.103:162
+11/20-13:00:20.833629  [**] [1:1421:11] SNMP AgentX/tcp request [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.56.1:37546 -> 192.168.56.103:705
+Snort exiting
+
+
+Na het activeren van de sfportscan-preprocessor en het analyseren van de pcap met Snort zien we in de logs verschillende aanvalspatronen:
+XMAS-scan gedetecteerd door Snort (SCAN nmap XMAS).
+SNMP gerichte probes (SNMP request, SNMP trap, SNMP AgentX/tcp request), geclassificeerd als Attempted Information Leak. Dit komt door de decoy scan waarbij meerdere bron-IP’s tegelijk naar SNMP-poorten scannen.
+👉 Conclusie: de aanvaller heeft Nmap gebruikt en Snort detecteert zowel de XMAS-scan als SNMP/decoy scans in de logs.
