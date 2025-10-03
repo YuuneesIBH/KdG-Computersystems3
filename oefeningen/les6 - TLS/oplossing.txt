@@ -1,0 +1,1015 @@
+####Je kan gebruik maken van een standaard apache2 op Ubuntu
+Bij twijfel gebruik je de bootable live cd iso / VMWare /Virtualbox
+
+1. Activeer je SSL module
+De module mod_ssl zit standaard in het pakket apache-common
+sudo a2enmod ssl
+
+ubuntu@ubuntu:~$ sudo apt install apache2 openssl -y
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following packages were automatically installed and are no longer required:
+  libwpe-1.0-1 libwpebackend-fdo-1.0-1
+Use 'sudo apt autoremove' to remove them.
+The following additional packages will be installed:
+  apache2-bin apache2-data apache2-utils libapr1 libaprutil1
+  libaprutil1-dbd-sqlite3 libaprutil1-ldap
+Suggested packages:
+  apache2-doc apache2-suexec-pristine | apache2-suexec-custom ufw
+The following NEW packages will be installed:
+  apache2 apache2-bin apache2-data apache2-utils libapr1 libaprutil1
+  libaprutil1-dbd-sqlite3 libaprutil1-ldap
+The following packages will be upgraded:
+
+--> ssl module activeren 
+
+ubuntu@ubuntu:~$ sudo a2enmod ssl
+Considering dependency setenvif for ssl:
+Module setenvif already enabled
+Considering dependency mime for ssl:
+Module mime already enabled
+Considering dependency socache_shmcb for ssl:
+Module socache_shmcb already enabled
+Module ssl already enabled
+ubuntu@ubuntu:~$ sudo systemctl restart apache2
+Job for apache2.service failed because the control process exited with error code.
+See "systemctl status apache2.service" and "journalctl -xeu apache2.service" for details.
+ubuntu@ubuntu:~$ 
+
+ubuntu@ubuntu:~$ cd /etc/ssl
+ubuntu@ubuntu:/etc/ssl$ sudo openssl req -new -x509 -extensions v3_ca -keyout private/cakey.pem -out certs/cacert.pem -days 3650
+.+............+...+....+...+.........+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*...+....+.....+...+....+.....+......+...+....+..+.............+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*...+..................+...+.....+...+.+...+...+..+......+.........+..........+...+..+.......+.......................+................+..+....+...+...+..+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+......+.....+...+....+......+...+.....+.+......+..+.....................+....+..+......+.......+..+.+...+......+...+......+..............+.+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*..........+....+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*...+..................+...+....+.....+.+.........+.....+....+.....+....+.....+.+......+..................+...+..+...+.......+......+...........+.+............+...............+...+...............+..+.+...............+......+..................+..+.........+.+.....+....+.....+....+..+......+.............+..+...+....+..+.+..+.+...........+.........+....+...+........+................+..............+............+.........+.+.....+.......+..+...+.+......+.........+.....+....+...+.....+...+...............+.........+...+.......+..+.....................+.........+.+..+.......+...+..+..........+......+.................+.+.....+........................+.......+.....+.............+...............+..+...+.+.........+........+.......+......+..............+.......+.....+.+..+......+.......+...+.........+...+............+........+..........+..+...+...+.+...+...+..+.......+......+.....+....+.....+...................+..+...+....+.....+.+.........+......+..............+......+.+.........+......+.....+......+...+....+........+...+.......+...............+.....+.......+.....+.+..+....+........+......+.+......+...+...............+...........+.+........+....+...........+......+.+...+..+.......+..+....+.........+.....+.+..+.........+.+...+...........+...+...+..................+....+...+..............+......+....+........+.+..+...+................+...+..+...+................+..+....+...........+.............+..+.......+..+...+.......+...+..+.........+..........+.....+....+..+...+.......+..............+....+..+.+..............+....+..............+...+....+.....+....+..+....+......+...+..+....+...+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Enter PEM pass phrase:
+Verifying - Enter PEM pass phrase:
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:BE
+State or Province Name (full name) [Some-State]:Antwerp
+Locality Name (eg, city) []:Antwerp
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:KdG Students
+Organizational Unit Name (eg, section) []:OU_Students
+Common Name (e.g. server FQDN or YOUR name) []:www.mijnweb.local
+Email Address []:younes.elazzouzi@student.kdg.be
+ubuntu@ubuntu:/etc/ssl$ 
+
+2. Maak een nieuwe site
+sudo touch /etc/apache2/sites-available/sslsite.conf
+
+ubuntu@ubuntu:~$ sudo touch /etc/apache2/sites-available/sslsite.conf
+ubuntu@ubuntu:~$ sudo a2ensite sslsite
+Enabling site sslsite.
+To activate the new configuration, you need to run:
+  systemctl reload apache2
+ubuntu@ubuntu:~$ sudo vi /etc/apache2/sites-available/sslsite.conf
+
+Dit plakken we dan in de config:
+NameVirtualHost *:443
+<VirtualHost *:443>
+    DocumentRoot /var/www/html
+    ServerName www.mijnweb.local
+
+    SSLEngine on
+    SSLCertificateFile /etc/pki/tls/certs/mijnsslserver.crt
+    SSLCertificateKeyFile /etc/pki/tls/private/mijnsslserver.key
+</VirtualHost>
+
+5. Kijk na in /etc/apache2/ports.conf of de server ook op poort 443 zal luisteren
+
+# If you just change the port or add more ports here, you will likely also
+# have to change the VirtualHost statement in
+# /etc/apache2/sites-enabled/000-default.conf
+
+ubuntu@ubuntu:~$ sudo vi /etc/apache2/ports.conf
+ubuntu@ubuntu:~$ 
+
+Listen 80
+
+<IfModule ssl_module>
+        Listen 443
+</IfModule>
+
+<IfModule mod_gnutls.c>
+        Listen 443
+</IfModule>
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet
+
+6. Maak je eigen certificaat en sleutel aan (met jouw naam en emailadres van KdG) en zet deze klaar op de plaats die je aangaf in /etc/apache2/sites-available/sslsite
+Volg hiervoor volledig het document op REF A
+Opgelet!
+- Gebruik de zwaarst mogelijke encryptie en sleutels
+- Configureer je eigen interne CA
+Wat is het verschil tussen een key met een passphrase en een key zonder passphrase?
+- Stel openssl.cnf in zodat default BE, Antwerpen,Antwerpen,KdG en uw email adres worden gebruikt
+
+Als je het aanvraagt naar CA keypassphrase.
+
+ubuntu@ubuntu:~$ sudo mkdir -p /etc/pki/tls/private /etc/pki/tls/certs
+sudo openssl genrsa -out /etc/pki/tls/private/mijnsslserver.key 4096
+ubuntu@ubuntu:~$ sudo openssl req -new -key /etc/pki/tls/private/mijnsslserver.key -out /etc/pki/tls/private/mijnsslserver.csr
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:BE
+State or Province Name (full name) [Some-State]:Antwerpen
+Locality Name (eg, city) []:Antwerpen
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:OU_Students
+Organizational Unit Name (eg, section) []:OU_Students
+Common Name (e.g. server FQDN or YOUR name) []:www.mijnweb.local
+Email Address []:younes.elazzouzi@student.kdg.be
+
+Please enter the following 'extra' attributes
+to be sent with your certificate request
+A challenge password []:
+An optional company name []:KdG
+ubuntu@ubuntu:~$ 
+
+ubuntu@ubuntu:~$ sudo openssl x509 -req -in /etc/pki/tls/private/mijnsslserver.csr \
+-CA /etc/ssl/certs/cacert.pem -CAkey /etc/ssl/private/cakey.pem \
+-CAcreateserial -out /etc/pki/tls/certs/mijnsslserver.crt -days 365 -sha256
+Certificate request self-signature ok
+subject=C = BE, ST = Antwerpen, L = Antwerpen, O = OU_Students, OU = OU_Students, CN = www.mijnweb.local, emailAddress = younes.elazzouzi@student.kdg.be
+Enter pass phrase for /etc/ssl/private/cakey.pem:
+ubuntu@ubuntu:~$ 
+
+ubuntu@ubuntu:~$ ls -l /etc/pki/tls/certs/mijnsslserver.crt /etc/pki/tls/private/mijnsslserver.key
+-rw-r--r-- 1 root root 1753 Oct  3 12:42 /etc/pki/tls/certs/mijnsslserver.crt
+-rw------- 1 root root 3272 Oct  3 12:40 /etc/pki/tls/private/mijnsslserver.key
+ubuntu@ubuntu:~$ 
+
+7. Start Apache2 opnieuw op
+  systemctl restart apache2
+
+Ik kreeg errors omdat NGINX runnde via de imported Ubuntu port 80 dus disablen:
+ubuntu@ubuntu:~$ sudo systemctl stop nginx
+sudo systemctl disable nginx
+sudo systemctl restart apache2
+Synchronizing state of nginx.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install disable nginx
+Removed /etc/systemd/system/multi-user.target.wants/nginx.service.
+ubuntu@ubuntu:~$ sudo systemctl stop nginx
+sudo systemctl disable nginx
+sudo systemctl restart apache2
+Synchronizing state of nginx.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install disable nginx
+ubuntu@ubuntu:~$ sudo systemctl restart apache2
+ubuntu@ubuntu:~$ systemctl status apache2 -l --no-pager
+\u25cf apache2.service - The Apache HTTP Server
+     Loaded: loaded (/lib/systemd/system/apache2.service; enabled; vendor preset: enabled)
+     Active: active (running) since Fri 2025-10-03 12:46:27 UTC; 24s ago
+       Docs: https://httpd.apache.org/docs/2.4/
+    Process: 113877 ExecStart=/usr/sbin/apachectl start (code=exited, status=0/SUCCESS)
+   Main PID: 113882 (apache2)
+      Tasks: 55 (limit: 4517)
+     Memory: 6.5M
+        CPU: 34ms
+     CGroup: /system.slice/apache2.service
+             \u251c\u2500113882 /usr/sbin/apache2 -k start
+             \u251c\u2500113883 /usr/sbin/apache2 -k start
+             \u2514\u2500113884 /usr/sbin/apache2 -k start
+
+Oct 03 12:46:27 ubuntu systemd[1]: Starting The Apache HTTP Server...
+Oct 03 12:46:27 ubuntu apachectl[113880]: AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1. Set the 'ServerName' directive globally to suppress this message
+Oct 03 12:46:27 ubuntu systemd[1]: Started The Apache HTTP Server.
+ubuntu@ubuntu:~$ 
+
+8. Je kan het certificaat uittesten via de browser op hetzelfde adres.
+ubuntu@ubuntu:~$ echo "127.0.0.1 www.mijnweb.local" | sudo tee -a /etc/hosts
+127.0.0.1 www.mijnweb.local
+ubuntu@ubuntu:~$ 
+
+--ISSUES FIXing 
+passphrase:../providers/implementations/encode_decode/encode_key2any.c:116:
+ubuntu@ubuntu:/etc/ssl$ sudo openssl req -new -x509 -extensions v3_ca -keyout private/cakey.pem -out certs/cacert.pem -days 3650
+....+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*......+...+...+.+..............+.+.....+.+..+.............+...+..+....+...+..+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*....+..+......+....+...+..+....+...........+.............+..+....+.....................+......+..+.......+.....+......+...+.+.....+......+..................+......+..........+........+..........+.....+.+......+...+...+........+.+......+...+..+...+....+.....+.......+...+...+...+...........+.............+........+.......+...............+...........+.+..............+.......+..................+..+...+....+...+...+......+.....+...+......+....+.....+......+......+.+........+.+........+...+............+...+...+.+...+........+.........+...+...+....+........+......+................+.....+.+...+...............+.....+.+.....+.+...............+............+..+.+..+...+....+.....+......+....+...+......+.....+.........+.......+.....+...+...+....+......+..+..........+...+.....+.......+.....+.+.................+...+....+...+..+...............+......+......+...+......................+.....+..................+.+...........+......+....+........+......+....+...+..+.+...........................+........+.......+...+.....+....+..+.+..+.......+..............+.+......+.................+.+..............+...+.......+..+.+..+...+....+...+........+...+....+............+...+..+......+.......+...+.....+...+.......+...+...........+.+...+...........+.+..+............+.+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+......+.........+........+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*....+.....+.........+..........+..+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*..+..................+....+......+..+............+.+..+............+.......+...+...........+.+........+...+...+.......+.....+.........+.+...+..+.......+..+.+...+.........+..+....+..+......................+...+...+.....+......+..........+.....+.+..+...+...+.+.....+.........+.......+.....+....+...+..+....+.....+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Enter PEM pass phrase:
+Verifying - Enter PEM pass phrase:
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:BE
+State or Province Name (full name) [Some-State]:Antwerp
+Locality Name (eg, city) []:Antwerp
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:KdG
+Organizational Unit Name (eg, section) []:OU_Students
+Common Name (e.g. server FQDN or YOUR name) []:KdG-CA
+Email Address []:
+ubuntu@ubuntu:/etc/ssl$ 
+ubuntu@ubuntu:/etc/ssl$ openssl x509 -in /etc/ssl/certs/cacert.pem -noout -issuer -subject
+issuer=C = BE, ST = Antwerp, L = Antwerp, O = KdG, OU = OU_Students, CN = KdG-CA
+subject=C = BE, ST = Antwerp, L = Antwerp, O = KdG, OU = OU_Students, CN = KdG-CA
+ubuntu@ubuntu:/etc/ssl$ 
+
+ubuntu@ubuntu:/etc/ssl$ openssl x509 -in /etc/ssl/certs/cacert.pem -noout -issuer -subject
+issuer=C = BE, ST = Antwerp, L = Antwerp, O = KdG, OU = OU_Students, CN = KdG-CA
+subject=C = BE, ST = Antwerp, L = Antwerp, O = KdG, OU = OU_Students, CN = KdG-CA
+ubuntu@ubuntu:/etc/ssl$ sudo openssl x509 -req -in /etc/pki/tls/private/mijnsslserver.csr \
+-CA /etc/ssl/certs/cacert.pem -CAkey /etc/ssl/private/cakey.pem \
+-CAcreateserial -out /etc/pki/tls/certs/mijnsslserver.crt -days 365 -sha256
+Certificate request self-signature ok
+subject=C = BE, ST = Antwerp, L = Antwerp, O = KdG, OU = OU_Students, CN = www.mijnweb.local
+Enter pass phrase for /etc/ssl/private/cakey.pem:
+ubuntu@ubuntu:/etc/ssl$ openssl x509 -in /etc/pki/tls/certs/mijnsslserver.crt -noout -issuer -subject
+issuer=C = BE, ST = Antwerp, L = Antwerp, O = KdG, OU = OU_Students, CN = KdG-CA
+subject=C = BE, ST = Antwerp, L = Antwerp, O = KdG, OU = OU_Students, CN = www.mijnweb.local
+ubuntu@ubuntu:/etc/ssl$ 
+
+______________
+FIX TWEE vanaf heir beginnen 
+ubuntu@ubuntu:~$ mkdir ~/easy-rsa
+ln -s /usr/share/easy-rsa/* ~/easy-rsa/
+chmod 700 ~/easy-rsa
+cd ~/easy-rsa
+mkdir: cannot create directory \u2018/home/ubuntu/easy-rsa\u2019: File exists
+ln: failed to create symbolic link '/home/ubuntu/easy-rsa/easyrsa': File exists
+ln: failed to create symbolic link '/home/ubuntu/easy-rsa/openssl-easyrsa.cnf': File exists
+ln: failed to create symbolic link '/home/ubuntu/easy-rsa/vars.example': File exists
+ln: failed to create symbolic link '/home/ubuntu/easy-rsa/x509-types': File exists
+ubuntu@ubuntu:~/easy-rsa$ ./easyrsa init-pki
+
+init-pki complete; you may now create a CA or requests.
+Your newly created PKI dir is: /home/ubuntu/easy-rsa/pki
+
+
+ubuntu@ubuntu:~/easy-rsa$ ./easyrsa build-ca
+Using SSL: openssl OpenSSL 3.0.2 15 Mar 2022 (Library: OpenSSL 3.0.2 15 Mar 2022)
+
+Enter New CA Key Passphrase: 
+Re-Enter New CA Key Passphrase: 
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Common Name (eg: your user, host, or server name) [Easy-RSA CA]:www.mijnweb.loca^C
+ubuntu@ubuntu:~/easy-rsa$ ./easyrsa build-ca
+Using SSL: openssl OpenSSL 3.0.2 15 Mar 2022 (Library: OpenSSL 3.0.2 15 Mar 2022)
+
+Enter New CA Key Passphrase: 
+Re-Enter New CA Key Passphrase: 
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Common Name (eg: your user, host, or server name) [Easy-RSA CA]:KdG_CA
+
+CA creation complete and you may now import and sign cert requests.
+Your new CA certificate file for publishing is at:
+/home/ubuntu/easy-rsa/pki/ca.crt
+
+
+ubuntu@ubuntu:~/easy-rsa$ ./easyrsa gen-req mijnweb nopass
+Using SSL: openssl OpenSSL 3.0.2 15 Mar 2022 (Library: OpenSSL 3.0.2 15 Mar 2022)
+.....+..........+...+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*.+.......+..+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*.....+.+...+..+........................+...+.+.....+....+.....+............+....+.....+.+.........+......+...+...+.....+...+..........+.........+.....+.+..............+...............+...+.......+..+.+........+......+.+...+.....+....+...............+..+.........+......+..........+........+..........+...+..+.+......+........+......+......+...+.......+.....+......+...+....+...+.....+.............+......+...........+....+........+..........+..+..........+......+...+......+........+...+....+.....+....+.....+............+...............+...+.......+..+......+...............+.......+...+......+...........+...+.+.....+.........+.........+.+.........+..+...+.............+...+..+..................+.+..............+.+.....+...+...+...+.+...+..+.+.....+.......+......+.........+.....+.+.....+.+......+.....+..........+..+.+............+..+............+.+.....+.........+.+............+..+.+.........+...+..+....+..+....+.........+.....+................+.........+.....+.+........+......+....+........+.......+..+....+...........+...+......+.+........+...+............+.+............+...+.....+.+...+..+..........+......+...+..+...+............+...............+...+.+...+............+......+...+...........+.+..+.+..+...+......+.+........+......+.+...+...........+.+.........+........................+..+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+.....+...+..+...+.+..+.............+.....+....+..+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*......+.........+.............+.....+...+.+.........+............+...+......+.....+...+.+............+..+.......+...+..+..........+.........+..+............+...+....+...+..+....+..+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*....+............+...+..+.......+.....+.+...........+.+........+.+...+.....+......+.......+............+..+......+.............+..+...+.+........+.+...........+........................+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Common Name (eg: your user, host, or server name) [mijnweb]:www.mijnweb.local
+
+Keypair and certificate request completed. Your files are:
+req: /home/ubuntu/easy-rsa/pki/reqs/mijnweb.req
+key: /home/ubuntu/easy-rsa/pki/private/mijnweb.key
+
+
+ubuntu@ubuntu:~/easy-rsa$ 
+ubuntu@ubuntu:~/easy-rsa$ ./easyrsa sign-req server mijnweb
+Using SSL: openssl OpenSSL 3.0.2 15 Mar 2022 (Library: OpenSSL 3.0.2 15 Mar 2022)
+
+
+You are about to sign the following certificate.
+Please check over the details shown below for accuracy. Note that this request
+has not been cryptographically verified. Please be sure it came from a trusted
+source or that you have verified the request checksum with the sender.
+
+Request subject, to be signed as a server certificate for 825 days:
+
+subject=
+    commonName                = www.mijnweb.local
+
+
+Type the word 'yes' to continue, or any other input to abort.
+  Confirm request details: 
+
+Aborting without confirmation.
+
+ubuntu@ubuntu:~/easy-rsa$ ./easyrsa sign-req server mijnweb
+Using SSL: openssl OpenSSL 3.0.2 15 Mar 2022 (Library: OpenSSL 3.0.2 15 Mar 2022)
+
+
+You are about to sign the following certificate.
+Please check over the details shown below for accuracy. Note that this request
+has not been cryptographically verified. Please be sure it came from a trusted
+source or that you have verified the request checksum with the sender.
+
+Request subject, to be signed as a server certificate for 825 days:
+
+subject=
+    commonName                = www.mijnweb.local
+
+
+Type the word 'yes' to continue, or any other input to abort.
+  Confirm request details: yes
+Using configuration from /home/ubuntu/easy-rsa/pki/easy-rsa-150745.AhRhpZ/tmp.acU4Q0
+Enter pass phrase for /home/ubuntu/easy-rsa/pki/private/ca.key:
+20201C9FFFFF0000:error:0700006C:configuration file routines:NCONF_get_string:no value:../crypto/conf/conf_lib.c:315:group=<NULL> name=unique_subject
+Check that the request matches the signature
+Signature ok
+The Subject's Distinguished Name is as follows
+commonName            :ASN.1 12:'www.mijnweb.local'
+Certificate is to be certified until Jan  6 13:27:26 2028 GMT (825 days)
+
+Write out database with 1 new entries
+Data Base Updated
+
+Certificate created at: /home/ubuntu/easy-rsa/pki/issued/mijnweb.crt
+
+
+ubuntu@ubuntu:~/easy-rsa$ 
+ubuntu@ubuntu:~/easy-rsa$ sudo mkdir -p /etc/pki/tls/certs /etc/pki/tls/private
+sudo cp ~/easy-rsa/pki/issued/mijnweb.crt /etc/pki/tls/certs/mijnsslserver.crt
+sudo cp ~/easy-rsa/pki/private/mijnweb.key /etc/pki/tls/private/mijnsslserver.key
+sudo cp ~/easy-rsa/pki/ca.crt /etc/ssl/certs/cacert.pem
+ubuntu@ubuntu:~/easy-rsa$ sudo vi /etc/apache2/sites-available/sslsite.conf
+ubuntu@ubuntu:~/easy-rsa$ cat /etc/apache2/sites-available/sslsite.conf
+#NameVirtualHost *:443
+<VirtualHost *:443>
+    DocumentRoot /var/www/html
+    ServerName www.mijnweb.local
+
+    SSLEngine on
+    SSLCertificateFile /etc/pki/tls/certs/mijnsslserver.crt
+    SSLCertificateKeyFile /etc/pki/tls/private/mijnsslserver.key
+</VirtualHost>
+
+ubuntu@ubuntu:~/easy-rsa$ 
+
+UPDATED 
+    SSLCertificateFile /etc/pki/tls/certs/mijnsslserver.crt
+    SSLCertificateKeyFile /etc/pki/tls/private/mijnsslserver.key
+</VirtualHost>
+
+ubuntu@ubuntu:~/easy-rsa$ sudo vi /etc/apache2/sites-available/sslsite.conf
+ubuntu@ubuntu:~/easy-rsa$ cat /etc/apache2/sites-available/sslsite.conf
+<VirtualHost *:443>
+    DocumentRoot /var/www/html
+    ServerName www.mijnweb.local
+
+    SSLEngine on
+    SSLCertificateFile /etc/pki/tls/certs/mijnsslserver.crt
+    SSLCertificateKeyFile /etc/pki/tls/private/mijnsslserver.key
+    SSLCACertificateFile /etc/ssl/certs/cacert.pem
+</VirtualHost>
+ubuntu@ubuntu:~/easy-rsa$ 
+
+TESTING:
+ubuntu@ubuntu:~/easy-rsa$ sudo systemctl restart apache2
+ubuntu@ubuntu:~/easy-rsa$ systemctl status apache2 --no-pager -l
+\u25cf apache2.service - The Apache HTTP Server
+     Loaded: loaded (/lib/systemd/system/apache2.service; enabled; vendor preset: enabled)
+     Active: active (running) since Fri 2025-10-03 13:29:30 UTC; 5s ago
+       Docs: https://httpd.apache.org/docs/2.4/
+    Process: 150850 ExecStart=/usr/sbin/apachectl start (code=exited, status=0/SUCCESS)
+   Main PID: 150854 (apache2)
+      Tasks: 55 (limit: 4517)
+     Memory: 6.5M
+        CPU: 50ms
+     CGroup: /system.slice/apache2.service
+             \u251c\u2500150854 /usr/sbin/apache2 -k start
+             \u251c\u2500150855 /usr/sbin/apache2 -k start
+             \u2514\u2500150856 /usr/sbin/apache2 -k start
+
+Oct 03 13:29:30 ubuntu systemd[1]: Starting The Apache HTTP Server...
+Oct 03 13:29:30 ubuntu apachectl[150853]: AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1. Set the 'ServerName' directive globally to suppress this message
+Oct 03 13:29:30 ubuntu systemd[1]: Started The Apache HTTP Server.
+ubuntu@ubuntu:~/easy-rsa$ openssl s_client -connect www.mijnweb.local:443 -showcerts
+CONNECTED(00000003)
+depth=1 CN = KdG_CA
+verify error:num=19:self-signed certificate in certificate chain
+verify return:1
+depth=1 CN = KdG_CA
+verify return:1
+depth=0 CN = www.mijnweb.local
+verify return:1
+---
+Certificate chain
+ 0 s:CN = www.mijnweb.local
+   i:CN = KdG_CA
+   a:PKEY: rsaEncryption, 2048 (bit); sigalg: RSA-SHA256
+   v:NotBefore: Oct  3 13:27:26 2025 GMT; NotAfter: Jan  6 13:27:26 2028 GMT
+-----BEGIN CERTIFICATE-----
+MIIDdDCCAlygAwIBAgIRAP3VCgitlTvsPiuOdYZw0igwDQYJKoZIhvcNAQELBQAw
+ETEPMA0GA1UEAwwGS2RHX0NBMB4XDTI1MTAwMzEzMjcyNloXDTI4MDEwNjEzMjcy
+NlowHDEaMBgGA1UEAwwRd3d3Lm1pam53ZWIubG9jYWwwggEiMA0GCSqGSIb3DQEB
+AQUAA4IBDwAwggEKAoIBAQCyRSSu/3FaVhQ+BmVNi1GbHrcNxMAwYU9PFXzcINla
+yzlXvt+7wf+S2OX2kOnWb9uiRruOel0xrxsxqMXlAO0SencepdbPw+lyQ1MkFbi8
+TaNDmLUH/elcoSwyky32Ns1MF8V2oUNb/ErdcOSuKAztxGu1LHbbMFvJ8WvGXbHP
+ztDLSff8FUf3v3b1VLuqXMcTVme+OlkWsooe4rAyecPLZNVcRyMseExZm4ejPrU/
+2o/bae5Ka5rhA/8xCbycw4+ogxjFJLp1pqUfG9erkg+kHcbDhKhx0b50SQSsqmtB
+UAGzjMZV02tB++fy85k+Nb3n0RK0JnON2gPaDWwGNaCrAgMBAAGjgbswgbgwCQYD
+VR0TBAIwADAdBgNVHQ4EFgQUSCSL4ZKm2VXE3VhAoSG2rgWO60kwTAYDVR0jBEUw
+Q4AU8TvYQyVlObBXL2LY8hh2PgLEyaehFaQTMBExDzANBgNVBAMMBktkR19DQYIU
+a5VsSBobS8SP5ow6+Q3eVopXRREwEwYDVR0lBAwwCgYIKwYBBQUHAwEwCwYDVR0P
+BAQDAgWgMBwGA1UdEQQVMBOCEXd3dy5taWpud2ViLmxvY2FsMA0GCSqGSIb3DQEB
+CwUAA4IBAQCnIV+BtKkAGf9+zMuCNCHOxycbvg1WM2uT0tMcWkmwicDL1oPfPQMI
+wnrLs9OBX5JfWjEAENQIk+uOpdcwx0jQiH0/9NLXqgqiHKp5AQWaD8mtlJDPY9kN
+EQzJl8Z8xF8NSXo+lCniyNXugw20hjdA5y8AUiAjbNrYL79OimnZDPCCch4voTAK
+VZEJlOJ5VzylNXOn4GTxl5KnwwCK0lkYsujjswAMKOvk3D202nA2mrOXDDnREx/f
+VUKAi5GmKW898msYq2TGe5zjd8hlcAenpfqVx1NwKzjLedtZlwghtVU8IpO2j/AP
+jHGaOI51JmutJ1dlKNyrKU78hXS7LTOK
+-----END CERTIFICATE-----
+ 1 s:CN = KdG_CA
+   i:CN = KdG_CA
+   a:PKEY: rsaEncryption, 2048 (bit); sigalg: RSA-SHA256
+   v:NotBefore: Oct  3 13:26:06 2025 GMT; NotAfter: Oct  1 13:26:06 2035 GMT
+-----BEGIN CERTIFICATE-----
+MIIDPDCCAiSgAwIBAgIUa5VsSBobS8SP5ow6+Q3eVopXRREwDQYJKoZIhvcNAQEL
+BQAwETEPMA0GA1UEAwwGS2RHX0NBMB4XDTI1MTAwMzEzMjYwNloXDTM1MTAwMTEz
+MjYwNlowETEPMA0GA1UEAwwGS2RHX0NBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A
+MIIBCgKCAQEAruU+8l2TdeLfXpljZfsmbytHzySeBCz1ukI3jVXW0YO0ozGVuI1l
+ECAzzununUhM9jRxnuOm7nMJXYZzBP69X0+5nFB3W2cb7X5mg+Y8O8G5F1EiBwRw
+O+fcAIZvLE44Kier0ghzryepdFdKUw2uHdlpgGI+if6n8FV/jAHWSoCAz5mZNTPV
+0yePqCa2YK0qvIybDP3L1Nh6kBv+X9hwSjOXIDFBOwcurE5JpIfDXtfmd0eO9SIm
+lmlkpQNN3lqzocQYhaFQp9aTQjkAodO4hTTSYZUWQviXeB5f4+HBcDOf37+vfniQ
+C4kPIuhgKldXl75w9IKoR+oY3uV6oVh5hwIDAQABo4GLMIGIMB0GA1UdDgQWBBTx
+O9hDJWU5sFcvYtjyGHY+AsTJpzBMBgNVHSMERTBDgBTxO9hDJWU5sFcvYtjyGHY+
+AsTJp6EVpBMwETEPMA0GA1UEAwwGS2RHX0NBghRrlWxIGhtLxI/mjDr5Dd5WildF
+ETAMBgNVHRMEBTADAQH/MAsGA1UdDwQEAwIBBjANBgkqhkiG9w0BAQsFAAOCAQEA
+EIjhkx824hIjseTSoGLIBDDMr0zuDXt29QLq/Q4lwb85hasYe6h5wrZnJinmmcpX
++/3GoQ723yxpKrOmPgrVZFF878brbkp9dokyVnqmB+ENxihljvtaZfGk6u1fbEDm
+UB6yj5qRfVDwecZA/uGxNxVirY48sntW+KcHKGbH+YdsoRlNjbOArMnFdi6yQ/rK
+H/tRcPLG8TXACSo12WJCrc+H2dDY5auIwj2YvRIM5uHvDYmbme9Xlxx3J/Lnm0Ws
+fGzus5RMeK9IVGB80ygPpzmjRmTDpx8FcKxakyaYRVrfi2ybSDI31a7SHA5k8BAW
+ZxC+7z262SdZvsYxoCQZIg==
+-----END CERTIFICATE-----
+---
+Server certificate
+subject=CN = www.mijnweb.local
+issuer=CN = KdG_CA
+---
+No client certificate CA names sent
+Peer signing digest: SHA256
+Peer signature type: RSA-PSS
+Server Temp Key: X25519, 253 bits
+---
+SSL handshake has read 2285 bytes and written 399 bytes
+Verification error: self-signed certificate in certificate chain
+---
+New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
+Server public key is 2048 bit
+Secure Renegotiation IS NOT supported
+Compression: NONE
+Expansion: NONE
+No ALPN negotiated
+Early data was not sent
+Verify return code: 19 (self-signed certificate in certificate chain)
+---
+---
+Post-Handshake New Session Ticket arrived:
+SSL-Session:
+    Protocol  : TLSv1.3
+    Cipher    : TLS_AES_256_GCM_SHA384
+    Session-ID: 3B81DBD6ECF5E19D5A576785F3A1D0D3B8251CAD44B59B04520CB3D70A6C5402
+    Session-ID-ctx: 
+    Resumption PSK: F13E3B7299E37D874AE2D464BCEF2764A803B9DFEC9FD81C088054650DDAF0C6147ED00E69F5B3DC4E40F37B2340F9AF
+    PSK identity: None
+    PSK identity hint: None
+    SRP username: None
+    TLS session ticket lifetime hint: 300 (seconds)
+    TLS session ticket:
+    0000 - 7b cb 9f 88 79 32 62 a1-1d f9 fc 8f fe 9e d6 04   {...y2b.........
+    0010 - 46 20 cb e5 a6 c6 6a cd-2b 12 48 77 9d d1 0e e8   F ....j.+.Hw....
+    0020 - 7e ef ed 69 4e c5 f4 e5-23 ee e9 a5 95 cd 45 35   ~..iN...#.....E5
+    0030 - f0 f0 90 f0 cd e1 0b c1-96 8c 50 67 56 41 55 ec   ..........PgVAU.
+    0040 - 11 d2 a8 11 d3 86 2e 6f-22 51 1c d5 88 f6 6f ba   .......o"Q....o.
+    0050 - 08 7e c2 78 26 13 67 b2-46 61 e7 c4 9e 13 54 71   .~.x&.g.Fa....Tq
+    0060 - 90 6b 77 39 db 26 03 79-47 47 5b e8 85 fa 99 39   .kw9.&.yGG[....9
+    0070 - 80 c5 fd 9a 15 b1 be 13-71 fd 31 41 db a8 14 7a   ........q.1A...z
+    0080 - 58 19 88 07 56 32 db 90-42 39 28 d5 cc ce 2e 6e   X...V2..B9(....n
+    0090 - d6 9d 33 3a fa 0d d3 d7-66 20 04 d3 20 94 7a 94   ..3:....f .. .z.
+    00a0 - 84 10 a8 29 64 28 25 ce-a5 64 ee 75 42 67 fa cb   ...)d(%..d.uBg..
+    00b0 - 6a 47 bc 0f 2f 3f 95 73-76 cc 17 9f ee 8f c2 a0   jG../?.sv.......
+    00c0 - ba f8 32 2c 16 bd d5 ce-6f 72 c8 c0 01 e1 e4 14   ..2,....or......
+    00d0 - 48 d3 59 41 80 79 3f e4-30 c2 fe 45 20 f2 2d 2b   H.YA.y?.0..E .-+
+    00e0 - 27 4e 8d d9 cf 0f 02 7c-cd c0 9b 25 f2 72 39 69   'N.....|...%.r9i
+    00f0 - 3c 85 27 45 45 96 5b df-fd 20 fb 70 f5 af b8 20   <.'EE.[.. .p... 
+
+    Start Time: 1759498181
+    Timeout   : 7200 (sec)
+    Verify return code: 19 (self-signed certificate in certificate chain)
+    Extended master secret: no
+    Max Early Data: 0
+---
+read R BLOCK
+---
+Post-Handshake New Session Ticket arrived:
+SSL-Session:
+    Protocol  : TLSv1.3
+    Cipher    : TLS_AES_256_GCM_SHA384
+    Session-ID: 6449120EBFFCBADF5F6B2CDF4EE858E9E7B789C921AD149A420032744474C6D4
+    Session-ID-ctx: 
+    Resumption PSK: 08BED8EEA68E6C605BF5C5D52032E05EEB9E3BD7066697CC1F06DFE527D5F415F60A0D01D00303F3B205CD119B735D52
+    PSK identity: None
+    PSK identity hint: None
+    SRP username: None
+    TLS session ticket lifetime hint: 300 (seconds)
+    TLS session ticket:
+    0000 - 7b cb 9f 88 79 32 62 a1-1d f9 fc 8f fe 9e d6 04   {...y2b.........
+    0010 - 4f 7f bd 7f 64 f9 94 07-e7 d8 3f 6d 1f 05 6b 6f   O...d.....?m..ko
+    0020 - 7b b9 95 98 e3 04 ee 13-33 7c df a0 4e 78 42 91   {.......3|..NxB.
+    0030 - 37 7b 2c e2 f8 e7 f3 3b-a0 0e c6 34 05 37 5b 06   7{,....;...4.7[.
+    0040 - 69 21 91 75 98 00 9d 98-0c 3b 1a c7 81 ef 18 67   i!.u.....;.....g
+    0050 - 59 18 52 b1 95 45 39 e2-6d b9 ef af cf ef 62 0d   Y.R..E9.m.....b.
+    0060 - 8e bc d4 e1 bc d2 ee bf-b3 6f bd 44 84 00 36 5d   .........o.D..6]
+    0070 - e8 28 1b e1 28 b1 3d 22-2b 8f af 93 fa 56 00 6d   .(..(.="+....V.m
+    0080 - fd df 1e be b8 47 e3 b3-b3 e0 b0 21 c1 4b 63 77   .....G.....!.Kcw
+    0090 - 67 f4 87 ea 04 86 63 41-cd 79 e4 e7 a8 48 6d 87   g.....cA.y...Hm.
+    00a0 - 11 94 ea 82 a5 c1 f4 ba-95 01 db 14 a7 70 62 5b   .............pb[
+    00b0 - 64 03 6e 04 23 5d a8 5e-ca a0 18 e8 c8 6c 3d a8   d.n.#].^.....l=.
+    00c0 - e0 05 32 95 ca 3c c5 5e-23 cf f2 d7 65 b0 5f 53   ..2..<.^#...e._S
+    00d0 - 83 00 32 28 00 d5 5f 91-b2 99 37 d5 d4 c5 b3 b5   ..2(.._...7.....
+    00e0 - e2 81 3d fa 7c 08 51 49-99 9e d8 cf ab 20 a8 04   ..=.|.QI..... ..
+    00f0 - c1 b2 e8 42 d0 c8 79 7d-b3 85 8e 49 2c 99 c0 7c   ...B..y}...I,..|
+
+    Start Time: 1759498181
+    Timeout   : 7200 (sec)
+    Verify return code: 19 (self-signed certificate in certificate chain)
+    Extended master secret: no
+    Max Early Data: 0
+---
+read R BLOCK
+
+HIERNA IMPORTEN VAN DE CERTIFICATE
+
+9. Zorg ervoor dat apache enkel minstens TLS versie 1.2 gebruikt
+
+ubuntu@ubuntu:~$ sudo vi /etc/apache2/mods-available/ssl.conf
+ubuntu@ubuntu:~$ 
+
+Ik add en pas aan naar dit:
+    #   The protocols to enable.
+        #   Available values: all, SSLv3, TLSv1, TLSv1.1, TLSv1.2
+        #   SSL v2  is no longer supported
+        SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1
+        SSLCipherSuite HIGH:!aNULL:!MD5
+        SSLHonorCipherOrder on
+
+Checking:
+ubuntu@ubuntu:~$ sudo vi /etc/apache2/mods-available/ssl.conf
+ubuntu@ubuntu:~$ openssl s_client -connect www.mijnweb.local:443 -tls1_1
+CONNECTED(00000003)
+2030A392FFFF0000:error:0A0000BF:SSL routines:tls_setup_handshake:no protocols available:../ssl/statem/statem_lib.c:104:
+---
+no peer certificate available
+---
+No client certificate CA names sent
+---
+SSL handshake has read 0 bytes and written 7 bytes
+Verification: OK
+---
+New, (NONE), Cipher is (NONE)
+Secure Renegotiation IS NOT supported
+Compression: NONE
+Expansion: NONE
+No ALPN negotiated
+Early data was not sent
+Verify return code: 0 (ok)
+---
+ubuntu@ubuntu:~$ r
+
+10. Installeer en configureer proftpd zodat FTP over TLS mogelijk is.
+    Test eerst uit zonder TLS.
+    Test uit met Filezilla met de optie "Require explicit FTP over TLS"
+
+ubuntu@ubuntu:~$ sudo apt update
+sudo apt install proftpd openssl -y
+Hit:1 http://ports.ubuntu.com/ubuntu-ports jammy InRelease
+Hit:2 http://ports.ubuntu.com/ubuntu-ports jammy-updates InRelease
+Hit:3 http://ports.ubuntu.com/ubuntu-ports jammy-backports InRelease
+Hit:4 http://ports.ubuntu.com/ubuntu-ports jammy-security InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+160 packages can be upgraded. Run 'apt list --upgradable' to see them.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Note, selecting 'proftpd-core' instead of 'proftpd'
+openssl is already the newest version (3.0.2-0ubuntu1.20).
+The following packages were automatically installed and are no longer required:
+  libwpe-1.0-1 libwpebackend-fdo-1.0-1
+Use 'sudo apt autoremove' to remove them.
+The following additional packages will be installed:
+  libhiredis0.14 libmemcached11 libmemcachedutil2 proftpd-doc
+Suggested packages:
+  openbsd-inetd | inet-superserver proftpd-mod-ldap proftpd-mod-mysql
+  proftpd-mod-odbc proftpd-mod-pgsql proftpd-mod-sqlite proftpd-mod-geoip
+  proftpd-mod-snmp proftpd-mod-crypto proftpd-mod-wrap
+The following NEW packages will be installed:
+  libhiredis0.14 libmemcached11 libmemcachedutil2 proftpd-core proftpd-doc
+0 upgraded, 5 newly installed, 0 to remove and 160 not upgraded.
+Need to get 3558 kB of archives.
+After this operation, 9217 kB of additional disk space will be used.
+Get:1 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 libhiredis0.14 arm64 0.14.1-2 [31.6 kB]
+Get:2 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 libmemcached11 arm64 1.0.18-4.2ubuntu4 [89.5 kB]
+Get:3 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 libmemcachedutil2 arm64 1.0.18-4.2ubuntu4 [9714 B]
+Get:4 http://ports.ubuntu.com/ubuntu-ports jammy-updates/universe arm64 proftpd-core arm64 1.3.7c+dfsg-1ubuntu0.1 [2209 kB]
+Get:5 http://ports.ubuntu.com/ubuntu-ports jammy-updates/universe arm64 proftpd-doc all 1.3.7c+dfsg-1ubuntu0.1 [1218 kB]
+Fetched 3558 kB in 1s (3122 kB/s)   
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package libhiredis0.14:arm64.
+(Reading database ... 213636 files and directories currently installed.)
+Preparing to unpack .../libhiredis0.14_0.14.1-2_arm64.deb ...
+Unpacking libhiredis0.14:arm64 (0.14.1-2) ...
+Selecting previously unselected package libmemcached11:arm64.
+Preparing to unpack .../libmemcached11_1.0.18-4.2ubuntu4_arm64.deb ...
+Unpacking libmemcached11:arm64 (1.0.18-4.2ubuntu4) ...
+Selecting previously unselected package libmemcachedutil2:arm64.
+Preparing to unpack .../libmemcachedutil2_1.0.18-4.2ubuntu4_arm64.deb ...
+Unpacking libmemcachedutil2:arm64 (1.0.18-4.2ubuntu4) ...
+Selecting previously unselected package proftpd-core.
+Preparing to unpack .../proftpd-core_1.3.7c+dfsg-1ubuntu0.1_arm64.deb ...
+Unpacking proftpd-core (1.3.7c+dfsg-1ubuntu0.1) ...
+Selecting previously unselected package proftpd-doc.
+Preparing to unpack .../proftpd-doc_1.3.7c+dfsg-1ubuntu0.1_all.deb ...
+Unpacking proftpd-doc (1.3.7c+dfsg-1ubuntu0.1) ...
+Setting up proftpd-doc (1.3.7c+dfsg-1ubuntu0.1) ...
+Setting up libmemcached11:arm64 (1.0.18-4.2ubuntu4) ...
+Setting up libhiredis0.14:arm64 (0.14.1-2) ...
+Setting up libmemcachedutil2:arm64 (1.0.18-4.2ubuntu4) ...
+Setting up proftpd-core (1.3.7c+dfsg-1ubuntu0.1) ...
+Adding system user `proftpd' (UID 129) ...
+Adding new user `proftpd' (UID 129) with group `nogroup' ...
+Not creating home directory `/run/proftpd'.
+Adding system user `ftp' (UID 130) ...
+Adding new user `ftp' (UID 130) with group `nogroup' ...
+Creating home directory `/srv/ftp' ...
+'/usr/share/proftpd/templates/welcome.msg' -> '/srv/ftp/welcome.msg.proftpd-new'
+Synchronizing state of proftpd.service with SysV service script with /lib/system
+d/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable proftpd
+Created symlink /etc/systemd/system/multi-user.target.wants/proftpd.service \u2192 /l
+ib/systemd/system/proftpd.service.
+Processing triggers for man-db (2.10.2-1) ...
+Processing triggers for libc-bin (2.35-0ubuntu3.11) ...
+debconf: unable to initialize frontend: Dialog
+debconf: (No usable dialog-like program is installed, so the dialog based frontend cannot be used. at /usr/share/perl5/Debconf/FrontEnd/Dialog.pm line 78.)
+debconf: falling back to frontend: Readline
+Scanning processes...                                                           
+Scanning candidates...                                                          
+Scanning linux images...                                                        
+Pending kernel upgrade
+----------------------
+
+Newer kernel available
+
+The currently running kernel version is 5.15.0-156-generic which is not the
+expected kernel version 5.15.0-157-generic.
+
+Restarting the system to load the new kernel will not be handled automatically,
+so you should consider rebooting.
+
+
+Restarting services...
+Daemons using outdated libraries
+--------------------------------
+
+  1. accounts-daemon.service         21. qemu-guest-agent.service
+  2. apache-htcacheclean.service     22. rtkit-daemon.service
+  3. avahi-daemon.service            23. serial-getty@ttyAMA0.service
+  4. colord.service                  24. spice-vdagentd.service
+  5. cron.service                    25. ssh.service
+  6. cups-browsed.service            26. switcheroo-control.service
+  7. cups.service                    27. systemd-journald.service
+  8. dbus.service                    28. systemd-logind.service
+  9. fwupd.service                   29. systemd-manager
+  10. gdm.service                    30. systemd-networkd.service
+  11. gdm3                           31. systemd-oomd.service
+  12. kerneloops.service             32. systemd-timesyncd.service
+  13. ModemManager.service           33. systemd-udevd.service
+  14. multipathd.service             34. udisks2.service
+  15. named.service                  35. unattended-upgrades.service
+  16. networkd-dispatcher.service    36. upower.service
+  17. NetworkManager.service         37. user@1000.service
+  18. packagekit.service             38. wpa_supplicant.service
+  19. polkit.service                 39. none of the above
+  20. power-profiles-daemon.service
+[More] ^C
+ubuntu@ubuntu:~$ systemctl status proftpd
+\u25cf proftpd.service - ProFTPD FTP Server
+     Loaded: loaded (/lib/systemd/system/proftpd.service; enabled; vendor prese>
+     Active: active (running) since Fri 2025-10-03 13:41:44 UTC; 11s ago
+   Main PID: 152358 (proftpd)
+      Tasks: 1 (limit: 4517)
+     Memory: 4.2M
+        CPU: 27ms
+     CGroup: /system.slice/proftpd.service
+             \u2514\u2500152358 "proftpd: (accepting connections)" "" "" "" "" "" "" "" ">
+
+Oct 03 13:41:44 ubuntu systemd[1]: Starting ProFTPD FTP Server...
+Oct 03 13:41:44 ubuntu proftpd[152356]: Checking syntax of configuration file
+Oct 03 13:41:44 ubuntu systemd[1]: Started ProFTPD FTP Server.
+lines 1-13/13 (END)
+^C
+ubuntu@ubuntu:~$ sudo adduser ftpuser
+Adding user `ftpuser' ...
+Adding new group `ftpuser' (1001) ...
+Adding new user `ftpuser' (1001) with group `ftpuser' ...
+Creating home directory `/home/ftpuser' ...
+Copying files from `/etc/skel' ...
+New password: 
+BAD PASSWORD: The password is shorter than 8 characters
+Retype new password: 
+passwd: password updated successfully
+Changing the user information for ftpuser
+Enter the new value, or press ENTER for the default
+	Full Name []:       
+	Room Number []: 
+	Work Phone []: 
+	Home Phone []: 
+	Other []: 
+Is the information correct? [Y/n] Y
+ubuntu@ubuntu:~$ 
+
+ubuntu@ubuntu:~$ sudo vi /etc/proftpd/proftpd.conf
+ubuntu@ubuntu:~$ 
+
+UIt commentaar halen:
+#
+# This is used for FTPS connections
+#
+Include /etc/proftpd/tls.conf
+
+Claude Help:
+ubuntu@ubuntu:~$ sudo systemctl status proftpd
+\u25cf proftpd.service - ProFTPD FTP Server
+     Loaded: loaded (/lib/systemd/system/proftpd.service; enabled; vendor prese>
+     Active: active (running) since Fri 2025-10-03 13:47:41 UTC; 2min 3s ago
+    Process: 153317 ExecStartPre=/usr/sbin/proftpd --configtest -c $CONFIG_FILE>
+    Process: 153318 ExecStart=/usr/sbin/proftpd -c $CONFIG_FILE $OPTIONS (code=>
+   Main PID: 153319 (proftpd)
+      Tasks: 1 (limit: 4517)
+     Memory: 2.0M
+        CPU: 24ms
+     CGroup: /system.slice/proftpd.service
+             \u2514\u2500153319 "proftpd: (accepting connections)" "" "" "" "" "" "" "" ">
+
+Oct 03 13:47:41 ubuntu systemd[1]: Starting ProFTPD FTP Server...
+Oct 03 13:47:41 ubuntu proftpd[153317]: Checking syntax of configuration file
+Oct 03 13:47:41 ubuntu systemd[1]: Started ProFTPD FTP Server.
+ubuntu@ubuntu:~$ 
+ubuntu@ubuntu:~$ ftp localhost
+bash: ftp: command not found
+ubuntu@ubuntu:~$ sudo apt install ftp -y
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following packages were automatically installed and are no longer required:
+  libwpe-1.0-1 libwpebackend-fdo-1.0-1
+Use 'sudo apt autoremove' to remove them.
+The following additional packages will be installed:
+  tnftp
+The following NEW packages will be installed:
+  ftp tnftp
+0 upgraded, 2 newly installed, 0 to remove and 160 not upgraded.
+Need to get 107 kB of archives.
+After this operation, 255 kB of additional disk space will be used.
+Get:1 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 tnftp arm64 20210827-4build1 [102 kB]
+Get:2 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 ftp all 20210827-4build1 [4812 B]
+Fetched 107 kB in 1s (206 kB/s)
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package tnftp.
+(Reading database ... 213964 files and directories currently installed.)
+Preparing to unpack .../tnftp_20210827-4build1_arm64.deb ...
+Unpacking tnftp (20210827-4build1) ...
+Selecting previously unselected package ftp.
+Preparing to unpack .../ftp_20210827-4build1_all.deb ...
+Unpacking ftp (20210827-4build1) ...
+Setting up tnftp (20210827-4build1) ...
+update-alternatives: using /usr/bin/tnftp to provide /usr/bin/ftp (ftp) in auto 
+mode
+update-alternatives: warning: skip creation of /usr/share/man/man1/ftp.1.gz beca
+use associated file /usr/share/man/man1/tnftp.1.gz (of link group ftp) doesn't e
+xist
+Setting up ftp (20210827-4build1) ...
+Processing triggers for man-db (2.10.2-1) ...
+debconf: unable to initialize frontend: Dialog
+debconf: (No usable dialog-like program is installed, so the dialog based frontend cannot be used. at /usr/share/perl5/Debconf/FrontEnd/Dialog.pm line 78.)
+debconf: falling back to frontend: Readline
+Scanning processes...                                                           
+Scanning candidates...                                                          
+Scanning linux images...                                                        
+Pending kernel upgrade
+----------------------
+
+Newer kernel available
+
+The currently running kernel version is 5.15.0-156-generic which is not the
+expected kernel version 5.15.0-157-generic.
+
+Restarting the system to load the new kernel will not be handled automatically,
+so you should consider rebooting.
+
+
+Restarting services...
+Daemons using outdated libraries
+--------------------------------
+
+  1. accounts-daemon.service         21. qemu-guest-agent.service
+  2. apache-htcacheclean.service     22. rtkit-daemon.service
+  3. avahi-daemon.service            23. serial-getty@ttyAMA0.service
+  4. colord.service                  24. spice-vdagentd.service
+  5. cron.service                    25. ssh.service
+  6. cups-browsed.service            26. switcheroo-control.service
+  7. cups.service                    27. systemd-journald.service
+  8. dbus.service                    28. systemd-logind.service
+  9. fwupd.service                   29. systemd-manager
+  10. gdm.service                    30. systemd-networkd.service
+  11. gdm3                           31. systemd-oomd.service
+  12. kerneloops.service             32. systemd-timesyncd.service
+  13. ModemManager.service           33. systemd-udevd.service
+  14. multipathd.service             34. udisks2.service
+  15. named.service                  35. unattended-upgrades.service
+  16. networkd-dispatcher.service    36. upower.service
+  17. NetworkManager.service         37. user@1000.service
+  18. packagekit.service             38. wpa_supplicant.service
+  19. polkit.service                 39. none of the above
+  20. power-profiles-daemon.service
+[More] ^C
+ubuntu@ubuntu:~$ ftp localhost
+Connected to localhost.
+220 ProFTPD Server (Debian) [::ffff:127.0.0.1]
+Name (localhost:ubuntu):     
+331 Password required for ubuntu
+Password: 
+230 User ubuntu logged in
+Remote system type is UNIX.
+Using binary mode to transfer files.
+ftp> 
+
+ubuntu@ubuntu:~$ sudo tee /etc/proftpd/tls.conf > /dev/null << 'EOF'
+<IfModule mod_tls.c>
+TLSEngine on
+TLSLog /var/log/proftpd/tls.log
+TLSProtocol TLSv1.2 TLSv1.3
+
+TLSRSACertificateFile /etc/pki/tls/certs/mijnsslserver.crt
+TLSRSACertificateKeyFile /etc/pki/tls/private/mijnsslserver.key
+TLSCACertificateFile /etc/ssl/certs/cacert.pem
+
+TLSVerifyClient off
+TLSRequired on
+
+TLSOptions NoSessionReuseRequired
+</IfModule>
+EOF
+ubuntu@ubuntu:~$ cat /etc/proftpd/tls.conf
+<IfModule mod_tls.c>
+TLSEngine on
+TLSLog /var/log/proftpd/tls.log
+TLSProtocol TLSv1.2 TLSv1.3
+
+TLSRSACertificateFile /etc/pki/tls/certs/mijnsslserver.crt
+TLSRSACertificateKeyFile /etc/pki/tls/private/mijnsslserver.key
+TLSCACertificateFile /etc/ssl/certs/cacert.pem
+
+TLSVerifyClient off
+TLSRequired on
+
+TLSOptions NoSessionReuseRequired
+</IfModule>
+ubuntu@ubuntu:~$ sudo systemctl restart proftpd
+ubuntu@ubuntu:~$ sudo systemctl status proftpd
+\u25cf proftpd.service - ProFTPD FTP Server
+     Loaded: loaded (/lib/systemd/system/proftpd.service; enabled; vendor prese>
+     Active: active (running) since Fri 2025-10-03 13:52:20 UTC; 5s ago
+    Process: 153783 ExecStartPre=/usr/sbin/proftpd --configtest -c $CONFIG_FILE>
+    Process: 153784 ExecStart=/usr/sbin/proftpd -c $CONFIG_FILE $OPTIONS (code=>
+   Main PID: 153785 (proftpd)
+      Tasks: 1 (limit: 4517)
+     Memory: 3.9M
+        CPU: 38ms
+     CGroup: /system.slice/proftpd.service
+             \u2514\u2500153785 "proftpd: (accepting connections)" "" "" "" "" "" "" "" ">
+
+Oct 03 13:52:20 ubuntu systemd[1]: Starting ProFTPD FTP Server...
+Oct 03 13:52:20 ubuntu proftpd[153783]: Checking syntax of configuration file
+Oct 03 13:52:20 ubuntu systemd[1]: Started ProFTPD FTP Server.
+lines 1-15/15 (END)
+ubuntu@ubuntu:~$ sudo tail -20 /var/log/proftpd/proftpd.log
+2025-10-03 13:41:44,732 ubuntu proftpd[152358] ubuntu: ProFTPD 1.3.7c (maint) (built Wed Feb 5 2025 13:53:13 UTC) standalone mode STARTUP
+2025-10-03 13:47:41,305 ubuntu proftpd[152358] ubuntu: ProFTPD killed (signal 15)
+2025-10-03 13:47:41,306 ubuntu proftpd[152358] ubuntu: ProFTPD 1.3.7c standalone mode SHUTDOWN
+2025-10-03 13:47:41,330 ubuntu proftpd[153319] ubuntu: ProFTPD 1.3.7c (maint) (built Wed Feb 5 2025 13:53:13 UTC) standalone mode STARTUP
+2025-10-03 13:52:20,746 ubuntu proftpd[153319] ubuntu: ProFTPD killed (signal 15)
+2025-10-03 13:52:20,746 ubuntu proftpd[153319] ubuntu: ProFTPD 1.3.7c standalone mode SHUTDOWN
+2025-10-03 13:52:20,837 ubuntu proftpd[153785] ubuntu: ProFTPD 1.3.7c (maint) (built Wed Feb 5 2025 13:53:13 UTC) standalone mode STARTUP
+ubuntu@ubuntu:~$ 
+
+ubuntu@ubuntu:~$ openssl s_client -connect localhost:21 -starttls ftp
+CONNECTED(00000003)
+
+ubuntu@ubuntu:~$ openssl s_client -connect localhost:21 -starttls ftp
+CONNECTED(00000003)
+^C
+ubuntu@ubuntu:~$ openssl s_client -connect localhost:21 -starttls ftp 2>&1 | head -50
+^C
+ubuntu@ubuntu:~$ sudo apt install lftp -y
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following packages were automatically installed and are no longer required:
+  libwpe-1.0-1 libwpebackend-fdo-1.0-1
+Use 'sudo apt autoremove' to remove them.
+The following NEW packages will be installed:
+  lftp
+0 upgraded, 1 newly installed, 0 to remove and 160 not upgraded.
+Need to get 710 kB of archives.
+After this operation, 1929 kB of additional disk space will be used.
+Get:1 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 lftp arm64 4.9.2-1build1 [710 kB]
+Fetched 710 kB in 1s (676 kB/s)
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package lftp.
+(Reading database ... 213975 files and directories currently installed.)
+Preparing to unpack .../lftp_4.9.2-1build1_arm64.deb ...
+Unpacking lftp (4.9.2-1build1) ...
+Setting up lftp (4.9.2-1build1) ...
+Processing triggers for mailcap (3.70+nmu1ubuntu1) ...
+Processing triggers for desktop-file-utils (0.26-1ubuntu3) ...
+Processing triggers for hicolor-icon-theme (0.17-2) ...
+Processing triggers for gnome-menus (3.36.0-1ubuntu3) ...
+Processing triggers for man-db (2.10.2-1) ...
+debconf: unable to initialize frontend: Dialog
+debconf: (No usable dialog-like program is installed, so the dialog based frontend cannot be used. at /usr/share/perl5/Debconf/FrontEnd/Dialog.pm line 78.)
+debconf: falling back to frontend: Readline
+Scanning processes...                                                           
+Scanning candidates...                                                          
+Scanning linux images...                                                        
+Pending kernel upgrade
+----------------------
+
+Newer kernel available
+
+The currently running kernel version is 5.15.0-156-generic which is not the
+expected kernel version 5.15.0-157-generic.
+
+Restarting the system to load the new kernel will not be handled automatically,
+so you should consider rebooting.
+
+
+Restarting services...
+Daemons using outdated libraries
+--------------------------------
+
+  1. accounts-daemon.service         21. qemu-guest-agent.service
+  2. apache-htcacheclean.service     22. rtkit-daemon.service
+  3. avahi-daemon.service            23. serial-getty@ttyAMA0.service
+  4. colord.service                  24. spice-vdagentd.service
+  5. cron.service                    25. ssh.service
+  6. cups-browsed.service            26. switcheroo-control.service
+  7. cups.service                    27. systemd-journald.service
+  8. dbus.service                    28. systemd-logind.service
+  9. fwupd.service                   29. systemd-manager
+  10. gdm.service                    30. systemd-networkd.service
+  11. gdm3                           31. systemd-oomd.service
+  12. kerneloops.service             32. systemd-timesyncd.service
+  13. ModemManager.service           33. systemd-udevd.service
+  14. multipathd.service             34. udisks2.service
+  15. named.service                  35. unattended-upgrades.service
+  16. networkd-dispatcher.service    36. upower.service
+  17. NetworkManager.service         37. user@1000.service
+  18. packagekit.service             38. wpa_supplicant.service
+  19. polkit.service                 39. none of the above
+  20. power-profiles-daemon.service
+[More] ^C
+ubuntu@ubuntu:~$ lftp -u ftpuser ftps://localhost
+Password: 
+lftp ftpuser@localhost:~>        
