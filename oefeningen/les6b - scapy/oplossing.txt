@@ -1,0 +1,297 @@
+# ============================
+# INSTALLATIE (voer 1 keer uit)
+# ============================
+sudo apt update
+sudo apt install -y nmap wireshark tcpdump python3-scapy python3-pycryptodome ipython3 python3-graphviz imagemagick
+# (optioneel) pip3 install scapy-python3
+
+# ====================================================
+# OEF 1 - SNIFFING
+# Opdracht: Schrijf een script dat 10 pakketten snifft en summary toont.
+# Bestand: 01_sniff.py3
+# Run: chmod +x 01_sniff.py3 && sudo ./01_sniff.py3
+# ====================================================
+cat > 01_sniff.py3 <<'PY'
+#!/usr/bin/env python3
+from scapy.all import sniff
+
+__description__ = "scapy sniffer, sniffs 10 packets"
+print("##### " + __description__ + " #####")
+
+packets = sniff(count=10)
+packets.summary()
+PY
+
+# ====================================================
+# OEF 1b - SNIFFING MET FOUTAFHANDELING (root check)
+# Opdracht: Zelfde als OEF1 maar check voor root en behandel fouten.
+# Bestand: 01b_sniff.py3
+# Run: chmod +x 01b_sniff.py3 && sudo ./01b_sniff.py3
+# ====================================================
+cat > 01b_sniff.py3 <<'PY'
+#!/usr/bin/env python3
+from scapy.all import sniff
+from os import getuid
+
+if getuid() != 0:
+    print("Warning: Starting as non-root user!")
+
+try:
+    packets = sniff(count=10)
+    packets.summary()
+except Exception as e:
+    print("Error: Unable to sniff packets, try using sudo.")
+    print("Detail:", e)
+    exit(1)
+PY
+
+# ====================================================
+# OEF 2 - VERZENDEN VAN PAKKETTEN (laag 3 en laag 2)
+# Opdracht: Verstuur ICMP via send() en een aantal pakketten via sendp()
+# Bestand: 02_send.py3
+# Run: chmod +x 02_send.py3 && sudo ./02_send.py3
+# ====================================================
+cat > 02_send.py3 <<'PY'
+#!/usr/bin/env python3
+from scapy.all import send, sendp, IP, ICMP, Ether
+
+# send een enkel IP/ICMP pakket (laag 3)
+send(IP(dst="127.0.0.1")/ICMP())
+
+# sendp: laag 2 frames (Ether)
+sendp(Ether()/IP(dst="127.0.0.1", ttl=(1,4)))
+PY
+
+# ====================================================
+# OEF 3 - ZENDEN EN ONTVANGEN (sr / sr1)
+# Opdracht: Gebruik sr() en sr1() om replies te krijgen.
+# Bestand: 03_sendreceive.py3
+# Run: chmod +x 03_sendreceive.py3 && sudo ./03_sendreceive.py3
+# Pas TARGET aan naar jouw doel-IP in hetzelfde netwerk.
+# ====================================================
+cat > 03_sendreceive.py3 <<'PY'
+#!/usr/bin/env python3
+from scapy.all import sr, sr1, IP, ICMP
+
+TARGET = "192.168.56.101"   # pas aan naar jouw doel
+
+# meerdere antwoorden (sr)
+ans, unans = sr(IP(dst=TARGET, ttl=5)/ICMP(), timeout=2)
+ans.nsummary()
+unans.nsummary()
+
+# enkel 1 pakket en antwoord (sr1)
+p = sr1(IP(dst=TARGET)/ICMP()/"XXXXXX", timeout=2)
+if p:
+    p.show()
+else:
+    print("Geen antwoord ontvangen.")
+PY
+
+# ====================================================
+# OEF 4 - SCRIPT MET ARGUMENT (ping 1 host)
+# Opdracht: Maak script dat IP van commandline leest en pingt met sr1()
+# Bestand: 04_sr_arg.py3
+# Run: chmod +x 04_sr_arg.py3 && sudo ./04_sr_arg.py3 192.168.56.101
+# ====================================================
+cat > 04_sr_arg.py3 <<'PY'
+#!/usr/bin/env python3
+import sys
+from scapy.all import sr1, IP, ICMP
+
+if len(sys.argv) != 2:
+    print("Usage: {} <ip>".format(sys.argv[0]))
+    sys.exit(1)
+
+dst = sys.argv[1]
+p = sr1(IP(dst=dst)/ICMP(), timeout=1)
+if p:
+    p.show()
+else:
+    print("Geen antwoord van", dst)
+PY
+
+# ====================================================
+# OEF 5 - ARP PAKKET SNIFFEN + PRN CALLBACK
+# Opdracht: Sniff ARP-pakket en toon velden (psrc/pdst)
+# Bestand: 05_sniff_arp.py3
+# Run: chmod +x 05_sniff_arp.py3 && sudo ./05_sniff_arp.py3
+# Test: van andere VM: ping -c 1 <ander-ip> om ARP uit te lokken
+# ====================================================
+cat > 05_sniff_arp.py3 <<'PY'
+#!/usr/bin/env python3
+from scapy.all import sniff
+
+def analyze(p):
+    p.show()
+    try:
+        print(p.sprintf("ARP SRC adres %ARP.psrc% DST adres %ARP.pdst%"))
+    except:
+        pass
+
+packet = sniff(filter="arp", prn=analyze, count=1, timeout=10)
+print("Gevonden packet object:", packet)
+PY
+
+# ====================================================
+# OEF 6 - PING RANGE (scan netwerk / range)
+# Opdracht: Ping een subnet of range en toon welke hosts antwoorden (HTML output)
+# Bestand: 06_pingrange.py3
+# Run: chmod +x 06_pingrange.py3 && sudo ./06_pingrange.py3 192.168.56.0/24
+# ====================================================
+cat > 06_pingrange.py3 <<'PY'
+#!/usr/bin/env python3
+import sys, logging
+from scapy.all import sr, IP, ICMP
+
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
+
+if len(sys.argv) != 2:
+    print("Usage: {} <network or range>".format(sys.argv[0]))
+    print("  eg: {} 192.168.56.0/24".format(sys.argv[0]))
+    print("  eg: {} 192.168.56.101-103".format(sys.argv[0]))
+    sys.exit(1)
+
+target = sys.argv[1]
+ans, unans = sr(IP(dst=target)/ICMP(), timeout=1)
+print("<html><ol>")
+for s, r in ans:
+    print(r.sprintf("<li>received %IP.src% %ICMP.type%</li>"))
+print("</ol></html>")
+PY
+
+# ====================================================
+# OEF 7 - GRAFISCHE TRACEROUTE (graphviz nodig)
+# Opdracht: traceroute naar host en exporteer grafiek (tracert.png)
+# Bestand: 07_traceroute.py3
+# Run: chmod +x 07_traceroute.py3 && sudo ./07_traceroute.py3
+# ====================================================
+cat > 07_traceroute.py3 <<'PY'
+#!/usr/bin/env python3
+from scapy.all import traceroute
+
+print("##### traceroute with graph output #####")
+res, unans = traceroute(["www.kdg.be"], dport=[80,443], maxttl=20, retry=-2)
+res.graph(target="tracert.png")
+print("Grafiek opgeslagen als tracert.png")
+PY
+
+# ====================================================
+# OEF 8 - DHCP DISCOVERY (vind DHCP servers)
+# Opdracht: Stuur DHCP DISCOVER en druk responses (DHCP servers) af.
+# Bestand: 08_dhcp_discover.py3
+# Run: chmod +x 08_dhcp_discover.py3 && sudo ./08_dhcp_discover.py3
+# Pas iface variabele indien nodig (bv "enp0s8")
+# ====================================================
+cat > 08_dhcp_discover.py3 <<'PY'
+#!/usr/bin/env python3
+from scapy.all import Ether, IP, UDP, BOOTP, DHCP, srp, conf
+import sys
+
+# optioneel: zet hier jouw interface naam, bv "enp0s8"
+iface = None
+
+# bouw DHCP DISCOVER (laag2 broadcast)
+discover = (Ether(dst="ff:ff:ff:ff:ff:ff")/
+            IP(src="0.0.0.0", dst="255.255.255.255")/
+            UDP(sport=68, dport=67)/
+            BOOTP(chaddr=b'\x00\x11\x22\x33\x44\x55')/
+            DHCP(options=[("message-type", "discover"), "end"]))
+
+ans = srp(discover, timeout=5, iface=iface, verbose=1)[0]
+for s, r in ans:
+    if r.haslayer(DHCP):
+        print("DHCP server gevonden:", r[IP].src)
+        print("DHCP options:", r[DHCP].options)
+PY
+
+# ====================================================
+# OEF 9a - XMAS SCAN (eenvoudige versie)
+# Opdracht: Implementeer XMAS scan, vergelijk met nmap -sX
+# Bestand: 09_xmas_scan.py3
+# Run: chmod +x 09_xmas_scan.py3 && sudo ./09_xmas_scan.py3
+# Pas TARGET/PORTS aan
+# ====================================================
+cat > 09_xmas_scan.py3 <<'PY'
+#!/usr/bin/env python3
+from scapy.all import IP, TCP, sr
+import datetime
+
+TARGET = "192.168.56.101"   # pas aan
+PORTS = [22, 23, 80, 443]   # pas aan
+
+start = datetime.datetime.now()
+tcpflags = "FPU"  # XMAS (FIN, PSH, URG)
+
+ans, unans = sr(IP(dst=TARGET)/TCP(dport=PORTS, flags=tcpflags), timeout=2)
+print("Datum/tijd:", start.strftime("%Y-%m-%d %H:%M:%S"))
+print("Elapsed:", datetime.datetime.now() - start)
+
+for s, r in ans:
+    try:
+        print("Reply van", r[IP].src, "poort", r[TCP].sport, "reply flags:", r[TCP].flags)
+    except:
+        print("Onverwachte reply:", r.summary())
+# Onbeantwoorde poorten in 'unans' kunnen open|filtered impliceren (zoals nmap)
+PY
+
+# ====================================================
+# OEF 9b - SYN SCAN (eenvoudige versie)
+# Opdracht: Implementeer SYN scan, vergelijk met nmap -sS
+# Bestand: 10_syn_scan.py3
+# Run: chmod +x 10_syn_scan.py3 && sudo ./10_syn_scan.py3
+# Pas TARGET/PORTS aan
+# ====================================================
+cat > 10_syn_scan.py3 <<'PY'
+#!/usr/bin/env python3
+from scapy.all import IP, TCP, sr
+import datetime
+
+TARGET = "192.168.56.101"   # pas aan
+PORTS = [22, 23, 80, 443]   # pas aan
+
+start = datetime.datetime.now()
+ans, unans = sr(IP(dst=TARGET)/TCP(dport=PORTS, flags="S"), timeout=2)
+print("Datum/tijd:", start.strftime("%Y-%m-%d %H:%M:%S"))
+print("Elapsed:", datetime.datetime.now() - start)
+
+for s, r in ans:
+    if r.haslayer(TCP):
+        flags = r[TCP].flags
+        print(f"Port {r[TCP].sport} reply flags: {flags}")
+    else:
+        print("Onverwachte reply:", r.summary())
+PY
+
+# ====================================================
+# OEF 10 - PCAP SCHRIJVEN
+# Opdracht: Sniff 10 pakketten, schrijf naar pcap en open in Wireshark
+# Bestand: 11_write_pcap.py3
+# Run: chmod +x 11_write_pcap.py3 && sudo ./11_write_pcap.py3 testlog.pcap
+# ====================================================
+cat > 11_write_pcap.py3 <<'PY'
+#!/usr/bin/env python3
+import sys, os
+from scapy.all import sniff, wrpcap
+
+if len(sys.argv) != 2:
+    print("Usage: {} <output.pcap>".format(sys.argv[0]))
+    sys.exit(1)
+
+outfile = sys.argv[1]
+print("Sniff 10 packets...")
+packets = sniff(count=10)
+wrpcap(outfile, packets)
+print("Saved to", outfile)
+
+try:
+    os.system("wireshark {} &".format(outfile))
+except Exception as e:
+    print("Kan wireshark niet openen:", e)
+PY
+
+# ====================================================
+# Einde - klaar om uit te voeren
+# ====================================================
+echo "Alle bestanden aangemaakt. Maak ze uitvoerbaar met: chmod +x *.py3"
+echo "Run de scripts met sudo waar nodig, bv: sudo ./01_sniff.py3"
