@@ -1,0 +1,710 @@
+REF: http://wiki.python.org/moin/BaseHttpServer
+https://docs.python.org/3/library/http.server.html
+http://easygui.sourceforge.net/tutorial.html
+ 
+Basis webserver
+Pas de Voorbeeldcode van de basisserver3.py aan en start de webserver op als gewone gebruiker (neem poort 1234) met python3.
+Test de webserver uit.
+ 
+Voer nu achtereenvolgens volgende aanpassingen uit in de code:
+1. Zorg ervoor dat je webserver draait op 127.0.0.1
+2. Zorg ervoor dat de webserver een .html bestand kan openen. Bv met the method "open".
+Voorzie hiervoor bv het bestand index.html. Test uit met lynx http://127.0.0.1:1234/index.html
+
+ubuntu@ubuntu:~$ sudo apt update && sudo apt install -y python3 lynx
+Hit:1 http://ports.ubuntu.com/ubuntu-ports jammy InRelease
+Hit:2 http://ports.ubuntu.com/ubuntu-ports jammy-updates InRelease
+Hit:3 http://ports.ubuntu.com/ubuntu-ports jammy-backports InRelease
+Hit:4 http://ports.ubuntu.com/ubuntu-ports jammy-security InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+482 packages can be upgraded. Run 'apt list --upgradable' to see them.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  libpython3-stdlib lynx-common python3-minimal
+Suggested packages:
+  python3-doc python3-tk python3-venv
+The following NEW packages will be installed:
+  lynx lynx-common
+The following packages will be upgraded:
+  libpython3-stdlib python3 python3-minimal
+3 upgraded, 2 newly installed, 0 to remove and 479 not upgraded.
+Need to get 1773 kB of archives.
+After this operation, 5608 kB of additional disk space will be used.
+Get:1 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 python3-minimal arm64 3.10.6-1~22.04.1 [24.3 kB]
+Get:2 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 python3 arm64 3.10.6-1~22.04.1 [22.8 kB]
+Get:3 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 libpython3-stdlib arm64 3.10.6-1~22.04.1 [6812 B]
+Get:4 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 lynx-common all 2.9.0dev.10-1 [1024 kB]
+Get:5 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 lynx arm64 2.9.0dev.10-1 [695 kB]
+Fetched 1773 kB in 1s (1562 kB/s)    
+debconf: delaying package configuration, since apt-utils is not installed
+(Reading database ... 159695 files and directories currently installed.)
+Preparing to unpack .../python3-minimal_3.10.6-1~22.04.1_arm64.deb ...
+Unpacking python3-minimal (3.10.6-1~22.04.1) over (3.10.6-1~22.04) ...
+Setting up python3-minimal (3.10.6-1~22.04.1) ...
+(Reading database ... 159695 files and directories currently installed.)
+Preparing to unpack .../python3_3.10.6-1~22.04.1_arm64.deb ...
+running python pre-rtupdate hooks for python3.10...
+Unpacking python3 (3.10.6-1~22.04.1) over (3.10.6-1~22.04) ...
+Preparing to unpack .../libpython3-stdlib_3.10.6-1~22.04.1_arm64.deb ...
+Unpacking libpython3-stdlib:arm64 (3.10.6-1~22.04.1) over (3.10.6-1~22.04) ...
+Selecting previously unselected package lynx-common.
+Preparing to unpack .../lynx-common_2.9.0dev.10-1_all.deb ...
+Unpacking lynx-common (2.9.0dev.10-1) ...
+Selecting previously unselected package lynx.
+Preparing to unpack .../lynx_2.9.0dev.10-1_arm64.deb ...
+Unpacking lynx (2.9.0dev.10-1) ...
+Setting up lynx-common (2.9.0dev.10-1) ...
+Setting up lynx (2.9.0dev.10-1) ...
+update-alternatives: using /usr/bin/lynx to provide /usr/bin/www-browser (www-br
+owser) in auto mode
+update-alternatives: warning: skip creation of /usr/share/man/man1/www-browser.1
+.gz because associated file /usr/share/man/man1/lynx.1.gz (of link group www-bro
+wser) doesn't exist
+Setting up libpython3-stdlib:arm64 (3.10.6-1~22.04.1) ...
+Setting up python3 (3.10.6-1~22.04.1) ...
+running python rtupdate hooks for python3.10...
+running python post-rtupdate hooks for python3.10...
+Processing triggers for mailcap (3.70+nmu1ubuntu1) ...
+Processing triggers for man-db (2.10.2-1) ...
+debconf: unable to initialize frontend: Dialog
+debconf: (No usable dialog-like program is installed, so the dialog based frontend cannot be used. at /usr/share/perl5/Debconf/FrontEnd/Dialog.pm line 78.)
+debconf: falling back to frontend: Readline
+Scanning processes...                                                           
+Scanning linux images...                                                        
+
+Running kernel seems to be up-to-date.
+
+No services need to be restarted.
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+ubuntu@ubuntu:~$ cd ~
+ubuntu@ubuntu:~$ mkdir webserver
+ubuntu@ubuntu:~$ cd webserver
+ubuntu@ubuntu:~/webserver$ cd webserver
+bash: cd: webserver: No such file or directory
+ubuntu@ubuntu:~/webserver$ vi basisserver3-1.py
+ubuntu@ubuntu:~/webserver$ cat basisserver3-1.py 
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+# Handler voor inkomende HTTP requests
+class MyHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        # Als gebruiker /index.html vraagt
+        if self.path == "/index.html" or self.path == "/":
+            try:
+                # Open het HTML-bestand en lees de inhoud
+                with open("index.html", "r") as f:
+                    content = f.read()
+
+                # Stuur een succesvolle HTTP response terug
+                self.send_response(200)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                self.wfile.write(content.encode())
+
+            except FileNotFoundError:
+                self.send_error(404, "File not found")
+
+        else:
+            self.send_error(404, "File not found")
+
+# Webserver starten op 127.0.0.1:1234
+def run():
+    server_address = ("127.0.0.1", 1234)
+    httpd = HTTPServer(server_address, MyHandler)
+    print("Server draait op http://127.0.0.1:1234")
+    httpd.serve_forever()
+
+if __name__ == "__main__":
+    run()
+
+ubuntu@ubuntu:~/webserver$ 
+
+3. Een html bestand heeft als mimetype (en voor een browser als Content-type) text/html.
+Gebruik nu "import mimetypes" om ook andere content dan HTML te voorzien.
+Test uit met bv lynx http://127.0.0.1:1234/index.txt en lynx http://127.0.0.1:1234/image.jpg.
+
+4. Kijk na of de client vanuit de localhost komt. Als dit niet het geval is geef je een 404 error boodschap.
+
+ubuntu@ubuntu:~/webserver$ vi basisserver3-1.py
+ubuntu@ubuntu:~/webserver$ rm basisserver3-1.py 
+ubuntu@ubuntu:~/webserver$ touch basisserver3-1.py
+ubuntu@ubuntu:~/webserver$ vi basisserver3-1.py 
+ubuntu@ubuntu:~/webserver$ python3 basisserver3-1.py
+Server draait op http://127.0.0.1:1234
+127.0.0.1 - - [14/Oct/2025 08:22:13] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Oct/2025 08:22:15] "GET /index.txt HTTP/1.1" 200 -
+^CTraceback (most recent call last):
+  File "/home/ubuntu/webserver/basisserver3-1.py", line 48, in <module>
+    run()
+  File "/home/ubuntu/webserver/basisserver3-1.py", line 45, in run
+    httpd.serve_forever()
+  File "/usr/lib/python3.10/socketserver.py", line 232, in serve_forever
+    ready = selector.select(poll_interval)
+  File "/usr/lib/python3.10/selectors.py", line 416, in select
+    fd_event_list = self._selector.poll(timeout)
+KeyboardInterrupt
+
+ubuntu@ubuntu:~/webserver$ cat basisserver3-1.py 
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import mimetypes
+import os
+
+class MyHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        # Client-IP controleren (voor stap 4)
+        client_ip = self.client_address[0]
+        if client_ip != "127.0.0.1":
+            self.send_error(404, f"Access denied for {client_ip}")
+            return
+
+        # Bestand bepalen
+        filename = self.path.strip("/")
+        if filename == "":
+            filename = "index.html"
+
+        # Controleren of bestand bestaat
+        if os.path.exists(filename):
+            # MIME-type bepalen
+            mime_type, _ = mimetypes.guess_type(filename)
+            if mime_type is None:
+                mime_type = "application/octet-stream"
+
+            try:
+                with open(filename, "rb") as f:
+                    content = f.read()
+
+                # Bestand terugsturen
+                self.send_response(200)
+                self.send_header("Content-type", mime_type)
+                self.end_headers()
+                self.wfile.write(content)
+
+            except Exception as e:
+                self.send_error(500, f"Server error: {e}")
+
+        else:
+            self.send_error(404, "File not found")
+
+def run():
+    server_address = ("127.0.0.1", 1234)
+    httpd = HTTPServer(server_address, MyHandler)
+    print("Server draait op http://127.0.0.1:1234")
+    httpd.serve_forever()
+
+if __name__ == "__main__":
+    run()
+
+ubuntu@ubuntu:~/webserver$ 
+
+5. Installeer als root de psutil module
+Zorg nu dat je met behulp van deze module bij het oproepen van ps.cgi een proceslijst krijgt in je browser.
+
+ubuntu@ubuntu:~/webserver$ sudo apt install -y python3-pip
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following packages were automatically installed and are no longer required:
+  libwpe-1.0-1 libwpebackend-fdo-1.0-1
+Use 'sudo apt autoremove' to remove them.
+The following additional packages will be installed:
+  build-essential cpp-11 dpkg-dev fakeroot g++ g++-11 gcc gcc-11 gcc-11-base
+  gcc-12-base javascript-common libalgorithm-diff-perl
+  libalgorithm-diff-xs-perl libalgorithm-merge-perl libasan6 libatomic1
+  libc-dev-bin libc-devtools libc6 libc6-dbg libc6-dev libcc1-0 libcrypt-dev
+  libdpkg-perl libexpat1 libexpat1-dev libfakeroot libfile-fcntllock-perl
+  libgcc-11-dev libgcc-s1 libgomp1 libhwasan0 libitm1 libjs-jquery
+  libjs-sphinxdoc libjs-underscore liblsan0 libnsl-dev libpython3-dev
+  libpython3.10-dev libstdc++-11-dev libstdc++6 libtirpc-dev libtsan0
+  libubsan1 linux-libc-dev lto-disabled-list make manpages manpages-dev
+  python3-dev python3-wheel python3.10-dev rpcsvc-proto zlib1g-dev
+Suggested packages:
+  gcc-11-locales debian-keyring gcc-11-doc gcc-multilib autoconf automake
+  libtool flex bison gcc-doc apache2 | lighttpd | httpd glibc-doc git bzr
+  libstdc++-11-doc make-doc
+Recommended packages:
+  libnss-nis libnss-nisplus
+The following NEW packages will be installed:
+  build-essential dpkg-dev fakeroot g++ g++-11 gcc gcc-11 javascript-common
+  libalgorithm-diff-perl libalgorithm-diff-xs-perl libalgorithm-merge-perl
+  libasan6 libc-dev-bin libc-devtools libc6-dev libcc1-0 libcrypt-dev
+  libdpkg-perl libexpat1-dev libfakeroot libfile-fcntllock-perl libgcc-11-dev
+  libhwasan0 libitm1 libjs-jquery libjs-sphinxdoc libjs-underscore liblsan0
+  libnsl-dev libpython3-dev libpython3.10-dev libstdc++-11-dev libtirpc-dev
+  libtsan0 libubsan1 linux-libc-dev lto-disabled-list make manpages
+  manpages-dev python3-dev python3-pip python3-wheel python3.10-dev
+  rpcsvc-proto zlib1g-dev
+The following packages will be upgraded:
+  cpp-11 gcc-11-base gcc-12-base libatomic1 libc6 libc6-dbg libexpat1
+  libgcc-s1 libgomp1 libstdc++6
+10 upgraded, 46 newly installed, 0 to remove and 369 not upgraded.
+Need to get 57.6 MB/80.6 MB of archives.
+After this operation, 194 MB of additional disk space will be used.
+Get:1 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 manpages all 5.10-1ubuntu1 [1375 kB]
+Get:2 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 libc-dev-bin arm64 2.35-0ubuntu3.11 [19.7 kB]
+Get:3 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 linux-libc-dev arm64 5.15.0-157.167 [1306 kB]
+Get:4 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 libcrypt-dev arm64 1:4.4.27-1 [119 kB]
+Get:5 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 rpcsvc-proto arm64 1.4.2-0ubuntu6 [65.4 kB]
+Get:6 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 libtirpc-dev arm64 1.3.2-2ubuntu0.1 [199 kB]
+Get:7 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 libnsl-dev arm64 1.3.0-2build2 [72.1 kB]
+Get:8 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 libc6-dev arm64 2.35-0ubuntu3.11 [1548 kB]
+Get:9 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 libcc1-0 arm64 12.3.0-1ubuntu1~22.04.2 [45.1 kB]
+Get:10 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 libitm1 arm64 12.3.0-1ubuntu1~22.04.2 [28.5 kB]
+Get:11 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 libasan6 arm64 11.4.0-1ubuntu1~22.04.2 [2236 kB]
+Get:12 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 liblsan0 arm64 12.3.0-1ubuntu1~22.04.2 [1038 kB]
+Get:13 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 libtsan0 arm64 11.4.0-1ubuntu1~22.04.2 [2239 kB]
+Get:14 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 libubsan1 arm64 12.3.0-1ubuntu1~22.04.2 [967 kB]
+Get:15 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 libhwasan0 arm64 12.3.0-1ubuntu1~22.04.2 [1120 kB]
+Get:16 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 libgcc-11-dev arm64 11.4.0-1ubuntu1~22.04.2 [1145 kB]
+Get:17 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 gcc-11 arm64 11.4.0-1ubuntu1~22.04.2 [19.5 MB]
+Get:18 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 gcc arm64 4:11.2.0-1ubuntu1 [5128 B]
+Get:19 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 libstdc++-11-dev arm64 11.4.0-1ubuntu1~22.04.2 [2088 kB]
+Get:20 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 g++-11 arm64 11.4.0-1ubuntu1~22.04.2 [11.2 MB]
+Get:21 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 g++ arm64 4:11.2.0-1ubuntu1 [1394 B]
+Get:22 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 make arm64 4.3-4.1build1 [177 kB]
+Get:23 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 libdpkg-perl all 1.21.1ubuntu2.6 [237 kB]
+Get:24 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 lto-disabled-list all 24 [12.5 kB]
+Get:25 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 dpkg-dev all 1.21.1ubuntu2.6 [922 kB]
+Get:26 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 build-essential arm64 12.9ubuntu3 [4740 B]
+Get:27 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 libfakeroot arm64 1.28-1ubuntu1 [31.5 kB]
+Get:28 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 fakeroot arm64 1.28-1ubuntu1 [60.5 kB]
+Get:29 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 javascript-common all 11+nmu1 [5936 B]
+Get:30 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 libalgorithm-diff-perl all 1.201-1 [41.8 kB]
+Get:31 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 libalgorithm-diff-xs-perl arm64 0.04-6build3 [11.7 kB]
+Get:32 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 libalgorithm-merge-perl all 0.08-3 [12.0 kB]
+Get:33 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 libc-devtools arm64 2.35-0ubuntu3.11 [27.8 kB]
+Get:34 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 libexpat1-dev arm64 2.4.7-1ubuntu0.6 [130 kB]
+Get:35 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 libfile-fcntllock-perl arm64 0.22-3build7 [33.7 kB]
+Get:36 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 libjs-jquery all 3.6.0+dfsg+~3.5.13-1 [321 kB]
+Get:37 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 libjs-underscore all 1.13.2~dfsg-2 [118 kB]
+Get:38 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 libjs-sphinxdoc all 4.3.2-1 [139 kB]
+Get:39 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 zlib1g-dev arm64 1:1.2.11.dfsg-2ubuntu9.2 [163 kB]
+Get:40 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 libpython3.10-dev arm64 3.10.12-1~22.04.11 [4665 kB]
+Get:41 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 libpython3-dev arm64 3.10.6-1~22.04.1 [7064 B]
+Get:42 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 manpages-dev all 5.10-1ubuntu1 [2309 kB]
+Get:43 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 python3.10-dev arm64 3.10.12-1~22.04.11 [508 kB]
+Get:44 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 python3-dev arm64 3.10.6-1~22.04.1 [26.0 kB]
+Get:45 http://ports.ubuntu.com/ubuntu-ports jammy-updates/universe arm64 python3-wheel all 0.37.1-2ubuntu0.22.04.1 [32.0 kB]
+Get:46 http://ports.ubuntu.com/ubuntu-ports jammy-updates/universe arm64 python3-pip all 22.0.2+dfsg-1ubuntu0.7 [1306 kB]
+Fetched 57.6 MB in 5s (11.8 MB/s)         
+debconf: delaying package configuration, since apt-utils is not installed
+(Reading database ... 159811 files and directories currently installed.)
+Preparing to unpack .../libc6-dbg_2.35-0ubuntu3.11_arm64.deb ...
+Unpacking libc6-dbg:arm64 (2.35-0ubuntu3.11) over (2.35-0ubuntu3.4) ...
+Preparing to unpack .../libatomic1_12.3.0-1ubuntu1~22.04.2_arm64.deb ...
+Unpacking libatomic1:arm64 (12.3.0-1ubuntu1~22.04.2) over (12.3.0-1ubuntu1~22.04
+) ...
+Preparing to unpack .../gcc-12-base_12.3.0-1ubuntu1~22.04.2_arm64.deb ...
+Unpacking gcc-12-base:arm64 (12.3.0-1ubuntu1~22.04.2) over (12.3.0-1ubuntu1~22.0
+4) ...
+Setting up gcc-12-base:arm64 (12.3.0-1ubuntu1~22.04.2) ...
+(Reading database ... 159819 files and directories currently installed.)
+Preparing to unpack .../libstdc++6_12.3.0-1ubuntu1~22.04.2_arm64.deb ...
+Unpacking libstdc++6:arm64 (12.3.0-1ubuntu1~22.04.2) over (12.3.0-1ubuntu1~22.04
+) ...
+Setting up libstdc++6:arm64 (12.3.0-1ubuntu1~22.04.2) ...
+(Reading database ... 159819 files and directories currently installed.)
+Preparing to unpack .../libgomp1_12.3.0-1ubuntu1~22.04.2_arm64.deb ...
+Unpacking libgomp1:arm64 (12.3.0-1ubuntu1~22.04.2) over (12.3.0-1ubuntu1~22.04) 
+...
+Preparing to unpack .../libgcc-s1_12.3.0-1ubuntu1~22.04.2_arm64.deb ...
+Unpacking libgcc-s1:arm64 (12.3.0-1ubuntu1~22.04.2) over (12.3.0-1ubuntu1~22.04)
+ ...
+Setting up libgcc-s1:arm64 (12.3.0-1ubuntu1~22.04.2) ...
+(Reading database ... 159819 files and directories currently installed.)
+Preparing to unpack .../libc6_2.35-0ubuntu3.11_arm64.deb ...
+debconf: unable to initialize frontend: Dialog
+debconf: (No usable dialog-like program is installed, so the dialog based fronte
+nd cannot be used. at /usr/share/perl5/Debconf/FrontEnd/Dialog.pm line 78.)
+debconf: falling back to frontend: Readline
+Unpacking libc6:arm64 (2.35-0ubuntu3.11) over (2.35-0ubuntu3.4) ...
+Setting up libc6:arm64 (2.35-0ubuntu3.11) ...
+debconf: unable to initialize frontend: Dialog
+debconf: (No usable dialog-like program is installed, so the dialog based fronte
+nd cannot be used. at /usr/share/perl5/Debconf/FrontEnd/Dialog.pm line 78.)
+debconf: falling back to frontend: Readline
+(Reading database ... 159819 files and directories currently installed.)
+Preparing to unpack .../00-libexpat1_2.4.7-1ubuntu0.6_arm64.deb ...
+Unpacking libexpat1:arm64 (2.4.7-1ubuntu0.6) over (2.4.7-1ubuntu0.2) ...
+Selecting previously unselected package manpages.
+Preparing to unpack .../01-manpages_5.10-1ubuntu1_all.deb ...
+Unpacking manpages (5.10-1ubuntu1) ...
+Selecting previously unselected package libc-dev-bin.
+Preparing to unpack .../02-libc-dev-bin_2.35-0ubuntu3.11_arm64.deb ...
+Unpacking libc-dev-bin (2.35-0ubuntu3.11) ...
+Selecting previously unselected package linux-libc-dev:arm64.
+Preparing to unpack .../03-linux-libc-dev_5.15.0-157.167_arm64.deb ...
+Unpacking linux-libc-dev:arm64 (5.15.0-157.167) ...
+Selecting previously unselected package libcrypt-dev:arm64.
+Preparing to unpack .../04-libcrypt-dev_1%3a4.4.27-1_arm64.deb ...
+Unpacking libcrypt-dev:arm64 (1:4.4.27-1) ...
+Selecting previously unselected package rpcsvc-proto.
+Preparing to unpack .../05-rpcsvc-proto_1.4.2-0ubuntu6_arm64.deb ...
+Unpacking rpcsvc-proto (1.4.2-0ubuntu6) ...
+Selecting previously unselected package libtirpc-dev:arm64.
+Preparing to unpack .../06-libtirpc-dev_1.3.2-2ubuntu0.1_arm64.deb ...
+Unpacking libtirpc-dev:arm64 (1.3.2-2ubuntu0.1) ...
+Selecting previously unselected package libnsl-dev:arm64.
+Preparing to unpack .../07-libnsl-dev_1.3.0-2build2_arm64.deb ...
+Unpacking libnsl-dev:arm64 (1.3.0-2build2) ...
+Selecting previously unselected package libc6-dev:arm64.
+Preparing to unpack .../08-libc6-dev_2.35-0ubuntu3.11_arm64.deb ...
+Unpacking libc6-dev:arm64 (2.35-0ubuntu3.11) ...
+Preparing to unpack .../09-cpp-11_11.4.0-1ubuntu1~22.04.2_arm64.deb ...
+Unpacking cpp-11 (11.4.0-1ubuntu1~22.04.2) over (11.4.0-1ubuntu1~22.04) ...
+Preparing to unpack .../10-gcc-11-base_11.4.0-1ubuntu1~22.04.2_arm64.deb ...
+Unpacking gcc-11-base:arm64 (11.4.0-1ubuntu1~22.04.2) over (11.4.0-1ubuntu1~22.0
+4) ...
+Selecting previously unselected package libcc1-0:arm64.
+Preparing to unpack .../11-libcc1-0_12.3.0-1ubuntu1~22.04.2_arm64.deb ...
+Unpacking libcc1-0:arm64 (12.3.0-1ubuntu1~22.04.2) ...
+Selecting previously unselected package libitm1:arm64.
+Preparing to unpack .../12-libitm1_12.3.0-1ubuntu1~22.04.2_arm64.deb ...
+Unpacking libitm1:arm64 (12.3.0-1ubuntu1~22.04.2) ...
+Selecting previously unselected package libasan6:arm64.
+Preparing to unpack .../13-libasan6_11.4.0-1ubuntu1~22.04.2_arm64.deb ...
+Unpacking libasan6:arm64 (11.4.0-1ubuntu1~22.04.2) ...
+Selecting previously unselected package liblsan0:arm64.
+Preparing to unpack .../14-liblsan0_12.3.0-1ubuntu1~22.04.2_arm64.deb ...
+Unpacking liblsan0:arm64 (12.3.0-1ubuntu1~22.04.2) ...
+Selecting previously unselected package libtsan0:arm64.
+Preparing to unpack .../15-libtsan0_11.4.0-1ubuntu1~22.04.2_arm64.deb ...
+Unpacking libtsan0:arm64 (11.4.0-1ubuntu1~22.04.2) ...
+Selecting previously unselected package libubsan1:arm64.
+Preparing to unpack .../16-libubsan1_12.3.0-1ubuntu1~22.04.2_arm64.deb ...
+Unpacking libubsan1:arm64 (12.3.0-1ubuntu1~22.04.2) ...
+Selecting previously unselected package libhwasan0:arm64.
+Preparing to unpack .../17-libhwasan0_12.3.0-1ubuntu1~22.04.2_arm64.deb ...
+Unpacking libhwasan0:arm64 (12.3.0-1ubuntu1~22.04.2) ...
+Selecting previously unselected package libgcc-11-dev:arm64.
+Preparing to unpack .../18-libgcc-11-dev_11.4.0-1ubuntu1~22.04.2_arm64.deb ...
+Unpacking libgcc-11-dev:arm64 (11.4.0-1ubuntu1~22.04.2) ...
+Selecting previously unselected package gcc-11.
+Preparing to unpack .../19-gcc-11_11.4.0-1ubuntu1~22.04.2_arm64.deb ...
+Unpacking gcc-11 (11.4.0-1ubuntu1~22.04.2) ...
+Selecting previously unselected package gcc.
+Preparing to unpack .../20-gcc_4%3a11.2.0-1ubuntu1_arm64.deb ...
+Unpacking gcc (4:11.2.0-1ubuntu1) ...
+Selecting previously unselected package libstdc++-11-dev:arm64.
+Preparing to unpack .../21-libstdc++-11-dev_11.4.0-1ubuntu1~22.04.2_arm64.deb ..
+.
+Unpacking libstdc++-11-dev:arm64 (11.4.0-1ubuntu1~22.04.2) ...
+Selecting previously unselected package g++-11.
+Preparing to unpack .../22-g++-11_11.4.0-1ubuntu1~22.04.2_arm64.deb ...
+Unpacking g++-11 (11.4.0-1ubuntu1~22.04.2) ...
+Selecting previously unselected package g++.
+Preparing to unpack .../23-g++_4%3a11.2.0-1ubuntu1_arm64.deb ...
+Unpacking g++ (4:11.2.0-1ubuntu1) ...
+Selecting previously unselected package make.
+Preparing to unpack .../24-make_4.3-4.1build1_arm64.deb ...
+Unpacking make (4.3-4.1build1) ...
+Selecting previously unselected package libdpkg-perl.
+Preparing to unpack .../25-libdpkg-perl_1.21.1ubuntu2.6_all.deb ...
+Unpacking libdpkg-perl (1.21.1ubuntu2.6) ...
+Selecting previously unselected package lto-disabled-list.
+Preparing to unpack .../26-lto-disabled-list_24_all.deb ...
+Unpacking lto-disabled-list (24) ...
+Selecting previously unselected package dpkg-dev.
+Preparing to unpack .../27-dpkg-dev_1.21.1ubuntu2.6_all.deb ...
+Unpacking dpkg-dev (1.21.1ubuntu2.6) ...
+Selecting previously unselected package build-essential.
+Preparing to unpack .../28-build-essential_12.9ubuntu3_arm64.deb ...
+Unpacking build-essential (12.9ubuntu3) ...
+Selecting previously unselected package libfakeroot:arm64.
+Preparing to unpack .../29-libfakeroot_1.28-1ubuntu1_arm64.deb ...
+Unpacking libfakeroot:arm64 (1.28-1ubuntu1) ...
+Selecting previously unselected package fakeroot.
+Preparing to unpack .../30-fakeroot_1.28-1ubuntu1_arm64.deb ...
+Unpacking fakeroot (1.28-1ubuntu1) ...
+Selecting previously unselected package javascript-common.
+Preparing to unpack .../31-javascript-common_11+nmu1_all.deb ...
+Unpacking javascript-common (11+nmu1) ...
+Selecting previously unselected package libalgorithm-diff-perl.
+Preparing to unpack .../32-libalgorithm-diff-perl_1.201-1_all.deb ...
+Unpacking libalgorithm-diff-perl (1.201-1) ...
+Selecting previously unselected package libalgorithm-diff-xs-perl.
+Preparing to unpack .../33-libalgorithm-diff-xs-perl_0.04-6build3_arm64.deb ...
+Unpacking libalgorithm-diff-xs-perl (0.04-6build3) ...
+Selecting previously unselected package libalgorithm-merge-perl.
+Preparing to unpack .../34-libalgorithm-merge-perl_0.08-3_all.deb ...
+Unpacking libalgorithm-merge-perl (0.08-3) ...
+Selecting previously unselected package libc-devtools.
+Preparing to unpack .../35-libc-devtools_2.35-0ubuntu3.11_arm64.deb ...
+Unpacking libc-devtools (2.35-0ubuntu3.11) ...
+Selecting previously unselected package libexpat1-dev:arm64.
+Preparing to unpack .../36-libexpat1-dev_2.4.7-1ubuntu0.6_arm64.deb ...
+Unpacking libexpat1-dev:arm64 (2.4.7-1ubuntu0.6) ...
+Selecting previously unselected package libfile-fcntllock-perl.
+Preparing to unpack .../37-libfile-fcntllock-perl_0.22-3build7_arm64.deb ...
+Unpacking libfile-fcntllock-perl (0.22-3build7) ...
+Selecting previously unselected package libjs-jquery.
+Preparing to unpack .../38-libjs-jquery_3.6.0+dfsg+~3.5.13-1_all.deb ...
+Unpacking libjs-jquery (3.6.0+dfsg+~3.5.13-1) ...
+Selecting previously unselected package libjs-underscore.
+Preparing to unpack .../39-libjs-underscore_1.13.2~dfsg-2_all.deb ...
+Unpacking libjs-underscore (1.13.2~dfsg-2) ...
+Selecting previously unselected package libjs-sphinxdoc.
+Preparing to unpack .../40-libjs-sphinxdoc_4.3.2-1_all.deb ...
+Unpacking libjs-sphinxdoc (4.3.2-1) ...
+Selecting previously unselected package zlib1g-dev:arm64.
+Preparing to unpack .../41-zlib1g-dev_1%3a1.2.11.dfsg-2ubuntu9.2_arm64.deb ...
+Unpacking zlib1g-dev:arm64 (1:1.2.11.dfsg-2ubuntu9.2) ...
+Selecting previously unselected package libpython3.10-dev:arm64.
+Preparing to unpack .../42-libpython3.10-dev_3.10.12-1~22.04.11_arm64.deb ...
+Unpacking libpython3.10-dev:arm64 (3.10.12-1~22.04.11) ...
+Selecting previously unselected package libpython3-dev:arm64.
+Preparing to unpack .../43-libpython3-dev_3.10.6-1~22.04.1_arm64.deb ...
+Unpacking libpython3-dev:arm64 (3.10.6-1~22.04.1) ...
+Selecting previously unselected package manpages-dev.
+Preparing to unpack .../44-manpages-dev_5.10-1ubuntu1_all.deb ...
+Unpacking manpages-dev (5.10-1ubuntu1) ...
+Selecting previously unselected package python3.10-dev.
+Preparing to unpack .../45-python3.10-dev_3.10.12-1~22.04.11_arm64.deb ...
+Unpacking python3.10-dev (3.10.12-1~22.04.11) ...
+Selecting previously unselected package python3-dev.
+Preparing to unpack .../46-python3-dev_3.10.6-1~22.04.1_arm64.deb ...
+Unpacking python3-dev (3.10.6-1~22.04.1) ...
+Selecting previously unselected package python3-wheel.
+Preparing to unpack .../47-python3-wheel_0.37.1-2ubuntu0.22.04.1_all.deb ...
+Unpacking python3-wheel (0.37.1-2ubuntu0.22.04.1) ...
+Selecting previously unselected package python3-pip.
+Preparing to unpack .../48-python3-pip_22.0.2+dfsg-1ubuntu0.7_all.deb ...
+Unpacking python3-pip (22.0.2+dfsg-1ubuntu0.7) ...
+Setting up libexpat1:arm64 (2.4.7-1ubuntu0.6) ...
+Setting up javascript-common (11+nmu1) ...
+Setting up gcc-11-base:arm64 (11.4.0-1ubuntu1~22.04.2) ...
+Setting up lto-disabled-list (24) ...
+Setting up libfile-fcntllock-perl (0.22-3build7) ...
+Setting up libalgorithm-diff-perl (1.201-1) ...
+Setting up manpages (5.10-1ubuntu1) ...
+Setting up linux-libc-dev:arm64 (5.15.0-157.167) ...
+Setting up libgomp1:arm64 (12.3.0-1ubuntu1~22.04.2) ...
+Setting up python3-wheel (0.37.1-2ubuntu0.22.04.1) ...
+Setting up libfakeroot:arm64 (1.28-1ubuntu1) ...
+Setting up libasan6:arm64 (11.4.0-1ubuntu1~22.04.2) ...
+Setting up libc6-dbg:arm64 (2.35-0ubuntu3.11) ...
+Setting up fakeroot (1.28-1ubuntu1) ...
+update-alternatives: using /usr/bin/fakeroot-sysv to provide /usr/bin/fakeroot (
+fakeroot) in auto mode
+update-alternatives: warning: skip creation of /usr/share/man/man1/fakeroot.1.gz
+ because associated file /usr/share/man/man1/fakeroot-sysv.1.gz (of link group f
+akeroot) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/man1/faked.1.gz be
+cause associated file /usr/share/man/man1/faked-sysv.1.gz (of link group fakeroo
+t) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/es/man1/fakeroot.1
+.gz because associated file /usr/share/man/es/man1/fakeroot-sysv.1.gz (of link g
+roup fakeroot) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/es/man1/faked.1.gz
+ because associated file /usr/share/man/es/man1/faked-sysv.1.gz (of link group f
+akeroot) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/fr/man1/fakeroot.1
+.gz because associated file /usr/share/man/fr/man1/fakeroot-sysv.1.gz (of link g
+roup fakeroot) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/fr/man1/faked.1.gz
+ because associated file /usr/share/man/fr/man1/faked-sysv.1.gz (of link group f
+akeroot) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/sv/man1/fakeroot.1
+.gz because associated file /usr/share/man/sv/man1/fakeroot-sysv.1.gz (of link g
+roup fakeroot) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/sv/man1/faked.1.gz
+ because associated file /usr/share/man/sv/man1/faked-sysv.1.gz (of link group f
+akeroot) doesn't exist
+Setting up libtirpc-dev:arm64 (1.3.2-2ubuntu0.1) ...
+Setting up rpcsvc-proto (1.4.2-0ubuntu6) ...
+Setting up make (4.3-4.1build1) ...
+Setting up libatomic1:arm64 (12.3.0-1ubuntu1~22.04.2) ...
+Setting up python3-pip (22.0.2+dfsg-1ubuntu0.7) ...
+Setting up libdpkg-perl (1.21.1ubuntu2.6) ...
+Setting up libubsan1:arm64 (12.3.0-1ubuntu1~22.04.2) ...
+Setting up libnsl-dev:arm64 (1.3.0-2build2) ...
+Setting up libhwasan0:arm64 (12.3.0-1ubuntu1~22.04.2) ...
+Setting up libcrypt-dev:arm64 (1:4.4.27-1) ...
+Setting up libjs-jquery (3.6.0+dfsg+~3.5.13-1) ...
+Setting up libc-dev-bin (2.35-0ubuntu3.11) ...
+Setting up libalgorithm-diff-xs-perl (0.04-6build3) ...
+Setting up libcc1-0:arm64 (12.3.0-1ubuntu1~22.04.2) ...
+Setting up liblsan0:arm64 (12.3.0-1ubuntu1~22.04.2) ...
+Setting up libitm1:arm64 (12.3.0-1ubuntu1~22.04.2) ...
+Setting up libc-devtools (2.35-0ubuntu3.11) ...
+Setting up libjs-underscore (1.13.2~dfsg-2) ...
+Setting up libalgorithm-merge-perl (0.08-3) ...
+Setting up libtsan0:arm64 (11.4.0-1ubuntu1~22.04.2) ...
+Setting up cpp-11 (11.4.0-1ubuntu1~22.04.2) ...
+Setting up manpages-dev (5.10-1ubuntu1) ...
+Setting up dpkg-dev (1.21.1ubuntu2.6) ...
+Setting up libjs-sphinxdoc (4.3.2-1) ...
+Setting up libgcc-11-dev:arm64 (11.4.0-1ubuntu1~22.04.2) ...
+Setting up gcc-11 (11.4.0-1ubuntu1~22.04.2) ...
+Setting up libc6-dev:arm64 (2.35-0ubuntu3.11) ...
+Setting up gcc (4:11.2.0-1ubuntu1) ...
+Setting up libexpat1-dev:arm64 (2.4.7-1ubuntu0.6) ...
+Setting up libstdc++-11-dev:arm64 (11.4.0-1ubuntu1~22.04.2) ...
+Setting up zlib1g-dev:arm64 (1:1.2.11.dfsg-2ubuntu9.2) ...
+Setting up g++-11 (11.4.0-1ubuntu1~22.04.2) ...
+Setting up libpython3.10-dev:arm64 (3.10.12-1~22.04.11) ...
+Setting up python3.10-dev (3.10.12-1~22.04.11) ...
+Setting up g++ (4:11.2.0-1ubuntu1) ...
+update-alternatives: using /usr/bin/g++ to provide /usr/bin/c++ (c++) in auto mo
+de
+update-alternatives: warning: skip creation of /usr/share/man/man1/c++.1.gz beca
+use associated file /usr/share/man/man1/g++.1.gz (of link group c++) doesn't exi
+st
+Setting up build-essential (12.9ubuntu3) ...
+Setting up libpython3-dev:arm64 (3.10.6-1~22.04.1) ...
+Setting up python3-dev (3.10.6-1~22.04.1) ...
+Processing triggers for man-db (2.10.2-1) ...
+Processing triggers for libc-bin (2.35-0ubuntu3.4) ...
+debconf: unable to initialize frontend: Dialog
+debconf: (No usable dialog-like program is installed, so the dialog based frontend cannot be used. at /usr/share/perl5/Debconf/FrontEnd/Dialog.pm line 78.)
+debconf: falling back to frontend: Readline
+Scanning processes...                                                           
+Scanning candidates...                                                          
+Scanning linux images...                                                        
+
+Running kernel seems to be up-to-date.
+
+Restarting services...
+Daemons using outdated libraries
+--------------------------------
+
+  1. accounts-daemon.service         18. qemu-guest-agent.service
+  2. avahi-daemon.service            19. rtkit-daemon.service
+  3. colord.service                  20. serial-getty@ttyAMA0.service
+  4. cron.service                    21. spice-vdagentd.service
+  5. cups-browsed.service            22. ssh.service
+  6. cups.service                    23. switcheroo-control.service
+  7. dbus.service                    24. systemd-journald.service
+  8. gdm.service                     25. systemd-logind.service
+  9. gdm3                            26. systemd-networkd.service
+  10. kerneloops.service             27. systemd-resolved.service
+  11. ModemManager.service           28. systemd-timesyncd.service
+  12. multipathd.service             29. systemd-udevd.service
+  13. networkd-dispatcher.service    30. udisks2.service
+  14. NetworkManager.service         31. upower.service
+  15. packagekit.service             32. user@1000.service
+  16. polkit.service                 33. wpa_supplicant.service
+  17. power-profiles-daemon.service  34. none of the above
+
+(Enter the items or ranges you want to select, separated by spaces.)
+[More] 
+
+
+Which services should be restarted? 
+
+Service restarts being deferred:
+ systemctl restart ModemManager.service
+ systemctl restart NetworkManager.service
+ systemctl restart accounts-daemon.service
+ systemctl restart avahi-daemon.service
+ systemctl restart colord.service
+ systemctl restart cron.service
+ systemctl restart cups-browsed.service
+ systemctl restart cups.service
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart gdm.service
+ systemctl restart gdm3.service
+ systemctl restart kerneloops.service
+ systemctl restart multipathd.service
+ systemctl restart networkd-dispatcher.service
+ systemctl restart packagekit.service
+ systemctl restart polkit.service
+ systemctl restart power-profiles-daemon.service
+ systemctl restart qemu-guest-agent.service
+ systemctl restart rtkit-daemon.service
+ systemctl restart serial-getty@ttyAMA0.service
+ systemctl restart spice-vdagentd.service
+ systemctl restart ssh.service
+ systemctl restart switcheroo-control.service
+ systemctl restart systemd-journald.service
+ systemctl restart systemd-logind.service
+ systemctl restart systemd-networkd.service
+ systemctl restart systemd-resolved.service
+ systemctl restart systemd-timesyncd.service
+ systemctl restart systemd-udevd.service
+ systemctl restart udisks2.service
+ systemctl restart upower.service
+ systemctl restart user@1000.service
+ systemctl restart wpa_supplicant.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+
+^C
+ubuntu@ubuntu:~/webserver$ sudo pip3 install psutil
+Collecting psutil
+  Downloading psutil-7.1.0-cp36-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (293 kB)
+     \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 293.6/293.6 KB 3.9 MB/s eta 0:00:00
+Installing collected packages: psutil
+Successfully installed psutil-7.1.0
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+ubuntu@ubuntu:~/webserver$ python3 -c "import psutil; print(psutil.cpu_count())" 
+8
+ubuntu@ubuntu:~/webserver$ 
+ubuntu@ubuntu:~/webserver$ 
+
+Eenvoudige GUI:
+sudo apt-get install python3-easygui python3-pip
+pip3 install easygui
+(Opgelet: noem je bestand niet easygui.py, want dan probeert hij bij een import easygui zichzelf te importeren)
+ 
+7. Schrijf een eenvoudige grafische interface waarmee je de apache webserver kan starten en stoppen.
+(bv met easygui buttonbox een knop start en stop en exit)
+ 
+8. Vraag de status op van apache en toon deze status als tekst in de buttonbox.
+(bv de output van systemctl status apache2 | grep Active)
+
+
+Eenvoudige GUI:
+sudo apt-get install python3-easygui python3-pip
+pip3 install easygui
+(Opgelet: noem je bestand niet easygui.py, want dan probeert hij bij een import easygui zichzelf te importeren)
+ 
+7. Schrijf een eenvoudige grafische interface waarmee je de apache webserver kan starten en stoppen.
+(bv met easygui buttonbox een knop start en stop en exit)
+ 
+8. Vraag de status op van apache en toon deze status als tekst in de buttonbox.
+(bv de output van systemctl status apache2 | grep Active)
+
+ubuntu@ubuntu:~/webserver$ vi apache_gui.py
+ubuntu@ubuntu:~/webserver$ python3 apache_gui.py
+[sudo] password for ubuntu: 
+ubuntu@ubuntu:~/webserver$ cat apache_gui.py 
+import os
+import easygui
+
+def apache_status():
+    result = os.popen("systemctl status apache2 | grep Active").read()
+    return result.strip() if result else "Geen status gevonden."
+
+def main():
+    while True:
+        status = apache_status()
+        choice = easygui.buttonbox(
+            msg=f"Apache status:\n\n{status}\n\nWat wil je doen?",
+            title="Apache Control Panel",
+            choices=["Start Apache", "Stop Apache", "Exit"]
+        )
+
+        if choice == "Start Apache":
+            os.system("sudo systemctl start apache2")
+        elif choice == "Stop Apache":
+            os.system("sudo systemctl stop apache2")
+        elif choice == "Exit":
+            break
+
+if __name__ == "__main__":
+    main()
+
+ubuntu@ubuntu:~/webserver$ 
