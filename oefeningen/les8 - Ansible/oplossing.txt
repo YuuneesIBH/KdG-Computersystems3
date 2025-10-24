@@ -1,0 +1,534 @@
+STAP 1 --> Voorbereiding
+ubuntu@ubuntu:~$ sudo apt install ansible openssh-server ansible-lint -y
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+openssh-server is already the newest version (1:8.9p1-3ubuntu0.13).
+openssh-server set to manually installed.
+The following packages were automatically installed and are no longer required:
+  libwpe-1.0-1 libwpebackend-fdo-1.0-1
+Use 'sudo apt autoremove' to remove them.
+The following additional packages will be installed:
+  ieee-data python3-argcomplete python3-bracex python3-commonmark
+  python3-dnspython python3-enrich python3-jmespath python3-kerberos
+  python3-libcloud python3-netaddr python3-ntlm-auth python3-packaging
+  python3-pathspec python3-pbr python3-pycryptodome python3-pygments
+  python3-requests-kerberos python3-requests-ntlm python3-requests-toolbelt
+  python3-rich python3-ruamel.yaml python3-ruamel.yaml.clib python3-selinux
+  python3-simplejson python3-tenacity python3-wcmatch python3-winrm
+  python3-xmltodict yamllint
+Suggested packages:
+  cowsay sshpass python3-sniffio python3-trio ipython3 python-netaddr-docs
+  python-pygments-doc ttf-bitstream-vera python-tenacity-doc
+The following NEW packages will be installed:
+  ansible ansible-lint ieee-data python3-argcomplete python3-bracex
+  python3-commonmark python3-dnspython python3-enrich python3-jmespath
+  python3-kerberos python3-libcloud python3-netaddr python3-ntlm-auth
+  python3-packaging python3-pathspec python3-pbr python3-pycryptodome
+  python3-pygments python3-requests-kerberos python3-requests-ntlm
+  python3-requests-toolbelt python3-rich python3-ruamel.yaml
+  python3-ruamel.yaml.clib python3-selinux python3-simplejson python3-tenacity
+  python3-wcmatch python3-winrm python3-xmltodict yamllint
+0 upgraded, 31 newly installed, 0 to remove and 306 not upgraded.
+Need to get 24.3 MB of archives.
+After this operation, 251 MB of additional disk space will be used.
+Get:1 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 python3-packaging all 21.3-1 [30.7 kB]
+Get:2 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 python3-pycryptodome arm64 3.11.0+dfsg1-3ubuntu0.1 [1034 kB]
+Get:3 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 python3-dnspython all 2.1.0-1ubuntu1 [123 kB]
+Get:4 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 ieee-data all 20210605.1 [1887 kB]
+Get:5 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 python3-netaddr all 0.8.0-2 [309 kB]
+Get:6 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 ansible all 2.10.7+merged+base+2.10.8+dfsg-1 [17.5 MB]
+Get:7 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 python3-commonmark all 0.9.1-3 [43.7 kB]
+Get:8 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 python3-pygments all 2.11.2+dfsg-2ubuntu0.1 [750 kB]
+Get:9 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 python3-rich all 11.2.0-1 [177 kB]
+Get:10 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 python3-enrich all 1.2.6-2 [6488 B]
+Get:11 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 python3-ruamel.yaml.clib arm64 0.2.6-1build1 [126 kB]
+Get:12 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 python3-ruamel.yaml all 0.17.16-1 [86.3 kB]
+Get:13 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 python3-pbr all 5.8.0-0ubuntu1 [66.5 kB]
+Get:14 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 python3-tenacity all 6.3.1-3 [15.3 kB]
+Get:15 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 python3-bracex all 2.2.1-2 [10.5 kB]
+Get:16 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 python3-wcmatch all 8.3-2 [32.1 kB]
+Get:17 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 python3-pathspec all 0.9.0-1 [28.8 kB]
+Get:18 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 yamllint all 1.26.3-1 [36.9 kB]
+Get:19 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 ansible-lint all 5.4.0-2 [86.3 kB]
+Get:20 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 python3-argcomplete all 1.8.1-1.5 [27.2 kB]
+Get:21 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 python3-jmespath all 0.10.0-1 [21.7 kB]
+Get:22 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 python3-kerberos arm64 1.1.14-3.1build5 [22.6 kB]
+Get:23 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 python3-simplejson arm64 3.17.6-1build1 [54.2 kB]
+Get:24 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 python3-libcloud all 3.2.0-2 [1554 kB]
+Get:25 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 python3-ntlm-auth all 1.4.0-1 [20.4 kB]
+Get:26 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 python3-requests-kerberos all 0.12.0-2 [11.9 kB]
+Get:27 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 python3-requests-ntlm all 1.1.0-1.1 [6160 B]
+Get:28 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 python3-requests-toolbelt all 0.9.1-1 [38.0 kB]
+Get:29 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 python3-selinux arm64 3.3-1build2 [154 kB]
+Get:30 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 python3-xmltodict all 0.12.0-2 [12.6 kB]
+Get:31 http://ports.ubuntu.com/ubuntu-ports jammy/universe arm64 python3-winrm all 0.3.0-2 [21.7 kB]
+Fetched 24.3 MB in 5s (5151 kB/s)        
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package python3-packaging.
+(Reading database ... 167521 files and directories currently installed.)
+Preparing to unpack .../00-python3-packaging_21.3-1_all.deb ...
+Unpacking python3-packaging (21.3-1) ...
+Selecting previously unselected package python3-pycryptodome.
+Preparing to unpack .../01-python3-pycryptodome_3.11.0+dfsg1-3ubuntu0.1_arm64.de
+b ...
+Unpacking python3-pycryptodome (3.11.0+dfsg1-3ubuntu0.1) ...
+Selecting previously unselected package python3-dnspython.
+Preparing to unpack .../02-python3-dnspython_2.1.0-1ubuntu1_all.deb ...
+Unpacking python3-dnspython (2.1.0-1ubuntu1) ...
+Selecting previously unselected package ieee-data.
+Preparing to unpack .../03-ieee-data_20210605.1_all.deb ...
+Unpacking ieee-data (20210605.1) ...
+Selecting previously unselected package python3-netaddr.
+Preparing to unpack .../04-python3-netaddr_0.8.0-2_all.deb ...
+Unpacking python3-netaddr (0.8.0-2) ...
+Selecting previously unselected package ansible.
+Preparing to unpack .../05-ansible_2.10.7+merged+base+2.10.8+dfsg-1_all.deb ...
+Unpacking ansible (2.10.7+merged+base+2.10.8+dfsg-1) ...
+Selecting previously unselected package python3-commonmark.
+Preparing to unpack .../06-python3-commonmark_0.9.1-3_all.deb ...
+Unpacking python3-commonmark (0.9.1-3) ...
+Selecting previously unselected package python3-pygments.
+Preparing to unpack .../07-python3-pygments_2.11.2+dfsg-2ubuntu0.1_all.deb ...
+Unpacking python3-pygments (2.11.2+dfsg-2ubuntu0.1) ...
+Selecting previously unselected package python3-rich.
+Preparing to unpack .../08-python3-rich_11.2.0-1_all.deb ...
+Unpacking python3-rich (11.2.0-1) ...
+Selecting previously unselected package python3-enrich.
+Preparing to unpack .../09-python3-enrich_1.2.6-2_all.deb ...
+Unpacking python3-enrich (1.2.6-2) ...
+Selecting previously unselected package python3-ruamel.yaml.clib:arm64.
+Preparing to unpack .../10-python3-ruamel.yaml.clib_0.2.6-1build1_arm64.deb ...
+Unpacking python3-ruamel.yaml.clib:arm64 (0.2.6-1build1) ...
+Selecting previously unselected package python3-ruamel.yaml.
+Preparing to unpack .../11-python3-ruamel.yaml_0.17.16-1_all.deb ...
+Unpacking python3-ruamel.yaml (0.17.16-1) ...
+Selecting previously unselected package python3-pbr.
+Preparing to unpack .../12-python3-pbr_5.8.0-0ubuntu1_all.deb ...
+Unpacking python3-pbr (5.8.0-0ubuntu1) ...
+Selecting previously unselected package python3-tenacity.
+Preparing to unpack .../13-python3-tenacity_6.3.1-3_all.deb ...
+Unpacking python3-tenacity (6.3.1-3) ...
+Selecting previously unselected package python3-bracex.
+Preparing to unpack .../14-python3-bracex_2.2.1-2_all.deb ...
+Unpacking python3-bracex (2.2.1-2) ...
+Selecting previously unselected package python3-wcmatch.
+Preparing to unpack .../15-python3-wcmatch_8.3-2_all.deb ...
+Unpacking python3-wcmatch (8.3-2) ...
+Selecting previously unselected package python3-pathspec.
+Preparing to unpack .../16-python3-pathspec_0.9.0-1_all.deb ...
+Unpacking python3-pathspec (0.9.0-1) ...
+Selecting previously unselected package yamllint.
+Preparing to unpack .../17-yamllint_1.26.3-1_all.deb ...
+Unpacking yamllint (1.26.3-1) ...
+Selecting previously unselected package ansible-lint.
+Preparing to unpack .../18-ansible-lint_5.4.0-2_all.deb ...
+Unpacking ansible-lint (5.4.0-2) ...
+Selecting previously unselected package python3-argcomplete.
+Preparing to unpack .../19-python3-argcomplete_1.8.1-1.5_all.deb ...
+Unpacking python3-argcomplete (1.8.1-1.5) ...
+Selecting previously unselected package python3-jmespath.
+Preparing to unpack .../20-python3-jmespath_0.10.0-1_all.deb ...
+Unpacking python3-jmespath (0.10.0-1) ...
+Selecting previously unselected package python3-kerberos.
+Preparing to unpack .../21-python3-kerberos_1.1.14-3.1build5_arm64.deb ...
+Unpacking python3-kerberos (1.1.14-3.1build5) ...
+Selecting previously unselected package python3-simplejson.
+Preparing to unpack .../22-python3-simplejson_3.17.6-1build1_arm64.deb ...
+Unpacking python3-simplejson (3.17.6-1build1) ...
+Selecting previously unselected package python3-libcloud.
+Preparing to unpack .../23-python3-libcloud_3.2.0-2_all.deb ...
+Unpacking python3-libcloud (3.2.0-2) ...
+Selecting previously unselected package python3-ntlm-auth.
+Preparing to unpack .../24-python3-ntlm-auth_1.4.0-1_all.deb ...
+Unpacking python3-ntlm-auth (1.4.0-1) ...
+Selecting previously unselected package python3-requests-kerberos.
+Preparing to unpack .../25-python3-requests-kerberos_0.12.0-2_all.deb ...
+Unpacking python3-requests-kerberos (0.12.0-2) ...
+Selecting previously unselected package python3-requests-ntlm.
+Preparing to unpack .../26-python3-requests-ntlm_1.1.0-1.1_all.deb ...
+Unpacking python3-requests-ntlm (1.1.0-1.1) ...
+Selecting previously unselected package python3-requests-toolbelt.
+Preparing to unpack .../27-python3-requests-toolbelt_0.9.1-1_all.deb ...
+Unpacking python3-requests-toolbelt (0.9.1-1) ...
+Selecting previously unselected package python3-selinux.
+Preparing to unpack .../28-python3-selinux_3.3-1build2_arm64.deb ...
+Unpacking python3-selinux (3.3-1build2) ...
+Selecting previously unselected package python3-xmltodict.
+Preparing to unpack .../29-python3-xmltodict_0.12.0-2_all.deb ...
+Unpacking python3-xmltodict (0.12.0-2) ...
+Selecting previously unselected package python3-winrm.
+Preparing to unpack .../30-python3-winrm_0.3.0-2_all.deb ...
+Unpacking python3-winrm (0.3.0-2) ...
+Setting up python3-requests-toolbelt (0.9.1-1) ...
+Setting up python3-pbr (5.8.0-0ubuntu1) ...
+Setting up python3-ntlm-auth (1.4.0-1) ...
+Setting up python3-pycryptodome (3.11.0+dfsg1-3ubuntu0.1) ...
+Setting up python3-tenacity (6.3.1-3) ...
+Setting up python3-ruamel.yaml.clib:arm64 (0.2.6-1build1) ...
+Setting up python3-kerberos (1.1.14-3.1build5) ...
+Setting up python3-simplejson (3.17.6-1build1) ...
+Setting up python3-xmltodict (0.12.0-2) ...
+Setting up python3-pygments (2.11.2+dfsg-2ubuntu0.1) ...
+Setting up python3-packaging (21.3-1) ...
+Setting up python3-jmespath (0.10.0-1) ...
+Setting up python3-ruamel.yaml (0.17.16-1) ...
+Setting up python3-requests-kerberos (0.12.0-2) ...
+Setting up ieee-data (20210605.1) ...
+Setting up python3-dnspython (2.1.0-1ubuntu1) ...
+Setting up python3-bracex (2.2.1-2) ...
+Setting up python3-selinux (3.3-1build2) ...
+Setting up python3-argcomplete (1.8.1-1.5) ...
+Setting up python3-pathspec (0.9.0-1) ...
+Setting up python3-commonmark (0.9.1-3) ...
+Setting up python3-requests-ntlm (1.1.0-1.1) ...
+Setting up python3-rich (11.2.0-1) ...
+Setting up python3-libcloud (3.2.0-2) ...
+Setting up yamllint (1.26.3-1) ...
+Setting up python3-netaddr (0.8.0-2) ...
+Setting up python3-wcmatch (8.3-2) ...
+Setting up python3-winrm (0.3.0-2) ...
+Setting up ansible (2.10.7+merged+base+2.10.8+dfsg-1) ...
+Setting up python3-enrich (1.2.6-2) ...
+Setting up ansible-lint (5.4.0-2) ...
+Processing triggers for man-db (2.10.2-1) ...
+debconf: unable to initialize frontend: Dialog
+debconf: (No usable dialog-like program is installed, so the dialog based frontend cannot be used. at /usr/share/perl5/Debconf/FrontEnd/Dialog.pm line 78.)
+debconf: falling back to frontend: Readline
+Scanning processes...                                                           
+Scanning candidates...                                                          
+Scanning linux images...                                                        
+
+Running kernel seems to be up-to-date.
+
+Restarting services...
+Daemons using outdated libraries
+--------------------------------
+
+  1. accounts-daemon.service         19. rtkit-daemon.service
+  2. apache2.service                 20. spice-vdagentd.service
+  3. avahi-daemon.service            21. ssh.service
+  4. colord.service                  22. switcheroo-control.service
+  5. cups-browsed.service            23. systemd-journald.service
+  6. cups.service                    24. systemd-logind.service
+  7. dbus.service                    25. systemd-manager
+  8. gdm.service                     26. systemd-networkd.service
+  9. gdm3                            27. systemd-oomd.service
+  10. kerneloops.service             28. systemd-resolved.service
+  11. ModemManager.service           29. systemd-timesyncd.service
+  12. multipathd.service             30. systemd-udevd.service
+  13. networkd-dispatcher.service    31. udisks2.service
+  14. NetworkManager.service         32. unattended-upgrades.service
+  15. packagekit.service             33. upower.service
+  16. polkit.service                 34. user@1000.service
+  17. power-profiles-daemon.service  35. none of the above
+  18. qemu-guest-agent.service
+
+[More] ^C
+ubuntu@ubuntu:~$ mkdir -p ~/ansible-web/roles
+ubuntu@ubuntu:~$ cd ~/ansible-web
+ubuntu@ubuntu:~/ansible-web$ 
+
+STAP 2 --> Role Structuur Maken
+ubuntu@ubuntu:~/ansible-web$ cd ~/ansible-web/roles
+ubuntu@ubuntu:~/ansible-web/roles$ ansible-galaxy init nginx_role
+- Role nginx_role was created successfully
+ubuntu@ubuntu:~/ansible-web/roles$ 
+
+STAP 3 --> Files Invullen
+ubuntu@ubuntu:~/ansible-web/roles$ vi ~/ansible-web/roles/nginx_role/vars/main.yml
+ubuntu@ubuntu:~/ansible-web/roles$ cat ~/ansible-web/roles/nginx_role/vars/main.yml
+---
+# vars file for nginx_role
+
+---
+nginx_port: 80
+nginx_server_name: "{{ ansible_nodename }}"
+
+ubuntu@ubuntu:~/ansible-web/roles$ 
+
+template bestand aanmaken
+
+ubuntu@ubuntu:~/ansible-web/roles$ vi ~/ansible-web/roles/nginx_role/templates/default.j2
+ubuntu@ubuntu:~/ansible-web/roles$ cat ~/ansible-web/roles/nginx_role/templates/default.j2
+cat: /home/ubuntu/ansible-web/roles/nginx_role/templates/default.j2: No such file or directory
+ubuntu@ubuntu:~/ansible-web/roles$ ls -l ~/ansible-web/roles/nginx_role
+total 28
+-rw-rw-r-- 1 ubuntu ubuntu 1328 Oct 24 13:17 README.md
+drwxrwxr-x 2 ubuntu ubuntu 4096 Oct 24 13:17 defaults
+drwxrwxr-x 2 ubuntu ubuntu 4096 Oct 24 13:17 handlers
+drwxrwxr-x 2 ubuntu ubuntu 4096 Oct 24 13:17 meta
+drwxrwxr-x 2 ubuntu ubuntu 4096 Oct 24 13:17 tasks
+drwxrwxr-x 2 ubuntu ubuntu 4096 Oct 24 13:17 tests
+drwxrwxr-x 2 ubuntu ubuntu 4096 Oct 24 13:19 vars
+ubuntu@ubuntu:~/ansible-web/roles$ mkdir -p ~/ansible-web/roles/nginx_role/templates
+ubuntu@ubuntu:~/ansible-web/roles$ vi ~/ansible-web/roles/nginx_role/templates/default.j2
+ubuntu@ubuntu:~/ansible-web/roles$ cat ~/ansible-web/roles/nginx_role/templates/default.j2
+server {
+    listen {{ nginx_port }} default_server;
+    server_name {{ nginx_server_name }};
+    root /var/www/html;
+    index index.html index.htm;
+}
+
+ubuntu@ubuntu:~/ansible-web/roles$ 
+
+ubuntu@ubuntu:~/ansible-web/roles$ vi ~/ansible-web/roles/nginx_role/templates/index.html.j2
+ubuntu@ubuntu:~/ansible-web/roles$ cat ~/ansible-web/roles/nginx_role/templates/index.html.j2
+<!DOCTYPE html>
+<html>
+<head><title>Ansible Nginx</title></head>
+<body>
+  <h1>Nginx via Ansible role</h1>
+  <ul>
+    <li>Hostname: {{ ansible_facts['nodename'] }}</li>
+    <li>IP: {{ ansible_default_ipv4.address }}</li>
+    <li>CPU: {{ ansible_facts['processor'][0] }}</li>
+    <li>RAM (MB): {{ ansible_facts['memtotal_mb'] }}</li>
+  </ul>
+</body>
+</html>
+
+ubuntu@ubuntu:~/ansible-web/roles$ 
+
+ubuntu@ubuntu:~/ansible-web/roles$ mkdir -p ~/ansible-web/roles/nginx_role/files 
+ubuntu@ubuntu:~/ansible-web/roles$ vi ~/ansible-web/roles/nginx_role/files/check_port.sh
+ubuntu@ubuntu:~/ansible-web/roles$ cat ~/ansible-web/roles/nginx_role/files/check_port.sh
+#!/bin/bash
+set -euo pipefail
+PORT=80
+if ss -ltn | awk '{print $4}' | grep -q ":${PORT}$"; then
+  echo "Running"
+else
+  echo "Not Running"
+fi
+
+ubuntu@ubuntu:~/ansible-web/roles$ chmod +x ~/ansible-web/roles/nginx_role/files/check_port.sh
+ubuntu@ubuntu:~/ansible-web/roles$ cat ~/ansible-web/roles/nginx_role/files/check_port.sh
+#!/bin/bash
+set -euo pipefail
+PORT=80
+if ss -ltn | awk '{print $4}' | grep -q ":${PORT}$"; then
+  echo "Running"
+else
+  echo "Not Running"
+fi
+
+ubuntu@ubuntu:~/ansible-web/roles$ 
+
+ubuntu@ubuntu:~/ansible-web/roles$ vi ~/ansible-web/roles/nginx_role/handlers/main.yml
+ubuntu@ubuntu:~/ansible-web/roles$ cat ~/ansible-web/roles/nginx_role/handlers/main.yml
+---
+# handlers file for nginx_role
+
+---
+- name: restart nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+
+ubuntu@ubuntu:~/ansible-web/roles$ 
+
+ubuntu@ubuntu:~/ansible-web/roles$ vi ~/ansible-web/roles/nginx_role/tasks/main.yml
+ubuntu@ubuntu:~/ansible-web/roles$ cat ~/ansible-web/roles/nginx_role/tasks/main.yml
+---
+# tasks file for nginx_role
+
+---
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+  when: ansible_os_family == 'Debian'
+
+- name: Stop en disable apache2
+  ansible.builtin.service:
+    name: apache2
+    state: stopped
+    enabled: false
+  ignore_errors: true
+
+- name: Verwijder apache2
+  ansible.builtin.apt:
+    name: apache2
+    state: absent
+
+- name: Installeer nginx en tools
+  ansible.builtin.apt:
+    name:
+      - nginx
+      - curl
+      - psmisc
+    state: present
+
+- name: Plaats nginx-config
+  ansible.builtin.template:
+    src: default.j2
+    dest: /etc/nginx/sites-enabled/default
+  notify: restart nginx
+
+- name: Maak /var/www/html aan
+  ansible.builtin.file:
+    path: /var/www/html
+    state: directory
+
+- name: Plaats index.html
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: /var/www/html/index.html
+  notify: restart nginx
+
+- name: Start en enable nginx
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true
+
+- name: Copy port-check script
+  ansible.builtin.copy:
+    src: check_port.sh
+    dest: /usr/local/bin/check_port
+    mode: "0755"
+
+- name: Controleer poortstatus
+  ansible.builtin.command: /usr/local/bin/check_port
+  register: portcheck
+  changed_when: false
+
+- name: Toon status
+  ansible.builtin.debug:
+    msg: "{{ portcheck.stdout }}"
+
+ubuntu@ubuntu:~/ansible-web/roles$ 
+
+ubuntu@ubuntu:~/ansible-web/roles$ cd ~/ansible-web
+ubuntu@ubuntu:~/ansible-web$ vi playbook_nginx_deploy.yml
+ubuntu@ubuntu:~/ansible-web$ cat playbook_nginx_deploy.yml
+---
+- name: Deploy Nginx via role
+  hosts: nodes
+  become: true
+  gather_facts: true
+  roles:
+    - nginx_role
+
+ubuntu@ubuntu:~/ansible-web$ 
+
+ubuntu@ubuntu:~/ansible-web$ sudo mkdir -p /etc/ansible
+ubuntu@ubuntu:~/ansible-web$ sudo vi /etc/ansible/hosts
+ubuntu@ubuntu:~/ansible-web$ ansible all -m ping
+localhost | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+ubuntu@ubuntu:~/ansible-web$ 
+
+ERROR FIXING: 
+
+buntu@ubuntu:~/ansible-web$ ansible-playbook -b playbook_nginx_deploy.yml
+ERROR! We were unable to read either as JSON nor YAML, these are the errors we got from each:
+JSON: Expecting value: line 1 column 1 (char 0)
+
+Syntax Error while loading YAML.
+  but found another document
+
+The error appears to be in '/home/ubuntu/ansible-web/roles/nginx_role/vars/main.yml': line 4, column 1, but may
+be elsewhere in the file depending on the exact syntax problem.
+
+The offending line appears to be:
+
+
+---
+^ here
+ubuntu@ubuntu:~/ansible-web$ 
+
+ubuntu@ubuntu:~/ansible-web$ vi ~/ansible-web/roles/nginx_role/vars/main.yml
+ubuntu@ubuntu:~/ansible-web$ cat ~/ansible-web/roles/nginx_role/vars/main.yml
+---
+# vars file for nginx_role
+nginx_port: 80
+nginx_server_name: "{{ ansible_nodename }}"
+
+ubuntu@ubuntu:~/ansible-web$ ansible-playbook -b playbook_nginx_deploy.yml
+ERROR! We were unable to read either as JSON nor YAML, these are the errors we got from each:
+JSON: Expecting value: line 1 column 1 (char 0)
+
+Syntax Error while loading YAML.
+  but found another document
+
+The error appears to be in '/home/ubuntu/ansible-web/roles/nginx_role/tasks/main.yml': line 4, column 1, but may
+be elsewhere in the file depending on the exact syntax problem.
+
+The offending line appears to be:
+
+
+---
+^ here
+ubuntu@ubuntu:~/ansible-web$ 
+
+ubuntu@ubuntu:~/ansible-web$ vi ~/ansible-web/roles/nginx_role/handlers/main.yml 
+ubuntu@ubuntu:~/ansible-web$ cat ~/ansible-web/roles/nginx_role/handlers/main.yml
+---
+# handlers file for nginx_role
+- name: restart nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+
+ubuntu@ubuntu:~/ansible-web$ 
+
+-->
+Works na de bug fixing 
+-->
+
+ubuntu@ubuntu:~/ansible-web$ ansible-playbook -b playbook_nginx_deploy.yml
+
+PLAY [Deploy Nginx via role] ***************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [localhost]
+
+TASK [nginx_role : Update apt cache] *******************************************
+changed: [localhost]
+
+TASK [nginx_role : Stop en disable apache2] ************************************
+changed: [localhost]
+
+TASK [nginx_role : Verwijder apache2] ******************************************
+changed: [localhost]
+
+TASK [nginx_role : Installeer nginx en tools] **********************************
+changed: [localhost]
+
+TASK [nginx_role : Plaats nginx-config] ****************************************
+changed: [localhost]
+
+TASK [nginx_role : Maak /var/www/html aan] *************************************
+ok: [localhost]
+
+TASK [nginx_role : Plaats index.html] ******************************************
+changed: [localhost]
+
+TASK [nginx_role : Start en enable nginx] **************************************
+ok: [localhost]
+
+TASK [nginx_role : Copy port-check script] *************************************
+changed: [localhost]
+
+TASK [nginx_role : Controleer poortstatus] *************************************
+ok: [localhost]
+
+TASK [nginx_role : Toon status] ************************************************
+ok: [localhost] => {
+    "msg": "Running"
+}
+
+RUNNING HANDLER [nginx_role : restart nginx] ***********************************
+changed: [localhost]
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=13   changed=8    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+ubuntu@ubuntu:~/ansible-web$ 
