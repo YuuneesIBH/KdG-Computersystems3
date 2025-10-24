@@ -1,0 +1,703 @@
+1. Download het mono programma getstuff.exe
+Dit programma downloadt het python programma httpserver.py
+Volg de Layout Recommendation vanuit REF1 om dit als een regulier programma op je systeem te
+voorzien:
+- maak de directory /usr/lib/getstuff aan
+- copieer getstuff.exe naar /usr/lib/getstuff/getstuff.exe
+- schrijf in /usr/bin/getstuff dat je /usr/lib/gestuff/getstuff.exe met mono opstart
+- maak /usr/bin/getstuff executable
+
+ubuntu@ubuntu:~$ sudo apt install apparmor apparmor-utils auditd mono-complete python3 -y
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+auditd is already the newest version (1:3.0.7-1build1).
+mono-complete is already the newest version (6.8.0.105+dfsg-3.2).
+apparmor is already the newest version (3.0.4-2ubuntu2.4).
+apparmor-utils is already the newest version (3.0.4-2ubuntu2.4).
+python3 is already the newest version (3.10.6-1~22.04.1).
+The following packages were automatically installed and are no longer required:
+  libwpe-1.0-1 libwpebackend-fdo-1.0-1
+Use 'sudo apt autoremove' to remove them.
+0 upgraded, 0 newly installed, 0 to remove and 368 not upgraded.
+ubuntu@ubuntu:~$ sudo aa-status
+apparmor module is loaded.
+38 profiles are loaded.
+35 profiles are in enforce mode.
+   /snap/snapd/20298/usr/lib/snapd/snap-confine
+   /snap/snapd/20298/usr/lib/snapd/snap-confine//mount-namespace-capture-helper
+   /snap/snapd/25205/usr/lib/snapd/snap-confine
+   /snap/snapd/25205/usr/lib/snapd/snap-confine//mount-namespace-capture-helper
+   /usr/bin/evince
+   /usr/bin/evince-previewer
+   /usr/bin/evince-previewer//sanitized_helper
+   /usr/bin/evince-thumbnailer
+   /usr/bin/evince//sanitized_helper
+   /usr/bin/man
+   /usr/lib/NetworkManager/nm-dhcp-client.action
+   /usr/lib/NetworkManager/nm-dhcp-helper
+   /usr/lib/connman/scripts/dhclient-script
+   /usr/lib/cups/backend/cups-pdf
+   /usr/lib/snapd/snap-confine
+   /usr/lib/snapd/snap-confine//mount-namespace-capture-helper
+   /usr/sbin/cups-browsed
+   /usr/sbin/cupsd
+   /usr/sbin/cupsd//third_party
+   /{,usr/}sbin/dhclient
+   libreoffice-senddoc
+   libreoffice-soffice//gpg
+   libreoffice-xpdfimport
+   lsb_release
+   man_filter
+   man_groff
+   nvidia_modprobe
+   nvidia_modprobe//kmod
+   snap-update-ns.firefox
+   snap.firefox.firefox
+   snap.firefox.geckodriver
+   snap.firefox.hook.configure
+   snap.firefox.hook.connect-plug-host-hunspell
+   snap.firefox.hook.disconnect-plug-host-hunspell
+   snap.firefox.hook.post-refresh
+3 profiles are in complain mode.
+   /usr/sbin/sssd
+   libreoffice-oosplash
+   libreoffice-soffice
+0 profiles are in kill mode.
+0 profiles are in unconfined mode.
+4 processes have profiles defined.
+4 processes are in enforce mode.
+   /usr/sbin/cups-browsed (861) 
+   /usr/sbin/cupsd (821) 
+   /usr/lib/cups/notifier/dbus (855) /usr/sbin/cupsd
+   /usr/lib/cups/notifier/dbus (856) /usr/sbin/cupsd
+0 processes are in complain mode.
+0 processes are unconfined but have a profile defined.
+0 processes are in mixed mode.
+0 processes are in kill mode.
+ubuntu@ubuntu:~$ 
+
+ubuntu@ubuntu:~$ sudo mkdir -p /usr/lib/getstuff
+ubuntu@ubuntu:~$ sudo cp ~/Downloads/getstuff-1.exe /usr/lib/getstuff/getstuff.exe
+ubuntu@ubuntu:~$ ls -l /usr/lib/getstuff
+total 8
+-rw-r--r-- 1 root root 5632 Oct 24 12:08 getstuff.exe
+ubuntu@ubuntu:~$ 
+
+
+ubuntu@ubuntu:~$ sudo vi /usr/bin/getstuff
+ubuntu@ubuntu:~$ cat /usr/bin/getstuff
+#!/bin/bash
+mono /usr/lib/getstuff/getstuff.exe
+
+ubuntu@ubuntu:~$ 
+
+ubuntu@ubuntu:~$ ls -l /usr/bin/getstuff
+-rwxr-xr-x 1 root root 49 Oct 24 12:09 /usr/bin/getstuff
+ubuntu@ubuntu:~$ c
+
+2. Maak als root een apparmor profiel aan voor getstuff
+a) sudo aa-genprof /usr/bin/getstuff
+b) Start nu de applicatie
+- IN EEN ANDERE TERMINAL
+- ALS GEWONE GEBRUIKER.
+Doe dit vanuit de homedirectory van de gebruiker.
+Het profiel werkt nu in complain mode
+c) Kies Scan en duid alles aan wat je nodig hebt!
+Let er op dat getstuff moet werken voor alle gebruikers!
+Let op temp files en procesnummers
+d) Finish (profiel werkt in enforce mode)
+
+ubuntu@ubuntu:~$ sudo aa-genprof /usr/bin/getstuff
+Updating AppArmor profiles in /etc/apparmor.d.
+Writing updated profile for /usr/bin/getstuff.
+Setting /usr/bin/getstuff to complain mode.
+
+Before you begin, you may wish to check if a
+profile already exists for the application you
+wish to confine. See the following wiki page for
+more information:
+https://gitlab.com/apparmor/apparmor/wikis/Profiles
+
+Profiling: /usr/bin/getstuff
+
+Please start the application to be profiled in
+another window and exercise its functionality now.
+
+Once completed, select the "Scan" option below in 
+order to scan the system logs for AppArmor events. 
+
+For each AppArmor event, you will be given the 
+opportunity to choose whether the access should be 
+allowed or denied.
+
+[(S)can system log for AppArmor events] / (F)inish
+
+
+For each AppArmor event, you will be given the 
+opportunity to choose whether the access should be 
+allowed or denied.
+
+[(S)can system log for AppArmor events] / (F)inish
+Reading log entries from /var/log/audit/audit.log.
+
+Profile:  /usr/bin/getstuff
+Execute:  /usr/bin/mono-sgen
+Severity: unknown
+
+(I)nherit / (C)hild / (P)rofile / (N)amed / (U)nconfined / (X) ix On / (D)eny / Abo(r)t / (F)inish
+
+
+Nu open ik een twee terminal window
+
+buntu@ubuntu:~$ sudo systemctl enable --now auditd
+sudo systemctl restart auditd
+Synchronizing state of auditd.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable auditd
+ubuntu@ubuntu:~$ /usr/bin/getstuff
+/usr/bin/getstuff: line 2: /usr/bin/mono: Permission denied
+ubuntu@ubuntu:~$ /usr/bin/getstuff
+/usr/bin/getstuff: line 2: /usr/bin/mono: Permission denied
+ubuntu@ubuntu:~$ /usr/bin/getstuff
+/usr/bin/getstuff: line 2: /usr/bin/mono: Permission denied
+ubuntu@ubuntu:~$ /usr/bin/getstuff
+/usr/bin/getstuff: line 2: /usr/bin/mono: Permission denied
+ubuntu@ubuntu:~$ 
+
+Om de user wel access te geven:
+[(S)can system log for AppArmor events] / (F)inish
+Reading log entries from /var/log/audit/audit.log.
+
+Profile:  /usr/bin/getstuff
+Execute:  /usr/bin/mono-sgen
+Severity: unknown
+
+(I)nherit / (C)hild / (P)rofile / (N)amed / (U)nconfined / (X) ix On / (D)eny / Abo(r)t / (F)inish
+Enforce-mode changes:
+
+Profile:  /usr/bin/getstuff
+Path:     /dev/tty
+New Mode: rw
+Severity: 9
+
+ [1 - include <abstractions/consoles>]
+  2 - /dev/tty rw, 
+(A)llow / [(D)eny] / (I)gnore / (G)lob / Glob with (E)xtension / (N)ew / Audi(t) / Abo(r)t / (F)inish
+Adding include <abstractions/consoles> to profile.
+
+= Changed Local Profiles =
+
+The following local profiles were changed. Would you like to save them?
+
+ [1 - /usr/bin/getstuff]
+(S)ave Changes / Save Selec(t)ed Profile / [(V)iew Changes] / View Changes b/w (C)lean profiles / Abo(r)t
+Writing updated profile for /usr/bin/getstuff.
+
+Profiling: /usr/bin/getstuff
+
+Please start the application to be profiled in
+another window and exercise its functionality now.
+
+Once completed, select the "Scan" option below in 
+order to scan the system logs for AppArmor events. 
+
+For each AppArmor event, you will be given the 
+opportunity to choose whether the access should be 
+allowed or denied.
+
+[(S)can system log for AppArmor events] / (F)inish
+
+Checken of het profiel actief is 
+ubuntu@ubuntu:~$ sudo aa-status
+apparmor module is loaded.
+40 profiles are loaded.
+36 profiles are in enforce mode.
+   /snap/snapd/20298/usr/lib/snapd/snap-confine
+   /snap/snapd/20298/usr/lib/snapd/snap-confine//mount-namespace-capture-helper
+   /snap/snapd/25205/usr/lib/snapd/snap-confine
+   /snap/snapd/25205/usr/lib/snapd/snap-confine//mount-namespace-capture-helper
+   /usr/bin/evince
+   /usr/bin/evince-previewer
+   /usr/bin/evince-previewer//sanitized_helper
+   /usr/bin/evince-thumbnailer
+   /usr/bin/evince//sanitized_helper
+   /usr/bin/getstuff
+   /usr/bin/man
+   /usr/lib/NetworkManager/nm-dhcp-client.action
+   /usr/lib/NetworkManager/nm-dhcp-helper
+   /usr/lib/connman/scripts/dhclient-script
+   /usr/lib/cups/backend/cups-pdf
+   /usr/lib/snapd/snap-confine
+   /usr/lib/snapd/snap-confine//mount-namespace-capture-helper
+   /usr/sbin/cups-browsed
+   /usr/sbin/cupsd
+   /usr/sbin/cupsd//third_party
+   /{,usr/}sbin/dhclient
+   libreoffice-senddoc
+   libreoffice-soffice//gpg
+   libreoffice-xpdfimport
+   lsb_release
+   man_filter
+   man_groff
+   nvidia_modprobe
+   nvidia_modprobe//kmod
+   snap-update-ns.firefox
+   snap.firefox.firefox
+   snap.firefox.geckodriver
+   snap.firefox.hook.configure
+   snap.firefox.hook.connect-plug-host-hunspell
+   snap.firefox.hook.disconnect-plug-host-hunspell
+   snap.firefox.hook.post-refresh
+4 profiles are in complain mode.
+   /usr/bin/getstuff//null-/usr/bin/mono-sgen
+   /usr/sbin/sssd
+   libreoffice-oosplash
+   libreoffice-soffice
+0 profiles are in kill mode.
+0 profiles are in unconfined mode.
+4 processes have profiles defined.
+4 processes are in enforce mode.
+   /usr/sbin/cups-browsed (861) 
+   /usr/sbin/cupsd (821) 
+   /usr/lib/cups/notifier/dbus (855) /usr/sbin/cupsd
+   /usr/lib/cups/notifier/dbus (856) /usr/sbin/cupsd
+0 processes are in complain mode.
+0 processes are unconfined but have a profile defined.
+0 processes are in mixed mode.
+0 processes are in kill mode.
+ubuntu@ubuntu:~$ 
+
+3. Doe sudo su en tik cd /root
+Start nu het programma getstuff op als root.
+De download mag niet meer lukken (kijk na of het bestand httpserver.py geschreven wordt)
+Kijk na in /var/log/audit/audit.log
+
+ubuntu@ubuntu:~$ sudo su 
+root@ubuntu:/home/ubuntu# cd /root
+root@ubuntu:~# /usr/bin/getstuff
+
+Unhandled Exception:
+System.TypeInitializationException: The type initializer for 'System.Console' threw an exception. ---> System.TypeInitializationException: The type initializer for 'System.ConsoleDriver' threw an exception. ---> System.TypeInitializationException: The type initializer for 'Sys' threw an exception. ---> System.DllNotFoundException: System.Native assembly:<unknown assembly> type:<unknown type> member:(null)
+  at (wrapper managed-to-native) Interop+Sys.LChflagsCanSetHiddenFlag()
+  at Interop+Sys..cctor () [0x00000] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+   --- End of inner exception stack trace ---
+  at System.IO.FileSystem.FileExists (System.ReadOnlySpan`1[T] fullPath, System.Int32 fileType, Interop+ErrorInfo& errorInfo) [0x0000f] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.IO.FileSystem.DirectoryExists (System.ReadOnlySpan`1[T] fullPath, Interop+ErrorInfo& errorInfo) [0x00000] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.IO.FileSystem.DirectoryExists (System.ReadOnlySpan`1[T] fullPath) [0x00000] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.IO.Directory.Exists (System.String path) [0x0002c] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.TermInfoDriver.SearchTerminfo (System.String term) [0x00057] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.TermInfoDriver..ctor (System.String term) [0x0004b] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.ConsoleDriver.CreateTermInfoDriver (System.String term) [0x00000] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.ConsoleDriver..cctor () [0x00062] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+   --- End of inner exception stack trace ---
+  at System.Console.SetupStreams (System.Text.Encoding inputEncoding, System.Text.Encoding outputEncoding) [0x0000a] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.Console..cctor () [0x00097] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+   --- End of inner exception stack trace ---
+  at Program.Main (System.String[] args) [0x00000] in <b0db7aa6640a47a2b043e2e9b344d84c>:0 
+[ERROR] FATAL UNHANDLED EXCEPTION: System.TypeInitializationException: The type initializer for 'System.Console' threw an exception. ---> System.TypeInitializationException: The type initializer for 'System.ConsoleDriver' threw an exception. ---> System.TypeInitializationException: The type initializer for 'Sys' threw an exception. ---> System.DllNotFoundException: System.Native assembly:<unknown assembly> type:<unknown type> member:(null)
+  at (wrapper managed-to-native) Interop+Sys.LChflagsCanSetHiddenFlag()
+  at Interop+Sys..cctor () [0x00000] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+   --- End of inner exception stack trace ---
+  at System.IO.FileSystem.FileExists (System.ReadOnlySpan`1[T] fullPath, System.Int32 fileType, Interop+ErrorInfo& errorInfo) [0x0000f] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.IO.FileSystem.DirectoryExists (System.ReadOnlySpan`1[T] fullPath, Interop+ErrorInfo& errorInfo) [0x00000] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.IO.FileSystem.DirectoryExists (System.ReadOnlySpan`1[T] fullPath) [0x00000] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.IO.Directory.Exists (System.String path) [0x0002c] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.TermInfoDriver.SearchTerminfo (System.String term) [0x00057] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.TermInfoDriver..ctor (System.String term) [0x0004b] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.ConsoleDriver.CreateTermInfoDriver (System.String term) [0x00000] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.ConsoleDriver..cctor () [0x00062] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+   --- End of inner exception stack trace ---
+  at System.Console.SetupStreams (System.Text.Encoding inputEncoding, System.Text.Encoding outputEncoding) [0x0000a] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.Console..cctor () [0x00097] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+   --- End of inner exception stack trace ---
+  at Program.Main (System.String[] args) [0x00000] in <b0db7aa6640a47a2b043e2e9b344d84c>:0 
+root@ubuntu:~# /usr/bin/getstuff
+
+Unhandled Exception:
+System.TypeInitializationException: The type initializer for 'System.Console' threw an exception. ---> System.TypeInitializationException: The type initializer for 'System.ConsoleDriver' threw an exception. ---> System.TypeInitializationException: The type initializer for 'Sys' threw an exception. ---> System.DllNotFoundException: System.Native assembly:<unknown assembly> type:<unknown type> member:(null)
+  at (wrapper managed-to-native) Interop+Sys.LChflagsCanSetHiddenFlag()
+  at Interop+Sys..cctor () [0x00000] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+   --- End of inner exception stack trace ---
+  at System.IO.FileSystem.FileExists (System.ReadOnlySpan`1[T] fullPath, System.Int32 fileType, Interop+ErrorInfo& errorInfo) [0x0000f] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.IO.FileSystem.DirectoryExists (System.ReadOnlySpan`1[T] fullPath, Interop+ErrorInfo& errorInfo) [0x00000] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.IO.FileSystem.DirectoryExists (System.ReadOnlySpan`1[T] fullPath) [0x00000] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.IO.Directory.Exists (System.String path) [0x0002c] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.TermInfoDriver.SearchTerminfo (System.String term) [0x00057] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.TermInfoDriver..ctor (System.String term) [0x0004b] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.ConsoleDriver.CreateTermInfoDriver (System.String term) [0x00000] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.ConsoleDriver..cctor () [0x00062] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+   --- End of inner exception stack trace ---
+  at System.Console.SetupStreams (System.Text.Encoding inputEncoding, System.Text.Encoding outputEncoding) [0x0000a] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.Console..cctor () [0x00097] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+   --- End of inner exception stack trace ---
+  at Program.Main (System.String[] args) [0x00000] in <b0db7aa6640a47a2b043e2e9b344d84c>:0 
+[ERROR] FATAL UNHANDLED EXCEPTION: System.TypeInitializationException: The type initializer for 'System.Console' threw an exception. ---> System.TypeInitializationException: The type initializer for 'System.ConsoleDriver' threw an exception. ---> System.TypeInitializationException: The type initializer for 'Sys' threw an exception. ---> System.DllNotFoundException: System.Native assembly:<unknown assembly> type:<unknown type> member:(null)
+  at (wrapper managed-to-native) Interop+Sys.LChflagsCanSetHiddenFlag()
+  at Interop+Sys..cctor () [0x00000] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+   --- End of inner exception stack trace ---
+  at System.IO.FileSystem.FileExists (System.ReadOnlySpan`1[T] fullPath, System.Int32 fileType, Interop+ErrorInfo& errorInfo) [0x0000f] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.IO.FileSystem.DirectoryExists (System.ReadOnlySpan`1[T] fullPath, Interop+ErrorInfo& errorInfo) [0x00000] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.IO.FileSystem.DirectoryExists (System.ReadOnlySpan`1[T] fullPath) [0x00000] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.IO.Directory.Exists (System.String path) [0x0002c] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.TermInfoDriver.SearchTerminfo (System.String term) [0x00057] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.TermInfoDriver..ctor (System.String term) [0x0004b] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.ConsoleDriver.CreateTermInfoDriver (System.String term) [0x00000] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.ConsoleDriver..cctor () [0x00062] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+   --- End of inner exception stack trace ---
+  at System.Console.SetupStreams (System.Text.Encoding inputEncoding, System.Text.Encoding outputEncoding) [0x0000a] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.Console..cctor () [0x00097] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+   --- End of inner exception stack trace ---
+  at Program.Main (System.String[] args) [0x00000] in <b0db7aa6640a47a2b043e2e9b344d84c>:0 
+root@ubuntu:~# 
+
+oot@ubuntu:~# sudo tail -n 50 /var/log/audit/audit.log | grep getstuff
+type=AVC msg=audit(1761308648.408:565): apparmor="DENIED" operation="capable" profile="/usr/bin/getstuff" pid=5800 comm="mono" capability=23  capname="sys_nice"
+type=SYSCALL msg=audit(1761308648.408:565): arch=c00000b7 syscall=119 success=yes exit=0 a0=16aa a1=0 a2=ffff8506e720 a3=ffff87d8db58 items=0 ppid=5799 pid=5800 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=3 comm="mono" exe="/usr/bin/mono-sgen" subj=/usr/bin/getstuff key=(null)ARCH=aarch64 SYSCALL=sched_setscheduler AUID="ubuntu" UID="root" GID="root" EUID="root" SUID="root" FSUID="root" EGID="root" SGID="root" FSGID="root"
+type=AVC msg=audit(1761308692.016:566): apparmor="DENIED" operation="open" profile="/usr/bin/getstuff" name="/usr/local/sbin/" pid=5804 comm="mono" requested_mask="r" denied_mask="r" fsuid=0 ouid=0FSUID="root" OUID="root"
+type=SYSCALL msg=audit(1761308692.016:566): arch=c00000b7 syscall=56 success=no exit=-13 a0=ffffffffffffff9c a1=aaab09d4f2a0 a2=84800 a3=0 items=0 ppid=5803 pid=5804 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=3 comm="mono" exe="/usr/bin/mono-sgen" subj=/usr/bin/getstuff key=(null)ARCH=aarch64 SYSCALL=openat AUID="ubuntu" UID="root" GID="root" EUID="root" SUID="root" FSUID="root" EGID="root" SGID="root" FSGID="root"
+type=AVC msg=audit(1761308692.016:567): apparmor="DENIED" operation="open" profile="/usr/bin/getstuff" name="/usr/local/bin/" pid=5804 comm="mono" requested_mask="r" denied_mask="r" fsuid=0 ouid=0FSUID="root" OUID="root"
+type=SYSCALL msg=audit(1761308692.016:567): arch=c00000b7 syscall=56 success=no exit=-13 a0=ffffffffffffff9c a1=aaab09d4f2e0 a2=84800 a3=0 items=0 ppid=5803 pid=5804 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=3 comm="mono" exe="/usr/bin/mono-sgen" subj=/usr/bin/getstuff key=(null)ARCH=aarch64 SYSCALL=openat AUID="ubuntu" UID="root" GID="root" EUID="root" SUID="root" FSUID="root" EGID="root" SGID="root" FSGID="root"
+type=AVC msg=audit(1761308692.016:568): apparmor="DENIED" operation="open" profile="/usr/bin/getstuff" name="/usr/sbin/" pid=5804 comm="mono" requested_mask="r" denied_mask="r" fsuid=0 ouid=0FSUID="root" OUID="root"
+type=SYSCALL msg=audit(1761308692.016:568): arch=c00000b7 syscall=56 success=no exit=-13 a0=ffffffffffffff9c a1=aaab09d4f300 a2=84800 a3=0 items=0 ppid=5803 pid=5804 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=3 comm="mono" exe="/usr/bin/mono-sgen" subj=/usr/bin/getstuff key=(null)ARCH=aarch64 SYSCALL=openat AUID="ubuntu" UID="root" GID="root" EUID="root" SUID="root" FSUID="root" EGID="root" SGID="root" FSGID="root"
+type=AVC msg=audit(1761308692.016:569): apparmor="DENIED" operation="open" profile="/usr/bin/getstuff" name="/usr/bin/" pid=5804 comm="mono" requested_mask="r" denied_mask="r" fsuid=0 ouid=0FSUID="root" OUID="root"
+type=SYSCALL msg=audit(1761308692.016:569): arch=c00000b7 syscall=56 success=no exit=-13 a0=ffffffffffffff9c a1=aaab09d4f2c0 a2=84800 a3=0 items=0 ppid=5803 pid=5804 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=3 comm="mono" exe="/usr/bin/mono-sgen" subj=/usr/bin/getstuff key=(null)ARCH=aarch64 SYSCALL=openat AUID="ubuntu" UID="root" GID="root" EUID="root" SUID="root" FSUID="root" EGID="root" SGID="root" FSGID="root"
+type=AVC msg=audit(1761308692.016:570): apparmor="DENIED" operation="open" profile="/usr/bin/getstuff" name="/usr/sbin/" pid=5804 comm="mono" requested_mask="r" denied_mask="r" fsuid=0 ouid=0FSUID="root" OUID="root"
+type=SYSCALL msg=audit(1761308692.016:570): arch=c00000b7 syscall=56 success=no exit=-13 a0=ffffffffffffff9c a1=aaab09d4f350 a2=84800 a3=0 items=0 ppid=5803 pid=5804 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=3 comm="mono" exe="/usr/bin/mono-sgen" subj=/usr/bin/getstuff key=(null)ARCH=aarch64 SYSCALL=openat AUID="ubuntu" UID="root" GID="root" EUID="root" SUID="root" FSUID="root" EGID="root" SGID="root" FSGID="root"
+type=AVC msg=audit(1761308692.016:571): apparmor="DENIED" operation="open" profile="/usr/bin/getstuff" name="/usr/bin/" pid=5804 comm="mono" requested_mask="r" denied_mask="r" fsuid=0 ouid=0FSUID="root" OUID="root"
+type=SYSCALL msg=audit(1761308692.016:571): arch=c00000b7 syscall=56 success=no exit=-13 a0=ffffffffffffff9c a1=aaab09d4f3b0 a2=84800 a3=0 items=0 ppid=5803 pid=5804 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=3 comm="mono" exe="/usr/bin/mono-sgen" subj=/usr/bin/getstuff key=(null)ARCH=aarch64 SYSCALL=openat AUID="ubuntu" UID="root" GID="root" EUID="root" SUID="root" FSUID="root" EGID="root" SGID="root" FSGID="root"
+type=AVC msg=audit(1761308692.016:572): apparmor="DENIED" operation="open" profile="/usr/bin/getstuff" name="/usr/games/" pid=5804 comm="mono" requested_mask="r" denied_mask="r" fsuid=0 ouid=0FSUID="root" OUID="root"
+type=SYSCALL msg=audit(1761308692.016:572): arch=c00000b7 syscall=56 success=no exit=-13 a0=ffffffffffffff9c a1=aaab09d4f3d0 a2=84800 a3=0 items=0 ppid=5803 pid=5804 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=3 comm="mono" exe="/usr/bin/mono-sgen" subj=/usr/bin/getstuff key=(null)ARCH=aarch64 SYSCALL=openat AUID="ubuntu" UID="root" GID="root" EUID="root" SUID="root" FSUID="root" EGID="root" SGID="root" FSGID="root"
+type=AVC msg=audit(1761308692.016:573): apparmor="DENIED" operation="open" profile="/usr/bin/getstuff" name="/usr/local/games/" pid=5804 comm="mono" requested_mask="r" denied_mask="r" fsuid=0 ouid=0FSUID="root" OUID="root"
+type=SYSCALL msg=audit(1761308692.016:573): arch=c00000b7 syscall=56 success=no exit=-13 a0=ffffffffffffff9c a1=aaab09d4f440 a2=84800 a3=0 items=0 ppid=5803 pid=5804 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=3 comm="mono" exe="/usr/bin/mono-sgen" subj=/usr/bin/getstuff key=(null)ARCH=aarch64 SYSCALL=openat AUID="ubuntu" UID="root" GID="root" EUID="root" SUID="root" FSUID="root" EGID="root" SGID="root" FSGID="root"
+type=AVC msg=audit(1761308692.016:574): apparmor="DENIED" operation="open" profile="/usr/bin/getstuff" name="/snap/bin/" pid=5804 comm="mono" requested_mask="r" denied_mask="r" fsuid=0 ouid=0FSUID="root" OUID="root"
+type=SYSCALL msg=audit(1761308692.016:574): arch=c00000b7 syscall=56 success=no exit=-13 a0=ffffffffffffff9c a1=aaab09d4f460 a2=84800 a3=0 items=0 ppid=5803 pid=5804 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=3 comm="mono" exe="/usr/bin/mono-sgen" subj=/usr/bin/getstuff key=(null)ARCH=aarch64 SYSCALL=openat AUID="ubuntu" UID="root" GID="root" EUID="root" SUID="root" FSUID="root" EGID="root" SGID="root" FSGID="root"
+type=AVC msg=audit(1761308692.020:575): apparmor="DENIED" operation="open" profile="/usr/bin/getstuff" name="/etc/mono/config" pid=5804 comm="mono" requested_mask="r" denied_mask="r" fsuid=0 ouid=0FSUID="root" OUID="root"
+type=SYSCALL msg=audit(1761308692.020:575): arch=c00000b7 syscall=56 success=no exit=-13 a0=ffffffffffffff9c a1=aaab09d5a5d0 a2=0 a3=0 items=0 ppid=5803 pid=5804 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=3 comm="mono" exe="/usr/bin/mono-sgen" subj=/usr/bin/getstuff key=(null)ARCH=aarch64 SYSCALL=openat AUID="ubuntu" UID="root" GID="root" EUID="root" SUID="root" FSUID="root" EGID="root" SGID="root" FSGID="root"
+type=AVC msg=audit(1761308692.020:576): apparmor="DENIED" operation="open" profile="/usr/bin/getstuff" name="/dev/shm/" pid=5804 comm="mono" requested_mask="r" denied_mask="r" fsuid=0 ouid=0FSUID="root" OUID="root"
+type=SYSCALL msg=audit(1761308692.020:576): arch=c00000b7 syscall=56 success=no exit=-13 a0=ffffffffffffff9c a1=aaaadbf762b8 a2=84800 a3=0 items=0 ppid=5803 pid=5804 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=3 comm="mono" exe="/usr/bin/mono-sgen" subj=/usr/bin/getstuff key=(null)ARCH=aarch64 SYSCALL=openat AUID="ubuntu" UID="root" GID="root" EUID="root" SUID="root" FSUID="root" EGID="root" SGID="root" FSGID="root"
+type=AVC msg=audit(1761308692.020:577): apparmor="DENIED" operation="open" profile="/usr/bin/getstuff" name="/proc/" pid=5804 comm="mono" requested_mask="r" denied_mask="r" fsuid=0 ouid=0FSUID="root" OUID="root"
+type=SYSCALL msg=audit(1761308692.020:577): arch=c00000b7 syscall=56 success=no exit=-13 a0=ffffffffffffff9c a1=aaaadbf762b0 a2=84800 a3=0 items=0 ppid=5803 pid=5804 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=3 comm="mono" exe="/usr/bin/mono-sgen" subj=/usr/bin/getstuff key=(null)ARCH=aarch64 SYSCALL=openat AUID="ubuntu" UID="root" GID="root" EUID="root" SUID="root" FSUID="root" EGID="root" SGID="root" FSGID="root"
+type=AVC msg=audit(1761308692.020:578): apparmor="DENIED" operation="mknod" profile="/usr/bin/getstuff" name="/dev/shm/mono.5804" pid=5804 comm="mono" requested_mask="c" denied_mask="c" fsuid=0 ouid=0FSUID="root" OUID="root"
+type=SYSCALL msg=audit(1761308692.020:578): arch=c00000b7 syscall=56 success=no exit=-13 a0=ffffffffffffff9c a1=ffffd95d2228 a2=880c2 a3=1a0 items=0 ppid=5803 pid=5804 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=3 comm="mono" exe="/usr/bin/mono-sgen" subj=/usr/bin/getstuff key=(null)ARCH=aarch64 SYSCALL=openat AUID="ubuntu" UID="root" GID="root" EUID="root" SUID="root" FSUID="root" EGID="root" SGID="root" FSGID="root"
+type=AVC msg=audit(1761308692.024:579): apparmor="DENIED" operation="capable" profile="/usr/bin/getstuff" pid=5804 comm="mono" capability=23  capname="sys_nice"
+type=SYSCALL msg=audit(1761308692.024:579): arch=c00000b7 syscall=119 success=yes exit=0 a0=16ae a1=0 a2=ffffac06e720 a3=ffffaed9db58 items=0 ppid=5803 pid=5804 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=3 comm="mono" exe="/usr/bin/mono-sgen" subj=/usr/bin/getstuff key=(null)ARCH=aarch64 SYSCALL=sched_setscheduler AUID="ubuntu" UID="root" GID="root" EUID="root" SUID="root" FSUID="root" EGID="root" SGID="root" FSGID="root"
+root@ubuntu:~# 
+
+4. Zorg ervoor dat root nu ook kan downloaden naar de directory /root
+
+root@ubuntu:/# sudo vi /etc/apparmor.d/usr.bin.getstuff
+root@ubuntu:/# 
+
+# Last Modified: Fri Oct 24 12:21:16 2025
+abi <abi/3.0>,
+
+include <tunables/global>
+
+/usr/bin/getstuff {
+  include <abstractions/base>
+  include <abstractions/bash>
+  include <abstractions/consoles>
+
+  /usr/bin/bash ix,
+  /usr/bin/getstuff r,
+  /usr/bin/mono-sgen mrix,
+  /root/** rw,
+}
+
+eerst zorgen dat httpserver.py natuurlijk ready is 
+root@ubuntu:/# sudo tee /usr/lib/getstuff/httpserver.py > /dev/null << 'EOF'
+#!/usr/bin/env python3
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import time
+
+hostName = "localhost"
+hostPort = 1234
+
+class MyServer(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
+        self.wfile.write(bytes("<html><head><title>Titel</title></head>", "utf-8"))
+        self.wfile.write(bytes("<body><p>Dit is een test.</p>", "utf-8"))
+        self.wfile.write(bytes("<p>You accessed path: %s</p>" % self.path, "utf-8"))
+        self.wfile.write(bytes("</body></html>", "utf-8"))
+
+myServer = HTTPServer((hostName, hostPort), MyServer)
+print(time.asctime(), "Server Starts - %s:%s" % (hostName, hostPort))
+
+try:
+EOFnt(time.asctime(), "Server Stops - %s:%s" % (hostName, hostPort))
+root@ubuntu:/# 
+
+root@ubuntu:/# sudo chmod +x /usr/lib/getstuff/httpserver.py
+root@ubuntu:/# ls -l /usr/lib/getstuff/httpserver.py
+-rwxr-xr-x 1 root root 901 Oct 24 12:32 /usr/lib/getstuff/httpserver.py
+root@ubuntu:/# 
+
+ubuntu@ubuntu:~$ sudo aa-genprof /usr/bin/getstuff
+Updating AppArmor profiles in /etc/apparmor.d.
+
+Before you begin, you may wish to check if a
+profile already exists for the application you
+wish to confine. See the following wiki page for
+more information:
+https://gitlab.com/apparmor/apparmor/wikis/Profiles
+
+Profiling: /usr/bin/getstuff
+
+Please start the application to be profiled in
+another window and exercise its functionality now.
+
+Once completed, select the "Scan" option below in 
+order to scan the system logs for AppArmor events. 
+
+For each AppArmor event, you will be given the 
+opportunity to choose whether the access should be 
+allowed or denied.
+
+[(S)can system log for AppArmor events] / (F)inish
+Reading log entries from /var/log/audit/audit.log.
+Enforce-mode changes:
+
+Profile:    /usr/bin/getstuff
+Capability: sys_nice
+Severity:   8
+
+ [1 - capability sys_nice,]
+(A)llow / [(D)eny] / (I)gnore / Audi(t) / Abo(r)t / (F)inish
+Adding capability sys_nice, to profile.
+
+Profile:  /usr/bin/getstuff
+Path:     /usr/local/sbin/
+New Mode: owner r
+Severity: unknown
+
+ [1 - owner /usr/local/sbin/ r,]
+(A)llow / [(D)eny] / (I)gnore / (G)lob / Glob with (E)xtension / (N)ew / Audi(t) / (O)wner permissions off / Abo(r)t / (F)inish
+Adding owner /usr/local/sbin/ r, to profile.
+
+Profile:  /usr/bin/getstuff
+Path:     /usr/local/bin/
+New Mode: owner r
+Severity: unknown
+
+ [1 - owner /usr/local/bin/ r,]
+(A)llow / [(D)eny] / (I)gnore / (G)lob / Glob with (E)xtension / (N)ew / Audi(t) / (O)wner permissions off / Abo(r)t / (F)inish
+
+Profile:  /usr/bin/getstuff
+Path:     /usr/local/bin/
+New Mode: owner r
+Severity: unknown
+
+ [1 - owner /usr/local/bin/ r,]
+(A)llow / [(D)eny] / (I)gnore / (G)lob / Glob with (E)xtension / (N)ew / Audi(t) / (O)wner permissions off / Abo(r)t / (F)inish
+Adding owner /usr/local/bin/ r, to profile.
+
+Profile:  /usr/bin/getstuff
+Path:     /usr/sbin/
+New Mode: owner r
+Severity: unknown
+
+ [1 - owner /usr/sbin/ r,]
+(A)llow / [(D)eny] / (I)gnore / (G)lob / Glob with (E)xtension / (N)ew / Audi(t) / (O)wner permissions off / Abo(r)t / (F)inish
+Adding owner /usr/sbin/ r, to profile.
+
+Profile:  /usr/bin/getstuff
+Path:     /usr/bin/
+New Mode: owner r
+Severity: unknown
+
+ [1 - owner /usr/bin/ r,]
+(A)llow / [(D)eny] / (I)gnore / (G)lob / Glob with (E)xtension / (N)ew / Audi(t) / (O)wner permissions off / Abo(r)t / (F)inish
+Adding owner /usr/bin/ r, to profile.
+
+Profile:  /usr/bin/getstuff
+Path:     /usr/games/
+New Mode: owner r
+Severity: unknown
+
+ [1 - owner /usr/games/ r,]
+(A)llow / [(D)eny] / (I)gnore / (G)lob / Glob with (E)xtension / (N)ew / Audi(t) / (O)wner permissions off / Abo(r)t / (F)inish
+Adding owner /usr/games/ r, to profile.
+
+Profile:  /usr/bin/getstuff
+Path:     /usr/local/games/
+New Mode: owner r
+Severity: unknown
+
+ [1 - owner /usr/local/games/ r,]
+(A)llow / [(D)eny] / (I)gnore / (G)lob / Glob with (E)xtension / (N)ew / Audi(t) / (O)wner permissions off / Abo(r)t / (F)inish
+Adding owner /usr/local/games/ r, to profile.
+
+Profile:  /usr/bin/getstuff
+Path:     /snap/bin/
+New Mode: owner r
+Severity: unknown
+
+ [1 - owner /snap/bin/ r,]
+(A)llow / [(D)eny] / (I)gnore / (G)lob / Glob with (E)xtension / (N)ew / Audi(t) / (O)wner permissions off / Abo(r)t / (F)inish
+Adding owner /snap/bin/ r, to profile.
+
+Profile:  /usr/bin/getstuff
+Path:     /etc/mono/config
+New Mode: owner r
+Severity: unknown
+
+ [1 - owner /etc/mono/config r,]
+(A)llow / [(D)eny] / (I)gnore / (G)lob / Glob with (E)xtension / (N)ew / Audi(t) / (O)wner permissions off / Abo(r)t / (F)inish
+Adding owner /etc/mono/config r, to profile.
+
+Profile:  /usr/bin/getstuff
+Path:     /dev/shm/
+New Mode: owner r
+Severity: unknown
+
+ [1 - include <abstractions/audio>]
+  2 - owner /dev/shm/ r, 
+(A)llow / [(D)eny] / (I)gnore / (G)lob / Glob with (E)xtension / (N)ew / Audi(t) / (O)wner permissions off / Abo(r)t / (F)inish
+Adding include <abstractions/audio> to profile.
+
+Profile:  /usr/bin/getstuff
+Path:     /proc/
+New Mode: owner r
+Severity: 6
+
+ [1 - owner /proc/ r,]
+(A)llow / [(D)eny] / (I)gnore / (G)lob / Glob with (E)xtension / (N)ew / Audi(t) / (O)wner permissions off / Abo(r)t / (F)inish
+Adding owner /proc/ r, to profile.
+
+Profile:  /usr/bin/getstuff
+Path:     /dev/shm/mono.5844
+New Mode: owner w
+Severity: unknown
+
+ [1 - owner /dev/shm/mono.5844 w,]
+(A)llow / [(D)eny] / (I)gnore / (G)lob / Glob with (E)xtension / (N)ew / Audi(t) / (O)wner permissions off / Abo(r)t / (F)inish
+Adding owner /dev/shm/mono.5844 w, to profile.
+
+Profile:  /usr/bin/getstuff
+Path:     /dev/shm/mono.8269
+New Mode: owner w
+Severity: unknown
+
+ [1 - owner /dev/shm/mono.8269 w,]
+(A)llow / [(D)eny] / (I)gnore / (G)lob / Glob with (E)xtension / (N)ew / Audi(t) / (O)wner permissions off / Abo(r)t / (F)inish
+Adding owner /dev/shm/mono.8269 w, to profile.
+
+= Changed Local Profiles =
+
+The following local profiles were changed. Would you like to save them?
+
+ [1 - /usr/bin/getstuff]
+(S)ave Changes / Save Selec(t)ed Profile / [(V)iew Changes] / View Changes b/w (C)lean profiles / Abo(r)t
+
+= Changed Local Profiles =
+
+The following local profiles were changed. Would you like to save them?
+
+ [1 - /usr/bin/getstuff]
+(S)ave Changes / Save Selec(t)ed Profile / [(V)iew Changes] / View Changes b/w (C)lean profiles / Abo(r)t
+
+= Changed Local Profiles =
+
+The following local profiles were changed. Would you like to save them?
+
+ [1 - /usr/bin/getstuff]
+(S)ave Changes / Save Selec(t)ed Profile / [(V)iew Changes] / View Changes b/w (C)lean profiles / Abo(r)t
+
+= Changed Local Profiles =
+
+The following local profiles were changed. Would you like to save them?
+
+ [1 - /usr/bin/getstuff]
+(S)ave Changes / Save Selec(t)ed Profile / [(V)iew Changes] / View Changes b/w (C)lean profiles / Abo(r)t
+
+= Changed Local Profiles =
+
+The following local profiles were changed. Would you like to save them?
+
+ [1 - /usr/bin/getstuff]
+(S)ave Changes / Save Selec(t)ed Profile / [(V)iew Changes] / View Changes b/w (C)lean profiles / Abo(r)t
+
+= Changed Local Profiles =
+
+The following local profiles were changed. Would you like to save them?
+
+ [1 - /usr/bin/getstuff]
+(S)ave Changes / Save Selec(t)ed Profile / [(V)iew Changes] / View Changes b/w (C)lean profiles / Abo(r)t
+
+= Changed Local Profiles =
+
+The following local profiles were changed. Would you like to save them?
+
+ [1 - /usr/bin/getstuff]
+(S)ave Changes / Save Selec(t)ed Profile / [(V)iew Changes] / View Changes b/w (C)lean profiles / Abo(r)t
+Writing updated profile for /usr/bin/getstuff.
+
+Profiling: /usr/bin/getstuff
+
+Please start the application to be profiled in
+another window and exercise its functionality now.
+
+Once completed, select the "Scan" option below in 
+order to scan the system logs for AppArmor events. 
+
+For each AppArmor event, you will be given the 
+opportunity to choose whether the access should be 
+allowed or denied.
+
+[(S)can system log for AppArmor events] / (F)inish
+
+5. Maak, gelijkaardig aan getstuff.exe, volgens REF1 een executable /usr/bin/httpserver voor
+httpserver.py aan. (deze draait niet met mono maar met python3)
+
+root@ubuntu:/# sudo tee /usr/bin/httpserver > /dev/null << 'EOF'
+#!/bin/bash
+python3 /usr/lib/getstuff/httpserver.py
+EOF
+root@ubuntu:/# sudo chmod +x /usr/bin/httpserver
+root@ubuntu:/# /usr/bin/httpserver
+Fri Oct 24 12:37:20 2025 Server Starts - localhost:1234
+
+6. Maak nu ook een apparmor profiel voor /usr/bin/httpserver. Let erop dat je ook uittest of je de
+httpserver kan bereiken vanuit je browser vanop http://localhost:1234
+Opmerking: Je profiel opnieuw maken kan je door /etc/apparmor.d/usr.bin.getstuff te verwijderen
+
+ubuntu@ubuntu:~$ sudo aa-genprof /usr/bin/httpserver
+Updating AppArmor profiles in /etc/apparmor.d.
+Writing updated profile for /usr/bin/httpserver.
+Setting /usr/bin/httpserver to complain mode.
+
+Before you begin, you may wish to check if a
+profile already exists for the application you
+wish to confine. See the following wiki page for
+more information:
+https://gitlab.com/apparmor/apparmor/wikis/Profiles
+
+Profiling: /usr/bin/httpserver
+
+Please start the application to be profiled in
+another window and exercise its functionality now.
+
+Once completed, select the "Scan" option below in 
+order to scan the system logs for AppArmor events. 
+
+For each AppArmor event, you will be given the 
+opportunity to choose whether the access should be 
+allowed or denied.
+
+[(S)can system log for AppArmor events] / (F)inish
+Reading log entries from /var/log/audit/audit.log.
+
+Profile:  /usr/bin/httpserver
+Execute:  /usr/bin/python3.10
+Severity: unknown
+
+(I)nherit / (C)hild / (N)amed / (X) ix On / (D)eny / Abo(r)t / (F)inish
+
+Tweede terminal 
+root@ubuntu:/# /usr/bin/httpserver
+Fri Oct 24 12:38:36 2025 Server Starts - localhost:1234
+127.0.0.1 - - [24/Oct/2025 12:39:09] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [24/Oct/2025 12:39:09] "GET /favicon.ico HTTP/1.1" 200 -
