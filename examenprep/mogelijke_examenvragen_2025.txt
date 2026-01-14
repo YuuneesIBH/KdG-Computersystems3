@@ -1,0 +1,14 @@
+Mondeling Computersystemen 2 - ISB in G501 15/01/26 om 11 uur
+
+Op het examen wordt er verondersteld dat je nog niets vergeten bent van Linux scripting. Je krijgt oefeningen in dezelfde trend van de praktijkoefeningen. Mogelijk een combinatie.
+- commandline/script om logische volumes aan te maken en te verwijderen
+- een eigen systemd service maken
+- een DNS server voorzien met eigen hosts (forward en reverse) voor een eigen domein
+- een https site voorzien met apache
+- een ftps site voorzien met proftpd
+- een portscan script schrijven met scapy
+- een deb pakket maken dat voldoet aan de deb policies
+- een apparmor profiel maken
+- een ansible role aanmaken die voldoet aan ansible-lint
+
+Geen SElinux, nagios, iSCSI en loadbalancing
