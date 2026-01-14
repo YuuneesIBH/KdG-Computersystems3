@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtualisatie Quiz - Volledige Theorie</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .progress-bar {
+            background: rgba(255,255,255,0.3);
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: #4ade80;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .quiz-content {
+            padding: 40px;
+        }
+        
+        .question {
+            display: none;
+        }
+        
+        .question.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .question h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 1.3em;
+            line-height: 1.5;
+        }
+        
+        .category {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-bottom: 15px;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.05em;
+        }
+        
+        .option:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+        
+        .option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .option.correct {
+            background: #4ade80;
+            color: white;
+            border-color: #4ade80;
+        }
+        
+        .option.wrong {
+            background: #f87171;
+            color: white;
+            border-color: #f87171;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 15px;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .btn-next {
+            background: #667eea;
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-next:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-next:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .results {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .results.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        .score {
+            font-size: 4em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 20px 0;
+        }
+        
+        .feedback {
+            font-size: 1.5em;
+            color: #555;
+            margin: 20px 0;
+        }
+        
+        .category-scores {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: left;
+        }
+        
+        .category-score {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .category-score:last-child {
+            border-bottom: none;
+        }
+        
+        .btn-restart {
+            background: #667eea;
+            color: white;
+            margin-top: 20px;
+        }
+        
+        .btn-restart:hover {
+            background: #5568d3;
+        }
+        
+        .explanation {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .explanation.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖥️ Virtualisatie Quiz - Volledige Theorie</h1>
+            <p id="question-counter">Vraag 1 van 60</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+        </div>
+        
+        <div class="quiz-content" id="quiz">
+            <!-- Questions will be inserted here -->
+        </div>
+        
+        <div class="results" id="results">
+            <h2>🎉 Quiz Voltooid!</h2>
+            <div class="score" id="score">0%</div>
+            <p class="feedback" id="feedback"></p>
+            <div class="category-scores" id="categoryScores"></div>
+            <button class="btn-restart" onclick="restartQuiz()">Opnieuw Proberen</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            // BASISCONCEPTEN (10 vragen)
+            {
+                category: "Basisconcepten",
+                q: "Wat is het typische gebruikspercentage van fysieke servers zonder virtualisatie?",
+                options: ["5-10%", "25-30%", "50-60%", "80-90%"],
+                correct: 0,
+                explanation: "Fysieke servers worden typisch slechts 5-10% benut, wat zeer inefficiënt is."
+            },
+            {
+                category: "Basisconcepten",
+                q: "Wat is de primaire functie van een hypervisor?",
+                options: ["Database beheren", "Hardware virtualiseren en VM toegang regelen", "Netwerk routering", "Alleen storage beheren"],
+                correct: 1,
+                explanation: "De hypervisor virtualiseert hardware en regelt de toegang voor meerdere VMs tot fysieke resources."
+            },
+            {
+                category: "Basisconcepten",
+                q: "Welke hypervisor is een Type 2 (Hosted) hypervisor?",
+                options: ["VMware ESXi", "Microsoft Hyper-V", "VirtualBox", "Citrix Xen"],
+                correct: 2,
+                explanation: "VirtualBox draait op een bestaand OS en is dus Type 2. De anderen zijn Type 1 (Bare Metal)."
+            },
+            {
+                category: "Basisconcepten",
+                q: "Wat betekent 'bare metal' bij Type 1 hypervisors?",
+                options: ["Het draait op bestaand OS", "Het draait direct op hardware", "Het is een software emulator", "Het vereist een kernel"],
+                correct: 1,
+                explanation: "Type 1 hypervisors draaien direct op de hardware zonder onderliggend besturingssysteem."
+            },
+            {
+                category: "Basisconcepten",
+                q: "Wat is het verschil tussen monolithic en microkernel Type 1 hypervisors?",
+                options: ["Geen verschil", "Monolithic heeft alle drivers in kernel, microkernel niet", "Microkernel is langzamer", "Monolithic is alleen voor Windows"],
+                correct: 1,
+                explanation: "Bij monolithic zitten alle drivers in de kernel (vSphere, KVM, Xen). Bij microkernel (Hyper-V) draait veel buiten de kernel."
+            },
+            {
+                category: "Basisconcepten",
+                q: "Welk voordeel biedt virtualisatie NIET?",
+                options: ["Consolidatie", "Snellere deployment", "Hogere CPU snelheid per VM", "Disaster recovery"],
+                correct: 2,
+                explanation: "Virtualisatie verhoogt niet de CPU snelheid per VM. CPU resources worden juist gedeeld tussen meerdere VMs."
+            },
+            {
+                category: "Basisconcepten",
+                q: "Wat is IaaS (Infrastructure as a Service)?",
+                options: ["Software updates service", "Gehoste infrastructuur on-demand", "Internet access service", "Database service"],
+                correct: 1,
+                explanation: "IaaS biedt computing infrastructuur on-demand, vaak via virtualisatie. Beheerbaar via IaC (Infrastructure as Code)."
+            },
+            {
+                category: "Basisconcepten",
+                q: "Waarom is hardware-onafhankelijkheid belangrijk bij virtualisatie?",
+                options: ["Voor snelheid", "Voor portabiliteit en migratie", "Voor beveiliging", "Voor opslag"],
+                correct: 1,
+                explanation: "Hardware-onafhankelijkheid maakt VMs portabel en makkelijk te migreren tussen hosts en datacenters."
+            },
+            {
+                category: "Basisconcepten",
+                q: "Wat is het resultaat van consolidatie?",
+                options: ["Meer fysieke servers nodig", "Meerdere OSes op 1 fysiek systeem", "Langzamere deployment", "Hogere kosten"],
+                correct: 1,
+                explanation: "Consolidatie betekent meerdere workloads (OSes) op één fysieke server, wat ruimte en kosten bespaart."
+            },
+            {
+                category: "Basisconcepten",
+                q: "Welke uitspraak over VMs is NIET correct?",
+                options: ["VM = 100% software", "VM draait geïsoleerd", "VMs kunnen software conflicten hebben onderling", "VM is hypervisor-afhankelijk"],
+                correct: 2,
+                explanation: "VMs draaien geïsoleerd, dus hebben GEEN software conflicten onderling. Elke VM heeft zijn eigen omgeving."
+            },
+
+            // RESOURCE SHARING (8 vragen)
+            {
+                category: "Resource Sharing",
+                q: "Hoe worden CPU resources verdeeld over VMs?",
+                options: ["Elke VM krijgt dedicated core", "Time-slicing over virtual processors", "Round-robin scheduling only", "VMs delen één processor"],
+                correct: 1,
+                explanation: "CPU wordt verdeeld via time-slicing, waarbij virtual processors gecreëerd worden voor elke VM."
+            },
+            {
+                category: "Resource Sharing",
+                q: "Hoe beschermt de hypervisor memory tussen VMs?",
+                options: ["Via encryption", "Via contiguous virtual memory spaces per VM", "Via shared memory pools", "Memory is niet beschermd"],
+                correct: 1,
+                explanation: "De hypervisor creëert aparte contiguous virtual memory spaces per VM, die beschermd zijn tegen elkaar."
+            },
+            {
+                category: "Resource Sharing",
+                q: "Wat doet een balloon driver?",
+                options: ["Disk compressie", "Memory management tussen host en VM", "Network load balancing", "CPU scheduling"],
+                correct: 1,
+                explanation: "De balloon driver helpt bij memory management door memory terug te claimen van VMs wanneer de host dit nodig heeft."
+            },
+            {
+                category: "Resource Sharing",
+                q: "Op welke laag werkt een virtual switch?",
+                options: ["Layer 1 (Physical)", "Layer 2 (Data Link)", "Layer 3 (Network)", "Layer 4 (Transport)"],
+                correct: 1,
+                explanation: "Virtual switches opereren op Layer 2 met MAC address tables, net als fysieke switches."
+            },
+            {
+                category: "Resource Sharing",
+                q: "Kunnen meerdere Layer 2 switches naar dezelfde physical NIC?",
+                options: ["Ja, altijd", "Nee, Layer 2 conflict", "Alleen met VLAN", "Alleen met bridging"],
+                correct: 1,
+                explanation: "Twee Layer 2 switches naar 1 NIC geeft conflicten. Elke virtual switch heeft zijn eigen uplink nodig."
+            },
+            {
+                category: "Resource Sharing",
+                q: "Wat ondersteunt een virtual switch?",
+                options: ["Alleen MAC forwarding", "VLAN segmentatie, access & trunk ports", "Alleen routing", "Layer 3 functies"],
+                correct: 1,
+                explanation: "Virtual switches ondersteunen VLAN segmentatie met zowel access als trunk ports, net als fysieke switches."
+            },
+            {
+                category: "Resource Sharing",
+                q: "Kan hardware (bijv. USB) gedeeld worden tussen meerdere VMs tegelijk?",
+                options: ["Ja, altijd", "Nee, meestal slechts 1 VM tegelijk", "Alleen bij Type 2", "Alleen bij clustering"],
+                correct: 1,
+                explanation: "Hardware zoals USB devices kan meestal slechts aan 1 VM tegelijk toegewezen worden."
+            },
+            {
+                category: "Resource Sharing",
+                q: "Kunnen VMs op dezelfde host communiceren zonder virtual switch?",
+                options: ["Ja, direct", "Nee, alle communicatie gaat via virtual switch", "Alleen met shared memory", "Alleen binnen zelfde VLAN"],
+                correct: 1,
+                explanation: "Alle netwerk communicatie op een host gaat via één of meer virtual switches, zelfs tussen VMs op dezelfde host."
+            },
+
+            // VM FILES & HARDWARE (10 vragen)
+            {
+                category: "VM Files & Hardware",
+                q: "Welk bestand bevat de VM configuratie (hardware settings)?",
+                options: [".vmdk", ".vmx", ".vswp", ".nvram"],
+                correct: 1,
+                explanation: ".vmx is een tekstbestand met configuratie zoals RAM, NICs, HDs, en ports."
+            },
+            {
+                category: "VM Files & Hardware",
+                q: "Wat is de functie van het .vswp bestand?",
+                options: ["BIOS settings", "Swap file bij memory exhaustion", "Snapshot data", "Log informatie"],
+                correct: 1,
+                explanation: ".vswp (swap file) wordt gebruikt wanneer physical memory uitgeput is. Grootte = assigned mem - reservation."
+            },
+            {
+                category: "VM Files & Hardware",
+                q: "Welk bestand bevat BIOS/hardware configuratie opties?",
+                options: [".vmx", ".nvram", ".vmdk", ".log"],
+                correct: 1,
+                explanation: ".nvram is een binair bestand dat BIOS en hardware configuratie opties bevat."
+            },
+            {
+                category: "VM Files & Hardware",
+                q: "Wat is het verschil tussen .vmdk en .flat-vmdk?",
+                options: ["Geen verschil", ".vmdk is descriptor, .flat-vmdk bevat data", ".vmdk is nieuwer", ".flat-vmdk is compressed"],
+                correct: 1,
+                explanation: ".vmdk is de disk descriptor (metadata), .flat-vmdk is het default bestand met de werkelijke disk data."
+            },
+            {
+                category: "VM Files & Hardware",
+                q: "Wanneer wordt een -delta.vmdk bestand aangemaakt?",
+                options: ["Bij VM start", "Bij snapshot creatie", "Bij migration", "Bij backup"],
+                correct: 1,
+                explanation: "-delta.vmdk bestanden worden gecreëerd bij het maken van een snapshot."
+            },
+            {
+                category: "VM Files & Hardware",
+                q: "Wat betekent thin provisioning?",
+                options: ["Volledige disk allocatie direct", "Disk groeit on-demand tot maximum", "Disk compressie", "RAID configuratie"],
+                correct: 1,
+                explanation: "Thin provisioning gebruikt alleen benodigde ruimte en groeit naar max capaciteit when needed."
+            },
+            {
+                category: "VM Files & Hardware",
+                q: "Wat is thick provisioning?",
+                options: ["Disk groeit on-demand", "Volledige disk ruimte direct gealloceerd", "Compressed disk", "Deduplicated disk"],
+                correct: 1,
+                explanation: "Bij thick provisioning wordt volledige disk ruimte voor de virtual disk direct bij creatie gealloceerd."
+            },
+            {
+                category: "VM Files & Hardware",
+                q: "Kunnen thin en thick provisioned disks gemixt worden op VMs?",
+                options: ["Nee, moet uniform", "Ja, kan gemixed worden", "Alleen op Type 1", "Alleen met SAN"],
+                correct: 1,
+                explanation: "Thin en thick provisioning kunnen gemixed worden op dezelfde VM voor verschillende disks."
+            },
+            {
+                category: "VM Files & Hardware",
+                q: "Wat ziet een guest OS qua hardware?",
+                options: ["Virtuele hardware", "Echte hardware (lijkt echt)", "Beide", "Alleen software"],
+                correct: 1,
+                explanation: "De guest OS ziet hardware die echt lijkt, maar het is uniform virtual hardware wat portabiliteit geeft."
+            },
+            {
+                category: "VM Files & Hardware",
+                q: "Wat bevatten .log bestanden?",
+                options: ["Configuratie", "Performance info en troubleshooting data", "Disk data", "Memory dumps"],
+                correct: 1,
+                explanation: ".log bestanden bevatten machine performance informatie nuttig voor troubleshooting."
+            },
+
+            // STORAGE CONCEPTEN (12 vragen)
+            {
+                category: "Storage",
+                q: "Wat is DAS (Direct-Attached Storage)?",
+                options: ["Network storage", "Internal/externe disks direct verbonden via SATA/IDE", "SAN storage", "Cloud storage"],
+                correct: 1,
+                explanation: "DAS zijn storage disks/arrays direct verbonden aan de host (niet via netwerk), meestal SATA, IDE, EIDE."
+            },
+            {
+                category: "Storage",
+                q: "Welke technologie gebruikt SCSI commands over IP?",
+                options: ["Fibre Channel", "FCoE", "iSCSI", "NFS"],
+                correct: 2,
+                explanation: "iSCSI (Internet SCSI) verstuurt SCSI commands over IP netwerken."
+            },
+            {
+                category: "Storage",
+                q: "Wat is FCoE?",
+                options: ["Fibre Channel over Email", "Fibre Channel over Ethernet", "Fast Connection Engine", "File Copy over Ethernet"],
+                correct: 1,
+                explanation: "FCoE (Fibre Channel over Ethernet) encapsuleert Fibre Channel traffic in Ethernet frames."
+            },
+            {
+                category: "Storage",
+                q: "Wat is een iSCSI initiator?",
+                options: ["Storage array", "Transmitter van SCSI commands over IP (in host)", "Network switch", "Disk controller"],
+                correct: 1,
+                explanation: "De initiator zit in de virtualization node en verstuurt SCSI commands over IP naar de target."
+            },
+            {
+                category: "Storage",
+                q: "Wat is een iSCSI target?",
+                options: ["Virtualization host", "Storage array die SCSI commands ontvangt", "Network router", "Backup server"],
+                correct: 1,
+                explanation: "De target zit in de storage array en ontvangt SCSI commands van de initiator."
+            },
+            {
+                category: "Storage",
+                q: "Wat is het format van een IQN (iSCSI Qualified Name)?",
+                options: ["IP address", "iqn.jaar-maand.com.bedrijf:string", "MAC address", "UUID"],
+                correct: 1,
+                explanation: "IQN format: iqn.registratie-datum.reversed-domain:unique-string, bijv. iqn.1992-08.com.mycompany:stor1"
+            },
+            {
+                category: "Storage",
+                q: "Wat is een EUI identifier in iSCSI?",
+                options: ["Email address", "Extended Unique Identifier met IEEE ID + serial", "European Unit ID", "Encryption key"],
+                correct: 1,
+                explanation: "EUI format: eui.24bits-IEEE-company.40bits-serial-number"
+            },
+            {
+                category: "Storage",
+                q: "Wat is een WWN (World Wide Name)?",
+                options: ["Website naam", "64-bit Fibre Channel address", "Windows network name", "Wireless network ID"],
+                correct: 1,
+                explanation: "WWN is een uniek 64-bit adres voor FC nodes, bijv. 21:00:00:E0:8B:19:AB:31"
+            },
+            {
+                category: "Storage",
+                q: "Wat is LUN masking?",
+                options: ["Disk encryption", "Bepalen welke LUNs zichtbaar zijn per host", "RAID configuratie", "Backup scheduling"],
+                correct: 1,
+                explanation: "LUN masking bepaalt welke LUNs zichtbaar zijn voor specifieke hosts, voor security en data integrity."
+            },
+            {
+                category: "Storage",
+                q: "Wat is het verschil tussen hard en soft zoning in FC?",
+                options: ["Geen verschil", "Hard = switch port filtering, Soft = name service filtering", "Hard is sneller", "Soft is veiliger"],
+                correct: 1,
+                explanation: "Hard zoning filtert op switch niveau per port. Soft zoning gebruikt name service (security through obscurity)."
+            },
+            {
+                category: "Storage",
+                q: "Wat is multipathing in storage?",
+                options: ["Multiple VMs naar storage", "Alternate paths wanneer één pad faalt", "RAID configuratie", "Load balancing"],
+                correct: 1,
+                explanation: "Multipathing biedt alternatieve paden naar storage voor redundancy en failover."
+            },
+            {
+                category: "Storage",
+                q: "Wat moet je doen om NFS storage te mounten?",
+                options: ["Alleen IP adres", "NFS server IP + shared folder + mount naam", "Alleen folder naam", "Certificaat"],
+                correct: 1,
+                explanation: "Voor NFS heb je nodig: server IP/naam, shared folder path, mount options (RW/RO), en datastore naam."
+            },
+
+            // NETWORKING (10 vragen)
+            {
+                category: "Networking",
+                q: "Wat is de basis van een physical switch?",
+                options: ["IP routing", "MAC address table (Layer 2)", "DNS lookups", "DHCP"],
+                correct: 1,
+                explanation: "Physical switches werken op Layer 2 met MAC address tables die ports aan MAC adressen koppelen."
+            },
+            {
+                category: "Networking",
+                q: "Wat zijn de connection types voor virtual switches?",
+                options: ["Alleen communication", "Communication, management, migration, storage", "Alleen management", "Alleen storage"],
+                correct: 1,
+                explanation: "Virtual switches kunnen gebruikt worden voor: communication, management, migration, en storage traffic."
+            },
+            {
+                category: "Networking",
+                q: "Wat is NIC teaming?",
+                options: ["VMs groeperen", "Meerdere NICs combineren voor bandwidth/failover", "Network monitoring", "VLAN configuratie"],
+                correct: 1,
+                explanation: "NIC teaming combineert bandwidth van meerdere NICs en biedt failover bij NIC failure."
+            },
+            {
+                category: "Networking",
+                q: "Ondersteunt een virtual switch 802.1Q?",
+                options: ["Nee", "Ja, voor VLAN tagging", "Alleen Type 1", "Alleen met hardware"],
+                correct: 1,
+                explanation: "Virtual switches ondersteunen 802.1Q voor VLAN tagging op trunk ports."
+            },
+            {
+                category: "Networking",
+                q: "Wat moet je overwegen bij physical network design?",
+                options: ["Alleen aantal NICs", "NICs, switches, traffic separation, teaming, VLANs, CDP", "Alleen VLAN support", "Alleen bandbreedte"],
+                correct: 1,
+                explanation: "Overweeg: aantal NICs, switches/ports, traffic separation (security), NIC teaming, VLAN trunking, en CDP support."
+            },
+            {
+                category: "Networking",
+                q: "Wat is CDP in netwerk context?",
+                options: ["Cloud Data Protocol", "Cisco Discovery Protocol", "Connection Data Port", "Central Distribution Point"],
+                correct: 1,
+                explanation: "CDP (Cisco Discovery Protocol) wordt ondersteund door virtual switches voor netwerk discovery."
+            },
+            {
+                category: "Networking",
+                q: "Kunnen multiple virtual switches per hypervisor host?",
+                options: ["Nee, slechts 1", "Ja, meerdere mogelijk", "Alleen bij Type 2", "Alleen met clustering"],
+                correct: 1,
+                explanation: "Je kunt meerdere virtual switches per hypervisor host hebben voor verschillende doeleinden."
+            },
+            {
+                category: "Networking",
+                q: "Wat gebeurt er bij communication tussen VMs op dezelfde host?",
+                options: ["Direct, geen switch", "Gaat via virtual switch", "Via physical network", "Via hypervisor kernel"],
+                correct: 1,
+                explanation: "Zelfs VMs op dezelfde host communiceren via de virtual switch."
+            },
+            {
+                category: "Networking",
+                q: "Welke port types zijn er op virtual switches?",
+                options: ["Alleen access ports", "Access en trunk ports", "Alleen trunk ports", "Mirror ports"],
+                correct: 1,
+                explanation: "Virtual switches ondersteunen zowel access ports (ontagged) als trunk ports (802.1Q tagged)."
+            },
+            {
+                category: "Networking",
+                q: "Wat zijn virtual switch policies?",
+                options: ["Alleen security", "Security, traffic shaping, NIC teaming, features", "Alleen teaming", "Alleen QoS"],
+                correct: 1,
+                explanation: "Virtual switch policies omvatten: security settings, traffic shaping, NIC teaming policies, en additional features."
+            },
+
+            // VM MANAGEMENT (10 vragen)
+            {
+                category: "VM Management",
+                q: "Wat is een VM template?",
+                options: ["Backup", "Primary copy van VM voor fast deployment", "Snapshot", "Clone"],
+                correct: 1,
+                explanation: "Een template is een primary copy (OS + apps + config) gebruikt voor snelle, consistente VM deployment."
+            },
+            {
+                category: "VM Management",
+                q: "Wat is een VM clone?",
+                options: ["Template", "Volledige copy van bestaande VM", "Snapshot", "Backup"],
+                correct: 1,
+                explanation: "Een clone is een volledige, onafhankelijke copy van een bestaande VM."
+            },
+            {
+                category: "VM Management",
+                q: "Wat is hot-pluggable hardware?",
+                options: ["Alle hardware", "Hardware toevoegen terwijl VM draait (USB, NIC, disk, soms CPU/RAM)", "Alleen USB", "Alleen disk"],
+                correct: 1,
+                explanation: "Hot-pluggable betekent hardware toevoegen zonder VM uit te zetten: USB, Ethernet, disk, soms CPU/memory."
+            },
+            {
+                category: "VM Management",
+                q: "Wat is cold migration?",
+                options: ["VM migreren terwijl deze draait", "VM migreren terwijl deze uit staat", "Storage migreren", "Template migreren"],
+                correct: 1,
+                explanation: "Cold migration betekent de VM uitschakelen, migreren, en weer opstarten."
+            },
+            {
+                category: "VM Management",
+                q: "Wat is hot migration?",
+                options: ["VM migreren terwijl uit", "VM migreren terwijl deze draait (vaak shared storage)", "VM dupliceren", "VM backuppen"],
+                correct: 1,
+                explanation: "Hot migration (live migration) verplaatst een draaiende VM, meestal met shared storage voor disk access."
+            },
+            {
+                category: "VM Management",
+                q: "Wat is een VM snapshot?",
+                options: ["Full backup", "Point-in-time state preservation met delta changes", "Clone", "Template"],
+                correct: 1,
+                explanation: "Een snapshot bewaart VM state op een moment met alleen changed blocks (copy-on-write), niet voor backup!"
+            },
+            {
+                category: "VM Management",
+                q: "Wat is de standaard initiële grootte van een snapshot?",
+                options: ["1MB", "16MB", "100MB", "1GB"],
+                correct: 1,
+                explanation: "Default snapshot space allocation is 16MB, groeit met changed blocks."
+            },
+            {
+                category: "VM Management",
+                q: "Hoe werken multiple snapshots?",
+                options: ["Allemaal parallel", "Parent → Child hierarchie", "Geen hierarchie", "Alleen 1 mogelijk"],
+                correct: 1,
+                explanation: "Snapshots hebben een parent-child hierarchie. Je kunt multiple snapshots hebben in een tree."
+            },
+            {
+                category: "VM Management",
+                q: "Waarvoor worden snapshots NIET aanbevolen?",
+                options: ["Patching", "Software upgrades", "Configuration testing", "Backup/recovery"],
+                correct: 3,
+                explanation: "Snapshots zijn NIET voor backup/recovery maar voor tijdelijke state preservation tijdens testing/patching."
+            },
+            {
+                category: "VM Management",
+                q: "Wat gebeurt er bij 'Remove from inventory'?",
+                options: ["VM permanent gewist", "VM uit lijst, kan weer toegevoegd worden", "VM gestopt", "Snapshot gemaakt"],
+                correct: 1,
+                explanation: "Remove from inventory haalt de VM uit de lijst maar bestanden blijven bestaan. Re-addition is mogelijk."
+            },
+
+            // CENTRAL MANAGEMENT (5 vragen)
+            {
+                category: "Central Management",
+                q: "Wat is de functie van central management (vCenter/Proxmox cluster)?",
+                options: ["Alleen monitoring", "Centraal beheerpunt voor meerdere hosts met advanced features", "Storage management", "Backup"],
+                correct: 1,
+                explanation: "Central management biedt centraal beheer voor multiple hosts met features zoals HA, FT, en migration."
+            },
+            {
+                category: "Central Management",
+                q: "Welke advanced features vereisen meestal central management?",
+                options: ["VM creation", "HA, FT, geautomatiseerde migration", "Snapshots", "Templates"],
+                correct: 1,
+                explanation: "High Availability (HA), Fault Tolerance (FT), en geautomatiseerde migration vereisen meestal central management/clustering."
+            },
+            {
+                category: "Central Management",
+                q: "Wat biedt central management qua functionaliteit?",
+                options: ["Alleen inventaris", "Inventarisatie, monitoring, administratie, clustering", "Alleen monitoring", "Alleen configuratie"],
+                correct: 1,
+                explanation: "Central management biedt: inventarisatie van resources, monitoring, administratie, en clustering functies."
+            },
+            {
+                category: "Central Management",
+                q: "Zijn er extra licentiekosten voor central management?",
+                options: ["Altijd gratis", "Vaak wel extra kosten", "Alleen bij VMware", "Alleen bij Microsoft"],
+                correct: 1,
+                explanation: "Central management heeft vaak extra licentiekosten en specifieke requirements (te onderzoeken per platform)."
+            },
+            {
+                category: "Central Management",
+                q: "Kan een VM migreren tussen hosts zonder shared storage?",
+                options: ["Ja altijd", "Mogelijk maar vaak vereist shared storage", "Nee nooit", "Alleen bij cold migration"],
+                correct: 1,
+                explanation: "Migratie zonder shared storage is mogelijk maar vereist disk copy. Shared storage maakt hot migration veel makkelijker."
+            },
+
+            // HIGH AVAILABILITY (5 vragen)
+            {
+                category: "High Availability",
+                q: "Wat is het doel van High Availability (HA)?",
+                options: ["Hogere performance", "Bescherming tegen hardware failures met auto-restart", "Snellere netwerken", "Meer storage"],
+                correct: 1,
+                explanation: "HA beschermt tegen hardware failures door VMs automatisch te herstarten op andere hosts bij failure."
+            },
+            {
+                category: "High Availability",
+                q: "Wat vereist HA typisch qua infrastructuur?",
+                options: ["Enkele server", "Redundante NICs, switches, storage ports", "Alleen storage", "Alleen netwerk"],
+                correct: 1,
+                explanation: "HA vereist redundantie op alle lagen: NIC cards, switches, storage ports, en meerdere hosts."
+            },
+            {
+                category: "High Availability",
+                q: "Wat betekent 'zero downtime bij planned maintenance'?",
+                options: ["Server blijft aan", "VMs migreren zonder downtime tijdens onderhoud", "Snellere updates", "Geen backups"],
+                correct: 1,
+                explanation: "Met HA kunnen VMs gemigreerd worden tijdens planned maintenance zonder downtime voor gebruikers."
+            },
+            {
+                category: "High Availability",
+                q: "Beschermt HA ook tegen disasters?",
+                options: ["Nee, alleen lokaal", "Ja, tegen unplanned downtime en disasters", "Alleen tegen power failures", "Alleen tegen disk failures"],
+                correct: 1,
+                explanation: "HA biedt bescherming tegen unplanned downtime én disasters door VM failover tussen hosts/sites."
+            },
+            {
+                category: "High Availability",
+                q: "Vereist HA een cluster van meerdere hypervisors?",
+                options: ["Nee, 1 host genoeg", "Ja, meerdere hosts nodig", "Alleen bij Type 1", "Alleen bij VMware"],
+                correct: 1,
+                explanation: "HA vereist meerdere hypervisor hosts in een cluster om VMs te kunnen failover bij host failure."
+            },
+
+            // MONITORING (4 vragen)
+            {
+                category: "Monitoring",
+                q: "Wat monitor je typisch bij VMs?",
+                options: ["Alleen CPU", "CPU, Memory, Disk, Network bandwidth", "Alleen Memory", "Alleen Network"],
+                correct: 1,
+                explanation: "Je moet CPU, Memory, Disk, en Network bandwidth monitoren voor goede performance."
+            },
+            {
+                category: "Monitoring",
+                q: "Wat is een alarm in virtualisatie context?",
+                options: ["Error log", "Notification bij selected events of conditions", "Backup melding", "Security warning"],
+                correct: 1,
+                explanation: "Een alarm is een notification die optreedt bij specifieke events of wanneer conditions bereikt worden."
+            },
+            {
+                category: "Monitoring",
+                q: "Welke events kunnen gemonitord worden?",
+                options: ["Alleen errors", "License expiry, VM power on, user login, host connection loss", "Alleen logins", "Alleen power events"],
+                correct: 1,
+                explanation: "Events kunnen zijn: license expiry, VM power on/off, user logins, host connection lost, en meer."
+            },
+            {
+                category: "Monitoring",
+                q: "Kunnen alarms automated actions triggeren?",
+                options: ["Nee, alleen notificaties", "Ja, automated actions mogelijk", "Alleen bij errors", "Alleen handmatig"],
+                correct: 1,
+                explanation: "Alarms kunnen automated actions triggeren zoals VMs herstarten, resources aanpassen, of scripts uitvoeren."
+            },
+
+            // USER INTERFACES & ADMINISTRATION (5 vragen)
+            {
+                category: "User Interfaces",
+                q: "Wat is het verschil tussen single server en clustered administration?",
+                options: ["Geen verschil", "Clustered heeft central management voor meerdere hosts", "Single is sneller", "Clustered heeft meer VMs"],
+                correct: 1,
+                explanation: "Bij clustered setup heb je een central management point voor meerdere hosts, bij single beheer je één host individueel."
+            },
+            {
+                category: "User Interfaces",
+                q: "Wat is een voordeel van GUI-based central management?",
+                options: ["Snellere VMs", "Overzicht en beheer van meerdere hosts vanuit één interface", "Goedkoper", "Veiliger"],
+                correct: 1,
+                explanation: "Central management GUI geeft overzicht over hele infrastructuur en maakt beheer van meerdere hosts eenvoudiger."
+            },
+            {
+                category: "User Interfaces",
+                q: "Kan je een enkele hypervisor later aan een cluster toevoegen?",
+                options: ["Nee, moet vanaf start", "Ja, standalone kan later clustered worden", "Alleen bij fresh install", "Alleen bij Type 2"],
+                correct: 1,
+                explanation: "Een standalone hypervisor kan later toegevoegd worden aan een cluster via central management."
+            },
+            {
+                category: "User Interfaces",
+                q: "Wat zie je typisch in een clustered management interface?",
+                options: ["Alleen VMs", "Hosts, VMs, resources, storage, networks van alle hosts", "Alleen één host", "Alleen storage"],
+                correct: 1,
+                explanation: "Clustered interface toont inventarisatie van hosts, VMs, resources, storage, en networks over alle hosts heen."
+            },
+            {
+                category: "User Interfaces",
+                q: "Vereist central management extra software installatie?",
+                options: ["Nee, altijd ingebouwd", "Vaak wel - plugin, appliance, of server", "Alleen bij VMware", "Alleen bij Type 1"],
+                correct: 1,
+                explanation: "Central management vereist vaak extra software: plugin, appliance, of dedicated management server (te onderzoeken per platform)."
+            },
+
+            // VM CREATION PROCES (8 vragen)
+            {
+                category: "VM Creation",
+                q: "Welke VM creation methoden bestaan er?",
+                options: ["Alleen manual", "Manual, import (OVF), IaC (Infrastructure as Code)", "Alleen IaC", "Alleen cloning"],
+                correct: 1,
+                explanation: "VM creation kan via: manual creation wizard, import van OVF files, of IaC tools (Terraform, Ansible, etc)."
+            },
+            {
+                category: "VM Creation",
+                q: "Wat is een OVF (Open Virtualization Format)?",
+                options: ["Backup format", "Standaard format voor preconfigured VMs", "Snapshot format", "Log format"],
+                correct: 1,
+                explanation: "OVF is een standaard format voor packaging en distributie van preconfigured virtual machines (VM + OS + apps)."
+            },
+            {
+                category: "VM Creation",
+                q: "Wat zijn guest tools?",
+                options: ["Backup software", "Drivers en utilities voor betere VM/host integratie", "Monitoring tools", "Security software"],
+                correct: 1,
+                explanation: "Guest tools bevatten drivers (display, balloon), utilities en integratie features tussen VM en hypervisor."
+            },
+            {
+                category: "VM Creation",
+                q: "Wat doet de virtual machine heartbeat feature?",
+                options: ["Performance meten", "Host informeren dat VM nog draait/responsive is", "Network latency meten", "Disk IO meten"],
+                correct: 1,
+                explanation: "Heartbeat laat de VM regelmatig aan host weten dat deze nog draait en responsive is (voor HA monitoring)."
+            },
+            {
+                category: "VM Creation",
+                q: "Waarom is time synchronization belangrijk in VMs?",
+                options: ["Voor snelheid", "Voor accurate logs, authentication, en tijdgevoelige applicaties", "Voor backup", "Voor network"],
+                correct: 1,
+                explanation: "Time sync zorgt voor accurate timestamps in logs, werking van authentication (Kerberos), en tijdgevoelige apps."
+            },
+            {
+                category: "VM Creation",
+                q: "Wat biedt guest tools qua shutdown mogelijkheid?",
+                options: ["Alleen force shutdown", "Graceful shutdown via hypervisor (clean OS shutdown)", "Snellere shutdown", "Scheduled shutdown"],
+                correct: 1,
+                explanation: "Guest tools maken graceful shutdown mogelijk: hypervisor kan OS netjes afsluiten via guest tools ipv hard power off."
+            },
+            {
+                category: "VM Creation",
+                q: "Welke driver in guest tools helpt met memory management?",
+                options: ["Display driver", "Balloon driver", "Network driver", "Storage driver"],
+                correct: 1,
+                explanation: "De balloon driver helpt bij memory management door memory dynamisch te reclaimen van VMs wanneer host dit nodig heeft."
+            },
+            {
+                category: "VM Creation",
+                q: "Wat is Infrastructure as Code (IaC) voor VM creation?",
+                options: ["Manual clicking", "Geautomatiseerde VM deployment via code/scripts", "Backup scripting", "Monitoring automation"],
+                correct: 1,
+                explanation: "IaC gebruikt tools zoals Terraform, Ansible om VM deployment te automatiseren en te versioneren als code."
+            },
+
+            // HA CONFIGURATIE DETAILS (6 vragen)
+            {
+                category: "HA Configuration",
+                q: "Wat doet HA NIET?",
+                options: ["VM failover bij host crash", "Performance boost voor VMs", "Protection tegen hardware failures", "Auto-restart VMs"],
+                correct: 1,
+                explanation: "HA biedt GEEN performance boost. Het is enkel voor availability/failover, niet voor snelheid."
+            },
+            {
+                category: "HA Configuration",
+                q: "Wat is een minimum vereiste voor HA?",
+                options: ["1 host genoeg", "Minimaal 2+ hosts in cluster", "Alleen shared storage", "Alleen redundante NICs"],
+                correct: 1,
+                explanation: "HA vereist minimaal 2 of meer hosts in een cluster zodat VMs kunnen failover bij host failure."
+            },
+            {
+                category: "HA Configuration",
+                q: "Is shared storage verplicht voor HA?",
+                options: ["Nee, niet nodig", "Vaak wel voor VM disk access na failover", "Alleen bij VMware", "Alleen bij Type 1"],
+                correct: 1,
+                explanation: "Shared storage is vaak vereist zodat de failover host toegang heeft tot VM disk files na failover."
+            },
+            {
+                category: "HA Configuration",
+                q: "Wat monitort HA om failures te detecteren?",
+                options: ["Alleen network", "Host heartbeats, VM heartbeats, storage access", "Alleen VMs", "Alleen CPU"],
+                correct: 1,
+                explanation: "HA monitort host heartbeats, VM heartbeats (via guest tools), en storage/network connectivity om failures te detecteren."
+            },
+            {
+                category: "HA Configuration",
+                q: "Wat gebeurt er bij host failure met HA enabled?",
+                options: ["VMs blijven uit", "VMs worden automatisch herstart op andere host", "Manual restart nodig", "Data verlies"],
+                correct: 1,
+                explanation: "Bij host failure restart HA automatisch de VMs op een andere beschikbare host in het cluster."
+            },
+            {
+                category: "HA Configuration",
+                q: "Verschilt HA configuratie per platform?",
+                options: ["Nee, altijd hetzelfde", "Ja, implementatie en requirements verschillen per platform", "Alleen VMware heeft HA", "Alleen Microsoft heeft HA"],
+                correct: 1,
+                explanation: "HA implementatie en configuratie verschilt per platform (VMware, Hyper-V, Proxmox, etc) - altijd platform-specifiek onderzoeken."
+            },
+
+            // FILESYSTEM LAYOUT (5 vragen)
+            {
+                category: "Filesystem",
+                q: "Wat is VMFS?",
+                options: ["Linux filesystem", "VMware's clustered filesystem voor VMs", "Windows filesystem", "Backup format"],
+                correct: 1,
+                explanation: "VMFS is VMware's eigen clustered filesystem geoptimaliseerd voor VM storage met concurrent access."
+            },
+            {
+                category: "Filesystem",
+                q: "Hoe worden datastores gemount in Linux/Unix hypervisors?",
+                options: ["Als drives (C:, D:)", "Als folders in directory structure", "Als databases", "Als network shares"],
+                correct: 1,
+                explanation: "In Linux/Unix worden datastores gemount als folders (bijv. /vmfs/datastore1) met subdirectories per VM."
+            },
+            {
+                category: "Filesystem",
+                q: "Wat is de structuur van een VM in het filesystem?",
+                options: ["Losse files verspreid", "Single directory met alle VM files", "Database entries", "Registry keys"],
+                correct: 1,
+                explanation: "Elke VM = single directory/folder met daarin alle VM files (.vmx, .vmdk, .vswp, .nvram, .log)."
+            },
+            {
+                category: "Filesystem",
+                q: "Kunnen meerdere hosts tegelijk naar dezelfde VMFS datastore schrijven?",
+                options: ["Nee, locking conflict", "Ja, VMFS ondersteunt concurrent access", "Alleen read", "Alleen met NFS"],
+                correct: 1,
+                explanation: "VMFS is een clustered filesystem dat concurrent read/write access van meerdere hosts ondersteunt met locking."
+            },
+            {
+                category: "Filesystem",
+                q: "Waar staan VM files bij gebruik van local storage?",
+                options: ["In database", "Op local datastore (local disk) van host", "Altijd op SAN", "In memory"],
+                correct: 1,
+                explanation: "Bij local storage staan VM files op de local disk/datastore van de specifieke host (niet gedeeld)."
+            },
+
+            // PROXMOX SPECIFICS (6 vragen)
+            {
+                category: "Proxmox",
+                q: "Welke port gebruikt Proxmox standaard voor web interface?",
+                options: ["80", "443", "8006", "3389"],
+                correct: 2,
+                explanation: "Proxmox web interface is bereikbaar via https://IP:8006"
+            },
+            {
+                category: "Proxmox",
+                q: "Wat is het IP bereik voor DHCP in Proxmox setup?",
+                options: ["IP 1-10", "IP 11-20", "IP 21-30", "IP 31-40"],
+                correct: 2,
+                explanation: "In de Proxmox setup: IP 1-20 voor static assignment, IP 21-30 reserved voor DHCP."
+            },
+            {
+                category: "Proxmox",
+                q: "Welk account gebruik je standaard voor Proxmox login?",
+                options: ["admin", "root", "proxmox", "user"],
+                correct: 1,
+                explanation: "Default account is 'root' met realm 'Linux PAM standard authentication'."
+            },
+            {
+                category: "Proxmox",
+                q: "Wat zijn de 4 suggested networks in Proxmox?",
+                options: ["Alleen outside", "outside, mgmt-inside, storage, migration", "outside, inside, DMZ, WAN", "LAN, WAN, DMZ, VPN"],
+                correct: 1,
+                explanation: "Proxmox setup suggereert: outside (external), mgmt-inside (management), storage, en migration networks."
+            },
+            {
+                category: "Proxmox",
+                q: "Wat is het IP adres van de NFS server in de setup?",
+                options: ["10.134.188.1", "10.134.189.34", "192.168.1.1", "10.0.0.1"],
+                correct: 1,
+                explanation: "NFS server: 10.134.189.34 met exported directory /isorepo"
+            },
+            {
+                category: "Proxmox",
+                q: "Is nested virtualization mogelijk in Proxmox?",
+                options: ["Nee, niet mogelijk", "Ja, vooral voor experimental setups", "Alleen bij Type 2", "Alleen met speciale hardware"],
+                correct: 1,
+                explanation: "Nested virtualization is mogelijk in Proxmox, vooral handig voor experimental setups. Proxmox als onderste laag gebruiken."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+        let categoryScores = {};
+
+        function initCategories() {
+            questions.forEach(q => {
+                if (!categoryScores[q.category]) {
+                    categoryScores[q.category] = { correct: 0, total: 0 };
+                }
+                categoryScores[q.category].total++;
+            });
+        }
+
+        function loadQuestion() {
+            const quiz = document.getElementById('quiz');
+            const q = questions[currentQuestion];
+            
+            quiz.innerHTML = `
+                <div class="question active">
+                    <span class="category">${q.category}</span>
+                    <h2>Vraag ${currentQuestion + 1}: ${q.q}</h2>
+                    <div class="options">
+                        ${q.options.map((opt, i) => `
+                            <div class="option" onclick="selectAnswer(${i})">${opt}</div>
+                        `).join('')}
+                    </div>
+                    <div class="explanation" id="explanation">
+                        💡 <strong>Uitleg:</strong> ${q.explanation}
+                    </div>
+                    <div class="nav-buttons">
+                        <button class="btn-next" id="nextBtn" onclick="nextQuestion()" disabled>
+                            ${currentQuestion < questions.length - 1 ? 'Volgende Vraag →' : 'Bekijk Resultaten 🎉'}
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            updateProgress();
+            answered = false;
+        }
+
+        function selectAnswer(selected) {
+            if (answered) return;
+            
+            answered = true;
+            const options = document.querySelectorAll('.option');
+            const correct = questions[currentQuestion].correct;
+            const category = questions[currentQuestion].category;
+            
+            options[selected].classList.add('selected');
+            
+            setTimeout(() => {
+                options[correct].classList.add('correct');
+                if (selected !== correct) {
+                    options[selected].classList.add('wrong');
+                } else {
+                    score++;
+                    categoryScores[category].correct++;
+                }
+                
+                document.getElementById('explanation').classList.add('show');
+                document.getElementById('nextBtn').disabled = false;
+                
+                options.forEach(opt => opt.style.pointerEvents = 'none');
+            }, 300);
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+            document.getElementById('question-counter').textContent = 
+                `Vraag ${currentQuestion + 1} van ${questions.length}`;
+        }
+
+        function showResults() {
+            const percentage = Math.round((score / questions.length) * 100);
+            document.getElementById('quiz').style.display = 'none';
+            document.getElementById('results').classList.add('active');
+            document.getElementById('score').textContent = percentage + '%';
+            
+            let feedback = '';
+            if (percentage === 100) feedback = '🏆 Perfect! Je bent een virtualisatie expert!';
+            else if (percentage >= 90) feedback = '🌟 Excellent! Bijna perfect!';
+            else if (percentage >= 80) feedback = '🎯 Zeer goed! Je beheerst de stof goed!';
+            else if (percentage >= 70) feedback = '👍 Goed gedaan! Nog wat details verbeteren.';
+            else if (percentage >= 60) feedback = '📖 Redelijk! Herhaal de zwakke punten.';
+            else feedback = '📚 Blijf oefenen! Bestudeer de theorie grondig.';
+            
+            document.getElementById('feedback').textContent = 
+                `Je hebt ${score} van de ${questions.length} vragen goed! ${feedback}`;
+            
+            let categoryHTML = '<h3 style="margin-bottom: 20px;">📊 Score per Categorie</h3>';
+            for (let cat in categoryScores) {
+                const catScore = categoryScores[cat];
+                const catPercentage = Math.round((catScore.correct / catScore.total) * 100);
+                categoryHTML += `
+                    <div class="category-score">
+                        <span><strong>${cat}</strong></span>
+                        <span>${catScore.correct}/${catScore.total} (${catPercentage}%)</span>
+                    </div>
+                `;
+            }
+            document.getElementById('categoryScores').innerHTML = categoryHTML;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            answered = false;
+            
+            for (let cat in categoryScores) {
+                categoryScores[cat].correct = 0;
+            }
+            
+            document.getElementById('quiz').style.display = 'block';
+            document.getElementById('results').classList.remove('active');
+            loadQuestion();
+        }
+
+        initCategories();
+        loadQuestion();
+    </script>
+</body>
+</html>
