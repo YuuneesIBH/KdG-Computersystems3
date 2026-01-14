@@ -1,0 +1,50 @@
+Examenlabo 1
+
+web.achternaam.local tls certificaat laten werken met easy-rsa config en tonen
+
+dus https://web.uwachternaam.local moet een slot hebbe linksvanbove in firefox
+
+apache2 config foto ook uploaden
+
+Examenlabo 2
+
+Maak een directory aan met de naam ACHTERNAAM-VOORNAAM.
+Hierin maak je de directory roles aan en een role (ansible directorystructuur) met de naam:
+ACHTERNAAM-pure-ftpd
+
+Maak een file playbook_ACHTERNAAM.yml aan. Deze installeert de role.
+Elke task begint met jouw achternaam in hoofdletters.
+bv TASKS [ CELIS remove nginx ]
+
+Jou playbook voert volgende functies uit:
+
+- Verwijdert het pakket vsftpd
+- Verwijdert het pakket proftpd-core
+- Installeert FTP server pure-ftpd 
+- Start pure-ftpd op, enabled deze bij opstarten machine
+
+- Dit custom config bestand schrijf je lokaal in een bestand FortunesFile-ACHTERNAAM. Dit copieer je naar de node op /etc/pure-ftpd/conf/FortunesFile met volgende inhoud:
+# Custom config /etc/pure-ftpd/conf/FortunesFile
+# ACHTERNAAM voornaam
+/etc/pure-ftpd/pure-ftpd-ACHTERNAAM.banner
+
+- Je maakt ook /etc/pure-ftpd/pure-ftpd-ACHTERNAAM.banner aan met als inhoud:
+FTP server ACHTERNAAM
+
+- Voorzie een handler die de service herstart wanneer het bestand /etc/pure-ftpd/pure-ftpd-ACHTERNAAM.banner wordt aangepast
+
+- Test uit door toepassen van de playbook en opstarten van een ftp naar de node.
+
+- Maak hier eventueel een backup van een jouw werkende configuratie
+
+- Maak van het bestand pure-ftpd-ACHTERNAAM.banner een template.
+  In deze template wordt de banner via een variable "banner" ingesteld
+  De handler herstart de service wanneer de template wordt aangepast
+
+- Test uit door toepassen van de playbook en opstarten van een ftp naar de node.
+
+- Zorg ervoor dat alle yml bestanden voldoen aan ansible-lint
+
+- Toon aan de docent
+  
+- Plak hier de output van ansible-playbook playbook-ACHTERNAAM.yml:
