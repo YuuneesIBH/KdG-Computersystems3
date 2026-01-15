@@ -1,0 +1,26 @@
+Open Vraag
+0 punten
+ 
+ 
+Vraag op positie 1 
+opgave07.zip  Links to an external site.opgave07.zip  Links to an external site.  Links to an external site.
+
+Maak van het bijgevoegde python3 spelletje een DEB installatiebestand.
+
+Je zorgt er voor dat de naam, waarmee jouw programma command line en grafisch opstart, "jouwvoornaam2" is.
+
+Maak in je home drive de directory achternaam_voornaam aan.
+Binnen deze directory maak je een deb bestand aan.
+Dit deb bestand moet:
+- Voldoen aan de debian policies (zonder errors en warnings)
+- De juiste dependencies hebben
+- Overal jouw naam en kdg adres als auteur en copyright hebben
+- Jouw script moet binnen de sectie/category “games” (ook je manual page)
+- Een ikoontje voorzien (het ikoontje in png formaat steekt in de zip)
+- Een desktop bestand voorzien zodat het opstartbaar is via de menu.
+- Het script moet opstartbaar zijn door je voornaam in te tikken als commando.
+Geef hieronder de output van het commando " lintian -v achternaam_voornaam.deb "
+Toon, als je klaar bent, het resultaat aan de docent. Laat zien dat je het programma met ikoontje via de menu kan opstarten. en toon de lintian output.
+
+Zorg dat je de volledige directory waarin je de deb maakt (inclusief het deb bestand)  in een tar.gz bestand steekt met de naam achternaam_voornaam.tgz. Upload hier het ACHTERNAAM_VOORNAAM.TGZ bestand.
+Vanuit de bestanden die je hier geeft moet de DEB kunnen aangemaakt worden.

@@ -1,0 +1,272 @@
+ubuntu@ubuntu:~$ cd ~/elazzouzi_younes
+ubuntu@ubuntu:~/elazzouzi_younes$ rm -rf younes2_1.0.0
+ubuntu@ubuntu:~/elazzouzi_younes$ rm -f elazzouzi_younes.deb younes2_1.0.0.deb
+ubuntu@ubuntu:~/elazzouzi_younes$ rm -f elazzouzi_younes.deb younes2_1.0.0.deb
+ubuntu@ubuntu:~/elazzouzi_younes$ mkdir -p younes2_1.0.0/DEBIAN
+mkdir -p younes2_1.0.0/usr/games
+mkdir -p younes2_1.0.0/usr/share/applications
+mkdir -p younes2_1.0.0/usr/share/pixmaps
+mkdir -p younes2_1.0.0/usr/share/man/man6
+mkdir -p younes2_1.0.0/usr/share/doc/younes2
+ubuntu@ubuntu:~/elazzouzi_younes$ find younes2_1.0.0 -type d -exec chmod 755 {} \;
+ubuntu@ubuntu:~/elazzouzi_younes$ cp ~/Downloads/opgave13/whacamole.py3 younes2_1.0.0/usr/games/younes2
+ubuntu@ubuntu:~/elazzouzi_younes$ cp ~/Downloads/opgave13/whacamole.png younes2_1.0.0/usr/share/pixmaps/younes2.png
+ubuntu@ubuntu:~/elazzouzi_younes$ cat > younes2_1.0.0/DEBIAN/control << 'EOF'
+Package: younes2
+Version: 1.0.0
+Section: games
+Priority: optional
+Architecture: all
+Depends: python3, python3-tk
+Maintainer: Younes El Azzouzi <younes.elazzouzi@student.kdg.be>
+Description: Whac-A-Mole spel
+ Een leuk whac-a-mole spelletje geschreven in Python3 met Tkinter.
+EOF
+ubuntu@ubuntu:~/elazzouzi_younes$ cat > younes2_1.0.0/usr/share/applications/younes2.desktop << 'EOF'
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Younes2 Whac-A-Mole
+Comment=Whac-A-Mole spel
+Exec=/usr/games/younes2
+Icon=younes2
+Terminal=false
+Categories=Game;
+EOF
+ubuntu@ubuntu:~/elazzouzi_younes$ cat > younes2_1.0.0/usr/share/doc/younes2/copyright << 'EOF'
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: younes2
+Source: https://github.com/youneselazzouzi/younes2
+
+Files: *
+Copyright: 2026 Younes El Azzouzi <younes.elazzouzi@student.kdg.be>
+License: GPL-3+
+
+License: GPL-3+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <https://www.gnu.org/licenses/>.
+ .
+ On Debian systems, the complete text of the GNU General
+ Public License version 3 can be found in "/usr/share/common-licenses/GPL-3".
+EOF
+ubuntu@ubuntu:~/elazzouzi_younes$ cat > younes2_1.0.0/usr/share/doc/younes2/changelog << 'EOF'
+younes2 (1.0.0) unstable; urgency=low
+
+  * Initial release
+
+ -- Younes El Azzouzi <younes.elazzouzi@student.kdg.be>  Wed, 15 Jan 2026 10:00:00 +0100
+EOF
+ubuntu@ubuntu:~/elazzouzi_younes$ gzip -9fn younes2_1.0.0/usr/share/doc/younes2/changelog
+ubuntu@ubuntu:~/elazzouzi_younes$ cat > younes2_1.0.0/usr/share/man/man6/younes2.6 << 'EOF'
+.TH YOUNES2 6 "January 2026" "younes2 1.0.0" "Games Manual"
+.SH NAME
+younes2 \- Whac-A-Mole spel
+.SH SYNOPSIS
+.B younes2
+.SH DESCRIPTION
+.B younes2
+is een leuk whac-a-mole spelletje geschreven in Python3 met Tkinter.
+Probeer de mollen te raken voordat ze verdwijnen!
+.SH AUTHOR
+Younes El Azzouzi <younes.elazzouzi@student.kdg.be>
+.SH COPYRIGHT
+Copyright \(co 2026 Younes El Azzouzi
+.br
+Dit is vrije software; zie de broncode voor kopieervoorwaarden.
+EOF
+ubuntu@ubuntu:~/elazzouzi_younes$ gzip -9fn younes2_1.0.0/usr/share/man/man6/younes2.6
+ubuntu@ubuntu:~/elazzouzi_younes$ chmod 755 younes2_1.0.0/usr/games/younes2
+chmod 644 younes2_1.0.0/usr/share/pixmaps/younes2.png
+chmod 644 younes2_1.0.0/usr/share/applications/younes2.desktop
+chmod 644 younes2_1.0.0/usr/share/doc/younes2/copyright
+chmod 644 younes2_1.0.0/usr/share/doc/younes2/changelog.gz
+chmod 644 younes2_1.0.0/usr/share/man/man6/younes2.6.gz
+ubuntu@ubuntu:~/elazzouzi_younes$ fakeroot dpkg-deb --build younes2_1.0.0
+dpkg-deb: building package 'younes2' in 'younes2_1.0.0.deb'.
+ubuntu@ubuntu:~/elazzouzi_younes$ mv younes2_1.0.0.deb elazzouzi_younes.deb
+ubuntu@ubuntu:~/elazzouzi_younes$ lintian -v elazzouzi_younes.deb
+W: younes2: debian-changelog-has-wrong-day-of-week 2026-01-15 is a Thursday
+ubuntu@ubuntu:~/elazzouzi_younes$ cat > younes2_1.0.0/usr/share/doc/younes2/changelog << 'EOF'
+younes2 (1.0.0) unstable; urgency=low
+
+  * Initial release
+
+ -- Younes El Azzouzi <younes.elazzouzi@student.kdg.be>  Thu, 15 Jan 2026 10:00:00 +0100
+EOF
+ubuntu@ubuntu:~/elazzouzi_younes$ gzip -9fn younes2_1.0.0/usr/share/doc/younes2/changelog
+ubuntu@ubuntu:~/elazzouzi_younes$ chmod 644 younes2_1.0.0/usr/share/doc/younes2/changelog.gz
+ubuntu@ubuntu:~/elazzouzi_younes$ rm -f elazzouzi_younes.deb younes2_1.0.0.deb
+ubuntu@ubuntu:~/elazzouzi_younes$ fakeroot dpkg-deb --build younes2_1.0.0
+dpkg-deb: building package 'younes2' in 'younes2_1.0.0.deb'.
+ubuntu@ubuntu:~/elazzouzi_younes$ mv younes2_1.0.0.deb elazzouzi_younes.deb
+ubuntu@ubuntu:~/elazzouzi_younes$ lintian -v elazzouzi_younes.deb
+ubuntu@ubuntu:~/elazzouzi_younes$ sudo dpkg -i elazzouzi_younes.deb
+Selecting previously unselected package younes2.
+(Reading database ... 250867 files and directories currently installed.)
+Preparing to unpack elazzouzi_younes.deb ...
+Unpacking younes2 (1.0.0) ...
+dpkg: dependency problems prevent configuration of younes2:
+ younes2 depends on python3-tk; however:
+  Package python3-tk is not installed.
+
+dpkg: error processing package younes2 (--install):
+ dependency problems - leaving unconfigured
+Processing triggers for mailcap (3.70+nmu1ubuntu1) ...
+Processing triggers for gnome-menus (3.36.0-1ubuntu3) ...
+Processing triggers for desktop-file-utils (0.26-1ubuntu3) ...
+Processing triggers for man-db (2.10.2-1) ...
+Errors were encountered while processing:
+ younes2
+ubuntu@ubuntu:~/elazzouzi_younes$ 
+ubuntu@ubuntu:~/elazzouzi_younes$ sudo apt-get install -y python3-tk
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+You might want to run 'apt --fix-broken install' to correct these.
+The following packages have unmet dependencies:
+ python3-tk : Depends: blt (>= 2.4z-9) but it is not going to be installed
+              Depends: libtk8.6 (>= 8.6.0) but it is not going to be installed
+              Depends: tk8.6-blt2.5 (>= 2.5.3) but it is not going to be installed
+E: Unmet dependencies. Try 'apt --fix-broken install' with no packages (or specify a solution).
+ubuntu@ubuntu:~/elazzouzi_younes$ sudo dpkg -i ~/elazzouzi_younes/elazzouzi_younes.deb
+(Reading database ... 250874 files and directories currently installed.)
+Preparing to unpack .../elazzouzi_younes.deb ...
+Unpacking younes2 (1.0.0) over (1.0.0) ...
+dpkg: dependency problems prevent configuration of younes2:
+ younes2 depends on python3-tk; however:
+  Package python3-tk is not installed.
+
+dpkg: error processing package younes2 (--install):
+ dependency problems - leaving unconfigured
+Processing triggers for mailcap (3.70+nmu1ubuntu1) ...
+Processing triggers for gnome-menus (3.36.0-1ubuntu3) ...
+Processing triggers for desktop-file-utils (0.26-1ubuntu3) ...
+Processing triggers for man-db (2.10.2-1) ...
+Errors were encountered while processing:
+ younes2
+ubuntu@ubuntu:~/elazzouzi_younes$ sudo apt --fix-broken install
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Correcting dependencies... Done
+The following packages were automatically installed and are no longer required:
+  libwpe-1.0-1 libwpebackend-fdo-1.0-1
+Use 'sudo apt autoremove' to remove them.
+The following additional packages will be installed:
+  blt libtk8.6 libxss1 python3-tk tk8.6-blt2.5
+Suggested packages:
+  blt-demo tk8.6 tix python3-tk-dbg
+The following NEW packages will be installed:
+  blt libtk8.6 libxss1 python3-tk tk8.6-blt2.5
+0 upgraded, 5 newly installed, 0 to remove and 2 not upgraded.
+1 not fully installed or removed.
+Need to get 1526 kB of archives.
+After this operation, 5292 kB of additional disk space will be used.
+Do you want to continue? [Y/n] Y
+Get:1 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 libxss1 arm64 1:1.2.3-1build2 [8252 B]
+Get:2 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 libtk8.6 arm64 8.6.12-1build1 [777 kB]
+Get:3 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 tk8.6-blt2.5 arm64 2.5.3+dfsg-4.1build2 [625 kB]
+Get:4 http://ports.ubuntu.com/ubuntu-ports jammy/main arm64 blt arm64 2.5.3+dfsg-4.1build2 [4838 B]
+Get:5 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 python3-tk arm64 3.10.8-1~22.04 [111 kB]
+Fetched 1526 kB in 0s (4131 kB/s)
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package libxss1:arm64.
+(Reading database ... 250874 files and directories currently installed.)
+Preparing to unpack .../libxss1_1%3a1.2.3-1build2_arm64.deb ...
+Unpacking libxss1:arm64 (1:1.2.3-1build2) ...
+Selecting previously unselected package libtk8.6:arm64.
+Preparing to unpack .../libtk8.6_8.6.12-1build1_arm64.deb ...
+Unpacking libtk8.6:arm64 (8.6.12-1build1) ...
+Selecting previously unselected package tk8.6-blt2.5.
+Preparing to unpack .../tk8.6-blt2.5_2.5.3+dfsg-4.1build2_arm64.deb ...
+Unpacking tk8.6-blt2.5 (2.5.3+dfsg-4.1build2) ...
+Selecting previously unselected package blt.
+Preparing to unpack .../blt_2.5.3+dfsg-4.1build2_arm64.deb ...
+Unpacking blt (2.5.3+dfsg-4.1build2) ...
+Selecting previously unselected package python3-tk:arm64.
+Preparing to unpack .../python3-tk_3.10.8-1~22.04_arm64.deb ...
+Unpacking python3-tk:arm64 (3.10.8-1~22.04) ...
+Setting up libxss1:arm64 (1:1.2.3-1build2) ...
+Setting up libtk8.6:arm64 (8.6.12-1build1) ...
+Setting up tk8.6-blt2.5 (2.5.3+dfsg-4.1build2) ...
+Setting up blt (2.5.3+dfsg-4.1build2) ...
+Setting up python3-tk:arm64 (3.10.8-1~22.04) ...
+Setting up younes2 (1.0.0) ...
+Processing triggers for libc-bin (2.35-0ubuntu3.11) ...
+needrestart is being skipped since dpkg has failed
+ubuntu@ubuntu:~/elazzouzi_younes$ sudo apt-get install -y python3-tk
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+python3-tk is already the newest version (3.10.8-1~22.04).
+python3-tk set to manually installed.
+The following packages were automatically installed and are no longer required:
+  libwpe-1.0-1 libwpebackend-fdo-1.0-1
+Use 'sudo apt autoremove' to remove them.
+0 upgraded, 0 newly installed, 0 to remove and 2 not upgraded.
+ubuntu@ubuntu:~/elazzouzi_younes$ sudo dpkg -i ~/elazzouzi_younes/elazzouzi_younes.deb
+(Reading database ... 251044 files and directories currently installed.)
+Preparing to unpack .../elazzouzi_younes.deb ...
+Unpacking younes2 (1.0.0) over (1.0.0) ...
+Setting up younes2 (1.0.0) ...
+Processing triggers for mailcap (3.70+nmu1ubuntu1) ...
+Processing triggers for gnome-menus (3.36.0-1ubuntu3) ...
+Processing triggers for desktop-file-utils (0.26-1ubuntu3) ...
+Processing triggers for man-db (2.10.2-1) ...
+ubuntu@ubuntu:~/elazzouzi_younes$ younes2
+Exception in thread Thread-1 (whac_a_mole):
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/threading.py", line 1016, in _bootstrap_inner
+    self.run()
+  File "/usr/lib/python3.10/threading.py", line 953, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/games/younes2", line 166, in whac_a_mole
+    hole3.config(state='disabled', text='', bg='black')
+  File "/usr/lib/python3.10/tkinter/__init__.py", line 1675, in configure
+    return self._configure('configure', cnf, kw)
+  File "/usr/lib/python3.10/tkinter/__init__.py", line 1665, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+RuntimeError: main thread is not in main loop
+ubuntu@ubuntu:~/elazzouzi_younes$ 
+
+ubuntu@ubuntu:~$ tar -xzf elazzouzi_younes.tgz
+cd elazzouzi_younes
+lintian -v elazzouzi_younes.deb  # Geen output = clean!
+sudo dpkg -i elazzouzi_younes.deb
+younes2  # Of via menu: "Younes2 Whac-A-Mole"
+(Reading database ... 251044 files and directories currently installed.)
+Preparing to unpack elazzouzi_younes.deb ...
+Unpacking younes2 (1.0.0) over (1.0.0) ...
+Setting up younes2 (1.0.0) ...
+Processing triggers for mailcap (3.70+nmu1ubuntu1) ...
+Processing triggers for gnome-menus (3.36.0-1ubuntu3) ...
+Processing triggers for desktop-file-utils (0.26-1ubuntu3) ...
+Processing triggers for man-db (2.10.2-1) ...
+Exception in thread Thread-1 (whac_a_mole):
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/threading.py", line 1016, in _bootstrap_inner
+    self.run()
+  File "/usr/lib/python3.10/threading.py", line 953, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/games/younes2", line 139, in whac_a_mole
+    ready_set_whack()
+  File "/usr/games/younes2", line 236, in ready_set_whack
+    scorelabel.config(text="Set")
+  File "/usr/lib/python3.10/tkinter/__init__.py", line 1675, in configure
+    return self._configure('configure', cnf, kw)
+  File "/usr/lib/python3.10/tkinter/__init__.py", line 1665, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+RuntimeError: main thread is not in main loop
+ubuntu@ubuntu:~/elazzouzi_younes$ younes
+bash: younes: command not found
+ubuntu@ubuntu:~/elazzouzi_younes$ younes2

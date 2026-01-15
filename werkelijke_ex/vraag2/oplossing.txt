@@ -1,0 +1,398 @@
+ubuntu@ubuntu:~/elazzouzi_younes$ cd ..
+ubuntu@ubuntu:~$ SURNAME="ELAZZOUZI"
+NAME="YOUNES"
+DIR="${SURNAME}-${NAME}"
+ROLE="${SURNAME}_proftpd"
+PLAYBOOK="playbook_${SURNAME}.yml"
+ubuntu@ubuntu:~$ mkdir -p "${DIR}/roles"
+cd "${DIR}" || exit 1
+mkdir -p "roles/${ROLE}"/{tasks,handlers,templates,files,defaults}
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ cat > "${PLAYBOOK}" <<EOF
+---
+- name: Install proftpd using role ${ROLE}
+  hosts: all
+  become: true
+  roles:
+    - ${ROLE}
+EOF
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ cat > "roles/${ROLE}/defaults/main.yml" <<EOF
+---
+banner: "FTP server ${SURNAME}"
+EOF
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ cat > "roles/${ROLE}/files/proftpd-${SURNAME}" <<EOF
+# Custom config /etc/proftpd/proftpd.conf
+# ${SURNAME} ${NAME}
+DisplayFile /etc/proftpd/proftpd.banner
+EOF
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ cat > "roles/${ROLE}/templates/proftpd.banner.j2" <<EOF
+{{ banner }}
+EOF
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ cat > "roles/${ROLE}/handlers/main.yml" <<EOF
+---
+- name: ${SURNAME} restart proftpd
+  ansible.builtin.service:
+    name: proftpd
+    state: restarted
+EOF
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ cat > "roles/${ROLE}/tasks/main.yml" <<EOF
+---
+- name: ${SURNAME} remove vsftpd
+  ansible.builtin.apt:
+    name: vsftpd
+    state: absent
+    purge: true
+
+- name: ${SURNAME} remove pure-ftpd
+  ansible.builtin.apt:
+    name: pure-ftpd
+    state: absent
+    purge: true
+
+- name: ${SURNAME} install proftpd-core
+  ansible.builtin.apt:
+    name: proftpd-core
+    state: present
+    update_cache: true
+
+- name: ${SURNAME} deploy proftpd.conf
+  ansible.builtin.copy:
+    src: proftpd-${SURNAME}
+    dest: /etc/proftpd/proftpd.conf
+    owner: root
+    group: root
+    mode: "0644"
+    backup: true
+
+- name: ${SURNAME} deploy banner template
+  ansible.builtin.template:
+    src: proftpd.banner.j2
+    dest: /etc/proftpd/proftpd.banner
+    owner: root
+    group: root
+    mode: "0644"
+    backup: true
+  notify: ${SURNAME} restart proftpd
+
+- name: ${SURNAME} enable and start proftpd
+  ansible.builtin.service:
+    name: proftpd
+    state: started
+    enabled: true
+EOF
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ ip a
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: enp0s1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 1a:63:23:39:a4:2c brd ff:ff:ff:ff:ff:ff
+    inet 192.168.64.11/24 metric 100 brd 192.168.64.255 scope global dynamic enp0s1
+       valid_lft 3103sec preferred_lft 3103sec
+    inet6 fdcb:aca9:d40a:5300:1863:23ff:fe39:a42c/64 scope global dynamic mngtmpaddr noprefixroute 
+       valid_lft 2591928sec preferred_lft 604728sec
+    inet6 fe80::1863:23ff:fe39:a42c/64 scope link 
+       valid_lft forever preferred_lft forever
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ cat > inventory.ini <<'EOF'
+[all]
+localhost ansible_connection=local
+EOF
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ ansible-playbook -i inventory.ini playbook_ELAZZOUZI.yml
+
+PLAY [Install proftpd using role ELAZZOUZI_proftpd] *****************************************************************************************************************
+
+TASK [Gathering Facts] **********************************************************************************************************************************************
+ok: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI remove vsftpd] ******************************************************************************************************************
+ok: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI remove pure-ftpd] ***************************************************************************************************************
+changed: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI install proftpd-core] ***********************************************************************************************************
+changed: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI deploy proftpd.conf] ************************************************************************************************************
+changed: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI deploy banner template] *********************************************************************************************************
+changed: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI enable and start proftpd] *******************************************************************************************************
+ok: [localhost]
+
+RUNNING HANDLER [ELAZZOUZI_proftpd : ELAZZOUZI restart proftpd] *****************************************************************************************************
+fatal: [localhost]: FAILED! => {"changed": false, "msg": "Unable to restart service proftpd: Job for proftpd.service failed because the control process exited with error code.\nSee \"systemctl status proftpd.service\" and \"journalctl -xeu proftpd.service\" for details.\n"}
+
+NO MORE HOSTS LEFT **************************************************************************************************************************************************
+
+PLAY RECAP **********************************************************************************************************************************************************
+localhost                  : ok=7    changed=4    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ sudo systemctl status proftpd.service --no-pager -l
+\u00d7 proftpd.service - ProFTPD FTP Server
+     Loaded: loaded (/lib/systemd/system/proftpd.service; enabled; vendor preset: enabled)
+     Active: failed (Result: exit-code) since Thu 2026-01-15 10:37:12 UTC; 24s ago
+    Process: 23353 ExecStartPre=/usr/sbin/proftpd --configtest -c $CONFIG_FILE (code=exited, status=1/FAILURE)
+        CPU: 3ms
+
+Jan 15 10:37:12 ubuntu proftpd[23353]: Checking syntax of configuration file
+Jan 15 10:37:12 ubuntu proftpd[23353]: 2026-01-15 10:37:12,965 ubuntu proftpd[23353]: fatal: unknown configuration directive 'DisplayFile' on line 3 of '/etc/proftpd/proftpd.conf'
+Jan 15 10:37:12 ubuntu proftpd[23353]: 2026-01-15 10:37:12,965 ubuntu proftpd[23353]: fatal: Did you mean:
+Jan 15 10:37:12 ubuntu proftpd[23353]:   DisplayFileTransfer
+Jan 15 10:37:12 ubuntu proftpd[23353]:   DisplayQuit
+Jan 15 10:37:12 ubuntu proftpd[23353]:   DisplayChdir
+Jan 15 10:37:12 ubuntu proftpd[23353]:   DisplayLogin
+Jan 15 10:37:12 ubuntu systemd[1]: proftpd.service: Control process exited, code=exited, status=1/FAILURE
+Jan 15 10:37:12 ubuntu systemd[1]: proftpd.service: Failed with result 'exit-code'.
+Jan 15 10:37:12 ubuntu systemd[1]: Failed to start ProFTPD FTP Server.
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ sudo journalctl -xeu proftpd.service --no-pager
+Jan 15 10:37:07 ubuntu systemd[1]: Starting ProFTPD FTP Server...
+\u2591\u2591 Subject: A start job for unit proftpd.service has begun execution
+\u2591\u2591 Defined-By: systemd
+\u2591\u2591 Support: http://www.ubuntu.com/support
+\u2591\u2591 
+\u2591\u2591 A start job for unit proftpd.service has begun execution.
+\u2591\u2591 
+\u2591\u2591 The job identifier is 4147.
+Jan 15 10:37:07 ubuntu proftpd[23051]: Checking syntax of configuration file
+Jan 15 10:37:08 ubuntu systemd[1]: Started ProFTPD FTP Server.
+\u2591\u2591 Subject: A start job for unit proftpd.service has finished successfully
+\u2591\u2591 Defined-By: systemd
+\u2591\u2591 Support: http://www.ubuntu.com/support
+\u2591\u2591 
+\u2591\u2591 A start job for unit proftpd.service has finished successfully.
+\u2591\u2591 
+\u2591\u2591 The job identifier is 4147.
+Jan 15 10:37:12 ubuntu systemd[1]: Stopping ProFTPD FTP Server...
+\u2591\u2591 Subject: A stop job for unit proftpd.service has begun execution
+\u2591\u2591 Defined-By: systemd
+\u2591\u2591 Support: http://www.ubuntu.com/support
+\u2591\u2591 
+\u2591\u2591 A stop job for unit proftpd.service has begun execution.
+\u2591\u2591 
+\u2591\u2591 The job identifier is 4341.
+Jan 15 10:37:12 ubuntu systemd[1]: proftpd.service: Deactivated successfully.
+\u2591\u2591 Subject: Unit succeeded
+\u2591\u2591 Defined-By: systemd
+\u2591\u2591 Support: http://www.ubuntu.com/support
+\u2591\u2591 
+\u2591\u2591 The unit proftpd.service has successfully entered the 'dead' state.
+Jan 15 10:37:12 ubuntu systemd[1]: Stopped ProFTPD FTP Server.
+\u2591\u2591 Subject: A stop job for unit proftpd.service has finished
+\u2591\u2591 Defined-By: systemd
+\u2591\u2591 Support: http://www.ubuntu.com/support
+\u2591\u2591 
+\u2591\u2591 A stop job for unit proftpd.service has finished.
+\u2591\u2591 
+\u2591\u2591 The job identifier is 4341 and the job result is done.
+Jan 15 10:37:12 ubuntu systemd[1]: Starting ProFTPD FTP Server...
+\u2591\u2591 Subject: A start job for unit proftpd.service has begun execution
+\u2591\u2591 Defined-By: systemd
+\u2591\u2591 Support: http://www.ubuntu.com/support
+\u2591\u2591 
+\u2591\u2591 A start job for unit proftpd.service has begun execution.
+\u2591\u2591 
+\u2591\u2591 The job identifier is 4341.
+Jan 15 10:37:12 ubuntu proftpd[23353]: Checking syntax of configuration file
+Jan 15 10:37:12 ubuntu proftpd[23353]: 2026-01-15 10:37:12,965 ubuntu proftpd[23353]: fatal: unknown configuration directive 'DisplayFile' on line 3 of '/etc/proftpd/proftpd.conf'
+Jan 15 10:37:12 ubuntu proftpd[23353]: 2026-01-15 10:37:12,965 ubuntu proftpd[23353]: fatal: Did you mean:
+Jan 15 10:37:12 ubuntu proftpd[23353]:   DisplayFileTransfer
+Jan 15 10:37:12 ubuntu proftpd[23353]:   DisplayQuit
+Jan 15 10:37:12 ubuntu proftpd[23353]:   DisplayChdir
+Jan 15 10:37:12 ubuntu proftpd[23353]:   DisplayLogin
+Jan 15 10:37:12 ubuntu systemd[1]: proftpd.service: Control process exited, code=exited, status=1/FAILURE
+\u2591\u2591 Subject: Unit process exited
+\u2591\u2591 Defined-By: systemd
+\u2591\u2591 Support: http://www.ubuntu.com/support
+\u2591\u2591 
+\u2591\u2591 An ExecStartPre= process belonging to unit proftpd.service has exited.
+\u2591\u2591 
+\u2591\u2591 The process' exit code is 'exited' and its exit status is 1.
+Jan 15 10:37:12 ubuntu systemd[1]: proftpd.service: Failed with result 'exit-code'.
+\u2591\u2591 Subject: Unit failed
+\u2591\u2591 Defined-By: systemd
+\u2591\u2591 Support: http://www.ubuntu.com/support
+\u2591\u2591 
+\u2591\u2591 The unit proftpd.service has entered the 'failed' state with result 'exit-code'.
+Jan 15 10:37:12 ubuntu systemd[1]: Failed to start ProFTPD FTP Server.
+\u2591\u2591 Subject: A start job for unit proftpd.service has failed
+\u2591\u2591 Defined-By: systemd
+\u2591\u2591 Support: http://www.ubuntu.com/support
+\u2591\u2591 
+\u2591\u2591 A start job for unit proftpd.service has finished with a failure.
+\u2591\u2591 
+\u2591\u2591 The job identifier is 4341 and the job result is failed.
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ sudo proftpd -t -c /etc/proftpd/proftpd.conf
+Checking syntax of configuration file
+2026-01-15 10:37:53,850 ubuntu proftpd[23752]: fatal: unknown configuration directive 'DisplayFile' on line 3 of '/etc/proftpd/proftpd.conf'
+2026-01-15 10:37:53,850 ubuntu proftpd[23752]: fatal: Did you mean:
+  DisplayFileTransfer
+  DisplayQuit
+  DisplayChdir
+  DisplayLogin
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ cat > roles/ELAZZOUZI_proftpd/files/proftpd-ELAZZOUZI <<'EOF'
+# Custom config /etc/proftpd/proftpd.conf
+# ELAZZOUZI Younes
+DisplayLogin /etc/proftpd/proftpd.banner
+EOF
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ ansible-playbook -i inventory.ini playbook_ELAZZOUZI.yml
+
+PLAY [Install proftpd using role ELAZZOUZI_proftpd] *****************************************************************************************************************
+
+TASK [Gathering Facts] **********************************************************************************************************************************************
+ok: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI remove vsftpd] ******************************************************************************************************************
+ok: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI remove pure-ftpd] ***************************************************************************************************************
+ok: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI install proftpd-core] ***********************************************************************************************************
+ok: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI deploy proftpd.conf] ************************************************************************************************************
+changed: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI deploy banner template] *********************************************************************************************************
+ok: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI enable and start proftpd] *******************************************************************************************************
+changed: [localhost]
+
+PLAY RECAP **********************************************************************************************************************************************************
+localhost                  : ok=7    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ sudo systemctl is-active proftpd
+sudo systemctl status proftpd --no-pager -l
+active
+\u25cf proftpd.service - ProFTPD FTP Server
+     Loaded: loaded (/lib/systemd/system/proftpd.service; enabled; vendor preset: enabled)
+     Active: active (running) since Thu 2026-01-15 10:38:38 UTC; 5s ago
+    Process: 24396 ExecStartPre=/usr/sbin/proftpd --configtest -c $CONFIG_FILE (code=exited, status=0/SUCCESS)
+    Process: 24397 ExecStart=/usr/sbin/proftpd -c $CONFIG_FILE $OPTIONS (code=exited, status=0/SUCCESS)
+   Main PID: 24398 (proftpd)
+      Tasks: 1 (limit: 4521)
+     Memory: 1.7M
+        CPU: 10ms
+     CGroup: /system.slice/proftpd.service
+             \u2514\u250024398 "proftpd: (accepting connections)" "" "" "" "" "" "" "" "" "" "" "" "" "" ""
+
+Jan 15 10:38:38 ubuntu systemd[1]: Starting ProFTPD FTP Server...
+Jan 15 10:38:38 ubuntu proftpd[24396]: Checking syntax of configuration file
+Jan 15 10:38:38 ubuntu proftpd[24398]: ubuntu - ProFTPD 1.3.7c (maint) (built Wed Feb 5 2025 13:53:13 UTC) standalone mode STARTUP
+Jan 15 10:38:38 ubuntu systemd[1]: Started ProFTPD FTP Server.
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ ftp localhost
+Connected to localhost.
+220 ProFTPD Server (ProFTPD) [::ffff:127.0.0.1]
+Name (localhost:ubuntu): ubuntu
+331 Password required for ubuntu
+Password: 
+530 Login incorrect.
+ftp: Login failed
+ftp> 
+ftp> 
+ftp> 
+ftp> 
+ftp> exit
+221 Goodbye.
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ ftp localhost
+Connected to localhost.
+220 ProFTPD Server (ProFTPD) [::ffff:127.0.0.1]
+Name (localhost:ubuntu): 
+331 Password required for ubuntu
+Password: 
+530 Login incorrect.
+ftp: Login failed
+ftp> 
+ftp> 
+ftp> exit
+221 Goodbye.
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ ftp localhost
+Connected to localhost.
+220 ProFTPD Server (ProFTPD) [::ffff:127.0.0.1]
+Name (localhost:ubuntu): ubuntu
+331 Password required for ubuntu
+Password: 
+230-FTP server ELAZZOUZI
+230 User ubuntu logged in
+Remote system type is UNIX.
+Using binary mode to transfer files.
+ftp> exit
+221 Goodbye.
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ ansible-lint playbook_ELAZZOUZI.yml roles/ELAZZOUZI_proftpd
+WARNING  Listing 1 violation(s) that are fatal
+role-name: Role name ELAZZOUZI_proftpd does not match ``^[a-z][a-z0-9_]+$`` pattern
+roles/ELAZZOUZI_proftpd:1
+
+
+Finished with 0 failure(s), 1 warning(s) on 7 files.
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ ansible-playbook playbook_ELAZZOUZI.yml
+[WARNING]: No inventory was parsed, only implicit localhost is available
+[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
+
+PLAY [Install proftpd using role ELAZZOUZI_proftpd] *****************************************************************************************************************
+skipping: no hosts matched
+
+PLAY RECAP **********************************************************************************************************************************************************
+
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ ansible-playbook -i inventory.ini playbook_ELAZZOUZI.yml
+
+PLAY [Install proftpd using role ELAZZOUZI_proftpd] *****************************************************************************************************************
+
+TASK [Gathering Facts] **********************************************************************************************************************************************
+ok: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI remove vsftpd] ******************************************************************************************************************
+ok: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI remove pure-ftpd] ***************************************************************************************************************
+ok: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI install proftpd-core] ***********************************************************************************************************
+ok: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI deploy proftpd.conf] ************************************************************************************************************
+ok: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI deploy banner template] *********************************************************************************************************
+ok: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI enable and start proftpd] *******************************************************************************************************
+ok: [localhost]
+
+PLAY RECAP **********************************************************************************************************************************************************
+localhost                  : ok=7    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ ansible-playbook -i inventory.ini playbook_ELAZZOUZI.yml
+
+PLAY [Install proftpd using role ELAZZOUZI_proftpd] *****************************************************************************************************************
+
+TASK [Gathering Facts] **********************************************************************************************************************************************
+ok: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI remove vsftpd] ******************************************************************************************************************
+ok: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI remove pure-ftpd] ***************************************************************************************************************
+ok: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI install proftpd-core] ***********************************************************************************************************
+ok: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI deploy proftpd.conf] ************************************************************************************************************
+ok: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI deploy banner template] *********************************************************************************************************
+ok: [localhost]
+
+TASK [ELAZZOUZI_proftpd : ELAZZOUZI enable and start proftpd] *******************************************************************************************************
+ok: [localhost]
+
+PLAY RECAP **********************************************************************************************************************************************************
+localhost                  : ok=7    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+ubuntu@ubuntu:~/ELAZZOUZI-YOUNES$ 
